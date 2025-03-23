@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="Inicio text-center">
+    <div class="llamadoAccion">
+        <div class="contenedorLlamadoAccion">
+            <div class="box">
+                <a href="{{url_for('servicios')}}">
+                    <img src="{{ url_for('static', filename='/bannerInicio.png')}}" alt="bannerInicio" id="banner" class="mx-auto">
+                    <span class="conoceMas block mt-4 text-lg font-semibold text-white hover:underline">Conoce Más</span>
+                </a>
+            </div>
+        </div>
+    </div>    
+</div>
+{% endblock %}
