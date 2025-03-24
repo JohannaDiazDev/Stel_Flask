@@ -10,5 +10,9 @@ def inicio():
 def servicios():
     return render_template('servicios.html')
 
+@app.route('/sobre-nosotros')
+def sobre_nosotros():
+    return render_template('sobre-nosotros.html')
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,16 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="Inicio text-center">
-    <div class="llamadoAccion">
-        <div class="contenedorLlamadoAccion">
-            <div class="box">
-                <a href="{{url_for('servicios')}}">
-                    <img src="{{ url_for('static', filename='/bannerInicio.png')}}" alt="bannerInicio" id="banner" class="mx-auto">
-                    <span class="conoceMas block mt-4 text-lg font-semibold text-white hover:underline">Conoce Más</span>
+<div class="Inicio w-full max-w-1360 m-0 p-0 overflow-visible">
+    <div class="llamadoAccion flex justify-start items-start w-full">
+        <div class="contenedorLlamadoAccion relative w-full">
+            <div class="box relative w-full">
+                <a href="{{ url_for('servicios') }}" class="block relative w-full">
+                    <img src="{{ url_for('static', filename='/bannerInicio.png')}}" 
+                        alt="bannerInicio" 
+                        id="banner" 
+                        class="max-w-1000 h-1000 object-cover m-0 p-0 justify-start">
+                    <span class="conoceMas absolute bottom-6 right-[200px] px-3 py-3 bg-green-900 text-white rounded-md text-lg transition duration-300 hover:bg-[#1E4C40] opacity-75">
+                        Conoce Más
+                    </span>
                 </a>
             </div>
         </div>
-    </div>    
+    </div>
 </div>
 {% endblock %}

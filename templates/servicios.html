@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div x-data="{
+    services: [
+        { title: 'Administración', description: 'Gestión integral de los recursos, transformando el conjunto en un lugar seguro para un entorno de calidez y armonía.', icon: 'bi bi-building-up', image: '', show: false },
+        { title: 'Parqueadero', description: 'Gestión de entrada y salida de vehículos. Podrás disfrutar de tu espacio asignado sin preocupaciones.', icon: 'bi bi-car-front', image: '', show: false },
+        { title: 'Correspondencia', description: 'Gestión de la comunicación al interior del conjunto. Podrás estar al tanto de las novedades y correspondencia.', icon: 'bi bi-megaphone', image: '', show: false }
+    ],
+    init() {
+        this.services[0].image = this.$refs.img1.dataset.src;
+        this.services[1].image = this.$refs.img2.dataset.src;
+        this.services[2].image = this.$refs.img3.dataset.src;
+
+
+       // Mostrar el título y cada card con efecto en secuencia
+        setTimeout(() => this.showTitle = true, 200);
+        this.services.forEach((service, index) => {
+            setTimeout(() => service.show = true, (index + 1) * 300);
+        });
+    },
+    showTitle: false
+    
+}">
+    <!-- Imágenes ocultas con referencias para Alpine.js -->
+    <img x-ref="img1" data-src="{{ url_for('static', filename='administracion.PNG') }}" class="hidden">
+    <img x-ref="img2" data-src="{{ url_for('static', filename='parqueadero.PNG') }}" class="hidden">
+    <img x-ref="img3" data-src="{{ url_for('static', filename='correspondencia.jpg') }}" class="hidden">
+
+     <!-- Título con animación -->
+     <h2 
+     x-show="showTitle" 
+     x-transition:enter="opacity-0 translate-y-5 scale-90"
+     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+     class="text-3xl font-bold text-[#1E4C40] text-center mb-6"
+ >
+     <i class="bi bi-briefcase-fill text-[#1E4C40]"></i> Servicios
+ </h2>
+
+ <!-- Cards de servicios -->
+ <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+     <template x-for="service in services" :key="service.title">
+         <div 
+             x-show="service.show" 
+             x-transition:enter="opacity-0 scale-75 translate-y-10"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             class="bg-white p-6 shadow-lg rounded-xl text-center transform transition duration-500 ease-in-out hover:shadow-2xl"
+         >
+             <i :class="service.icon" class="text-4xl text-[#1E4C40] mb-2"></i>
+             <h2 class="text-lg font-semibold" x-text="service.title"></h3>
+             <p class="text-sm text-[#1E4C40]" x-text="service.description"></p>
+             <img 
+                 :src="service.image" 
+                 :alt="service.title" 
+                 class="w-full h-40 object-cover rounded-lg mt-4 transform transition-transform duration-300 hover:scale-110"
+             >
+         </div>
+     </template>
+    </div>
+</div>
+
+
+{% endblock %}

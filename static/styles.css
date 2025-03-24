@@ -65,3 +65,33 @@
 body {
     padding-top: 100px;
 }
+.carousel {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    background-size: cover; /* Ajustamos el tamaño del fondo */
+}
+
+.carousel-indicators {
+    bottom: -30px;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 5%;
+}
+
+.carousel-inner {
+    border-radius: 15px;
+    height: 400px;
+}
+
+.carousel-item img {
+    border-radius: 15px;
+    height: 400px;
+    object-fit: cover; /* Ajustamos el objeto para que se ajuste al contenedor */
+    max-width: 100%;
+    width: auto;
+}

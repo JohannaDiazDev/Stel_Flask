@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="SobreNosotros max-w-5xl mx-auto my-10 p-6 bg-white shadow-lg rounded-lg">
+    <div class="card border border-gray-200 rounded-lg">
+        <div class="card-header bg-[#1E4C40] text-white py-4 px-6 text-center rounded-t-lg">
+            <h1 class="text-2xl font-bold">Sobre Nosotros <i class="bi bi-houses-fill"></i></h1>
+        </div>
+        <div class="card-body p-6">
+            <blockquote class="blockquote text-justify">
+                <h2 class="text-xl font-semibold mb-2">Conjunto Residencial Quintas del Recreo Primera Etapa</h2>
+               <p>
+                    Quintas del Recreo Primera etapa, es un Conjunto de Propiedad Horizontal,
+                    entregado a los copropietarios en el año 2001. 
+                    Consta de 240 inmuebles distribuidos en 10 andenes.
+                    En las zonas comunes, la copropiedad cuenta con:
+               </p>
+               <ul class="list-disc pl-6 mt-2">
+                    <li>Parqueadero Comunal con capacidad de 41 espacios para motos y 55 espacios para vehículos.</li>
+                    <li>Un parque infantil para el aprovechamiento de los niños de la copropiedad.</li>
+                    <li>Un salón comunal social.</li>  
+               </ul>
+            </blockquote>
+        </div>
+    </div>
+    <!-- Carrusel de imágenes -->
+     <div id="carouselExampleIndicators" class="carousel slide " data-bs-ride="carousel" data-bs-interval="3000">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="3" aria-label="Slide 4"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{{ url_for('static', filename='/casas.PNG') }}" class="d-block w-100 rounded-lg" alt="casas">
+            </div>
+            <div class="carousel-item">
+                <img src="{{ url_for('static', filename='/casas2.PNG') }}" class="d-block w-100 rounded-lg" alt="casas2">
+            </div>
+            <div class="carousel-item">
+                <img src="{{ url_for('static', filename='/parque.PNG') }}" class="d-block w-100 rounded-lg" alt="parque">
+            </div>
+            <div class="carousel-item">
+                <img src="{{ url_for('static', filename='/gimnasio.PNG') }}" class="d-block w-100 rounded-lg" alt="gimnasio">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+     </div>
+</div>
+
+{% endblock %}
