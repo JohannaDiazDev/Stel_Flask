@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+
+<div class="h-screen w-full bg-[url('/static/login.PNG')] bg-cover bg-center bg-no-repeat backdrop-blur-md">
+    <div class="flex items-center justify-center h-full">
+        <form action="{{url_for('ingresar')}}" method="POST" class="w-4/5 max-w-[480px] bg-white/70 shadow-xl rounded-lg backdrop-blur-lg p-10">
+            <h1 class="text-2xl font-bold text-center text-[#3d685d] mb-7">
+                Inicio de Sesión <i class="bi bi-building-fill text-[#3d685d]"></i>
+            </h1>
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-[#1E4C40]">Correo Electrónico</label>
+                <input type="email" name="correo" id="email" class="mt-1 p-2 w-full border rounded-md bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1E4C40]" required>
+            </div>
+            <div class="mb-4 relative">
+                <label for="password" class="block text-sm font-medium text-[#1E4C40]">Contraseña</label>
+                <input type="password" name="contraseña"  id="password" class="mt-1 p-2 w-full border rounded-md bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1E4C40]" required>
+                <button type="button" id="togglePassword" class="absolute right-2 top-9 text-gray-500">
+                    <i class="bi bi-eye font-bold text-[#1E4C40]"></i>
+                </button>
+            </div>
+            <button type="submit" class="w-full bg-[#1E4C40] text-white p-2 rounded-md hover:bg-[#1E4C40]-700 transition">Ingresar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordInput = document.getElementById('password');
+        const icon = this.querySelector('i');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    });
+</script>
+
+
+
+
+
+{% endblock %}

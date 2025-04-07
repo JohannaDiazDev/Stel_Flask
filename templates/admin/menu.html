@@ -1,0 +1,54 @@
+{% block content %}
+
+<nav class="bg-[#1E4C40] text-white p-4 w-full navbar flex justify-between items-center">
+        <a href="{{ url_for('dashboard_admin') }}" class="flex items-center text-white text-xl font-bold">
+            <img src="{{ url_for('static', filename='logoblanco.PNG') }}" alt="Logo" class="ml-4" style="max-height: 60px; width: auto;">
+        </a>
+        <div class="flex justify-center items-center flex-grow space-x-10">
+            <div class="relative group">
+                <button class="text-white font-bold text-lg">Usuarios <i class="bi bi-people-fill text-2xl ml-3"></i></button>
+                <div class="absolute hidden group-hover:block bg-[#1E4C40] shadow-md-lg p-6">
+                    <a href="{{url_for('Usuarios')}}" class="block px-5 py-3">Usuarios</a>
+                    <a href="{{url_for('Inmuebles')}}" class="block px-5 py-3">Inmuebles</a>
+                    <a href="{{url_for('Residentes')}}" class="block px-5 py-3">Residentes</a>
+                    <a href="{{url_for('Trabajadores')}}" class="block px-5 py-3">Trabajadores</a>
+                </div>
+            </div>
+            <div class="relative group">
+                <button class="text-white font-bold text-lg">Administración <i class="bi bi-house-fill text-2xl ml-3"></i></button>
+                <div class="absolute hidden group-hover:block bg-[#1E4C40] shadow-md-lg p-6">
+                    <a href="{{url_for('Multas')}}" class="block px-5 py-3">Multas</a>
+                    <a href="{{url_for('Cartera')}}" class="block px-5 py-3">Cartera</a>
+                    <a href="{{url_for('Visitantes')}}" class="block px-5 py-3">Visitantes</a>
+                </div>
+            </div>
+            <a href="{{url_for('Parqueadero')}}" class="text-white font-bold flex items-center text-lg">
+                Parqueadero <i class="bi bi-car-front-fill text-2xl ml-3"></i>
+            </a>
+            <div class=" relative group">
+                <button class="text-white font-bold text-lg">Comunicación <i class="bi bi-megaphone-fill text-2xl ml-3"></i></button>
+                <ul class="absolute hidden group-hover:block bg-[#1E4C40] shadow-md-lg p-6">
+                    <a href="{{url_for('Multas')}}" class="block px-5 py-3">Correspondencia</a>
+                    <a href="{{url_for('Cartera')}}" class="block px-5 py-3">Novedades</a>
+                </ul>
+            </div>
+            
+        </div>
+        <a href="{{ url_for('logout') }}" class="text-white font-bold mr-10 text-lg">
+            Salir <i class="bi bi-door-closed-fill text-2xl ml-2"></i>
+        </a>
+        
+</nav>
+
+<script>
+    document.querySelectorAll('.relative').forEach(dropdown =>{
+        dropdown.addEventListener('mouseenter', () =>{
+            dropdown.querySelector('div').classList.remove('hidden');
+        });
+        dropdown.addEventListener('mouseleave', () =>{
+            dropdown.querySelector('div').classList.add('hidden');
+        });
+    });
+</script>
+
+{% endblock %}
