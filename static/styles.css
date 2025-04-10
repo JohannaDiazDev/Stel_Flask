@@ -95,3 +95,76 @@ body {
     max-width: 100%;
     width: auto;
 }
+.dashboard-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.dashboard-title i {
+    font-size: 2rem; /* Ajusta el tamaño del ícono al mismo del texto */
+    vertical-align: middle;
+}
+
+.card-Dashboard {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 380px; 
+    height: 100%; 
+}
+
+.card-Dashboard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    background: #1E4C40; /* Verde Bootstrap */
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.card-Dashboard .card-img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    margin: 15px auto;
+}
+
+.card-Dashboard:nth-child(3) .card-img { /* Solo para la imagen de Multas */
+    width: 140px;
+    height: 140px;
+    padding: 10px;
+}
+
+.card-body {
+    padding: 10px;
+    flex-grow: 1; /* Hace que el contenido interno ocupe todo el espacio disponible */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-text {
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: bold;
+}

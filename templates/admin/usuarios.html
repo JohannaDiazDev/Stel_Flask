@@ -1,0 +1,133 @@
+{% extends 'admin/base_dash.html' %}
+
+{% block content %}
+
+<div class="container mx-auto py-8">
+    <h2 class="text-2xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Usuarios <i class="bi bi-people-fill"></i></h2>
+    
+    <button type="button" class="btn btn-success"style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modal1">
+        Registrar Usuario <i class="bi bi-person-plus"></i>
+      </button>
+      
+      <!-- Modal -->
+      <div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Usuario <i class="bi bi-person-plus"></i></h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('crear_usuario') }}" method="post">
+                    <input type="hidden" id="pkiduser" name="pkiduser">
+                    <div class="mb-2">
+                        <label for="text">Nombre</label>
+                        <input type="text" id="nombre" name="nombre" required class="border rounded px-2 py-1 w-full">
+                    </div>
+                    <div class="mb-2">
+                        <label for="cedula">Cedula</label>
+                        <input type="text" id="cedula" name="cedula" required class="border rounded px-2 py-1 w-full">
+                    </div>
+                    <div class="mb-2">
+                        <label for="celular">celular</label>
+                        <input type="number" id="celular" name="celular" required class="border rounded px-2 py-1 w-full">
+                    </div>
+                    <div class="mb-2">
+                        <label for="correo">Correo</label>
+                        <input type="email" id="correo" name="correo" required class="border rounded px-2 py-1 w-full">
+                    </div>
+                    <div class="mb-2">
+                        <label for="contraseña">Contraseña</label>
+                        <input type="password" id="contraseña" name="contraseña" required class="border rounded px-2 py-1 w-full">
+                    </div>
+                    <div class="mb-2">
+                        <label for="rol_id">Rol </label>
+                        <select name="rol_id">
+                            {% for rol in roles %}
+                                <option value="{{ rol.pkidrol }}">{{ rol.nombrerol }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" id="crear_usuario" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+          </div>
+        </div>
+      </div>
+    
+    <table class="w-full mt-4 border">
+        <thead>
+            <tr class="bg-[#1E4C40] text-white justify-center items-center">
+                <th class="p-2 text-center">Nombre</th>
+                <th class="p-2 text-center">Cédula</th>
+                <th class="p-2 text-center">Celular</th>
+                <th class="p-2 text-center">Correo</th>
+                <th class="p-2 text-center">Rol</th>
+                <th class="p-2 text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="userTable">
+            {% for usuario in usuarios %}
+            <tr class="hover:bg-gray-100">
+                
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ usuario.nombre }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ usuario.cedula }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ usuario.celular }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ usuario.correo }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ usuario.nombrerol }}</td>
+                <td>
+                    <button type="button" class="btn btn-warning"style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modal{{usuario.pkiduser}}">
+                        <i class="bi bi-pencil-fill text-white"></i>
+                    </button>
+                </td>
+                <td><a href="{{url_for('delete', pkiduser=usuario.pkiduser)}}"class="text-[#1E4C40] text-center"><i class="bi bi-person-x text-[#a11129] text-xl text-center"></i></a></td>
+                
+            </tr>
+
+            <div class="modal fade" id="modal{{usuario.pkiduser}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="exampleModalLabel">{{usuario.pkiduser}}</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <form action="{{ url_for('editar_usuario', pkiduser=usuario.pkiduser) }}" method="POST">
+                        <label for="text">Nombre</label>
+                        <input type="text" id="nombre" name="nombre" value="{{usuario.nombre}}" required class="border rounded px-2 py-1 w-full">
+                        <label for="cedula">Cedula</label>
+                        <input type="text" id="cedula" name="cedula" value="{{usuario.cedula}}"required class="border rounded px-2 py-1 w-full">
+                        <label for="celular">celular</label>
+                        <input type="number" id="celular" name="celular" value="{{usuario.celular}}"required class="border rounded px-2 py-1 w-full">
+                        <label for="correo">Correo</label>
+                        <input type="email" id="correo" name="correo" value="{{usuario.correo}}" required class="border rounded px-2 py-1 w-full">
+                        <label for="contraseña">Contraseña</label>
+                        <input type="password" id="contraseña" name="contraseña" value="{{usuario.contraseña}}" class="border rounded px-2 py-1 w-full">
+                        <label for="rol_id">Rol </label>
+                        <select id="rol_id" name="rol_id" class="border rounded px-2 py-1 w-full">
+                            {% for rol in roles %}
+                                <option value="{{ rol.pkidrol }}" 
+                                    {% if usuario and usuario.rol_id and usuario.rol_id == rol.pkidrol %}selected{% endif %}>
+                                    {{ rol.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                      
+                      <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Guardar <i class="bi bi-floppy-fill"></i> </button>
+                    </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

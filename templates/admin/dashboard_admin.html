@@ -1,21 +1,51 @@
 {% extends 'admin/base_dash.html' %}
 
 {% block content %}
+
 <div class="Dashboard">
-    <h1>Dahsboard <i class="bi bi-collection-fill"></i></h1>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <h1 class="dashboard-title">Dashboard <i class="bi bi-collection-fill font-bold text-[#1E4C40] text-2xl"></i></h1>
+    <div class="row row-cols-2 row-cols-md-2 g-3 justify-content-center">
         <div class="col">
             <div class="card-Dashboard">
+                <div class="card-header">Correspondencia <i class="bi bi-bag-fill"></i></div>
                 <img src="{{url_for('static', filename='/correspondencia.jpg')}}" alt="paquetes">
                 <div class="card-body">
-
+                    <p class="card-text">Total: <strong>{{ correspondencia_count }}</strong></p>
                 </div>
-
             </div>
-
+        </div>
+        <div class="col ">
+            <div class="card-Dashboard">
+                <div class="card-header">Parqueadero <i class="bi bi-p-square-fill"></i></div>
+                <img src="{{ url_for('static', filename='/parqueadero.PNG')}}" alt="parquear">
+                <div class="card-body">
+                    <p class="card-text">Total: <strong>{{ parqueadero_count }}</strong></p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-Dashboard">
+                <div class="card-header">Multas <i class="bi bi-file-earmark-text-fill"></i></div>
+                <img src="{{url_for('static', filename='/multa.PNG')}}" alt="multa">
+                <div class="card-body">
+                    
+                    <p class="card-text">Total: <strong>{{ multas_count }}</strong></p>
+                </div>
+            </div>
+        </div>
+        <div class="col ">
+            <div class="card-Dashboard">
+                <div class="card-header">Cartera <i class="bi bi-cash-coin"></i></div>
+                <img src="{{url_for('static', filename='/cartera.jpg')}}" alt="multa">
+                <div class="card-body">
+                    <p class="card-text text-[#1E4C40]">Paz y Salvo: <strong>{{ paz_y_salvo }}</strong></p>
+                    <p class="card-text text-danger">Mora: <strong>{{ mora }}</strong></p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
 
 {% endblock %}
 

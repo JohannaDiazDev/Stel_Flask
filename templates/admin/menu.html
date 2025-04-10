@@ -7,19 +7,19 @@
         <div class="flex justify-center items-center flex-grow space-x-10">
             <div class="relative group">
                 <button class="text-white font-bold text-lg">Usuarios <i class="bi bi-people-fill text-2xl ml-3"></i></button>
-                <div class="absolute hidden group-hover:block bg-[#1E4C40] shadow-md-lg p-6">
-                    <a href="{{url_for('Usuarios')}}" class="block px-5 py-3">Usuarios</a>
-                    <a href="{{url_for('Inmuebles')}}" class="block px-5 py-3">Inmuebles</a>
-                    <a href="{{url_for('Residentes')}}" class="block px-5 py-3">Residentes</a>
-                    <a href="{{url_for('Trabajadores')}}" class="block px-5 py-3">Trabajadores</a>
+                <div class="absolute hidden group-hover:block bg-[#1E4C40] shadow-md p-5 text-left w-40 font-semibold">
+                    <a href="{{url_for('usuarios')}}" class="block px-0 py-2">Usuarios</a>
+                    <a href="{{url_for('Inmuebles')}}" class="block px-0 py-2">Inmuebles</a>
+                    <a href="{{url_for('Residentes')}}" class="block px-0 py-2">Residentes</a>
+                    <a href="{{url_for('Trabajadores')}}" class="block px-0 py-2">Trabajadores</a>
                 </div>
             </div>
             <div class="relative group">
                 <button class="text-white font-bold text-lg">Administración <i class="bi bi-house-fill text-2xl ml-3"></i></button>
-                <div class="absolute hidden group-hover:block bg-[#1E4C40] shadow-md-lg p-6">
-                    <a href="{{url_for('Multas')}}" class="block px-5 py-3">Multas</a>
-                    <a href="{{url_for('Cartera')}}" class="block px-5 py-3">Cartera</a>
-                    <a href="{{url_for('Visitantes')}}" class="block px-5 py-3">Visitantes</a>
+                <div class="absolute hidden group-hover:block bg-[#1E4C40] shadow-md p-5 text-left w-40 font-semibold">
+                    <a href="{{url_for('Multas')}}" class="block px-0 py-2">Multas</a>
+                    <a href="{{url_for('Cartera')}}" class="block px-0 py-2">Cartera</a>
+                    <a href="{{url_for('Visitantes')}}" class="block px-0 py-2">Visitantes</a>
                 </div>
             </div>
             <a href="{{url_for('Parqueadero')}}" class="text-white font-bold flex items-center text-lg">
@@ -27,9 +27,9 @@
             </a>
             <div class=" relative group">
                 <button class="text-white font-bold text-lg">Comunicación <i class="bi bi-megaphone-fill text-2xl ml-3"></i></button>
-                <ul class="absolute hidden group-hover:block bg-[#1E4C40] shadow-md-lg p-6">
-                    <a href="{{url_for('Multas')}}" class="block px-5 py-3">Correspondencia</a>
-                    <a href="{{url_for('Cartera')}}" class="block px-5 py-3">Novedades</a>
+                <ul class="absolute hidden group-hover:block bg-[#1E4C40] shadow-md p-5 text-left w-70 font-semibold">
+                    <a href="{{url_for('Multas')}}" class="block px-0 py-2">Correspondencia</a>
+                    <a href="{{url_for('Cartera')}}" class="block px-0 py-2">Novedades</a>
                 </ul>
             </div>
             
