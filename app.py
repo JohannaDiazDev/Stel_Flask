@@ -128,10 +128,10 @@ def ingresar():
 
 @app.route('/admin/dashboard_admin')
 def dashboard_admin():
-    if 'pkiduser' not in session:
+    """if 'pkiduser' not in session:
         flash('Debes iniciar sesión primero', 'danger')
         return redirect(url_for('ingresar'))
-        
+    """    
     db = get_db_connection()
     cursor = db.cursor()
 
@@ -164,32 +164,78 @@ def dashboard_admin():
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
+    if 'pkiduser' not in session:
+        flash('Debes iniciar sesión primero', 'danger')
+        return redirect(url_for('ingresar'))
     
     return response
 
 @app.route('/admin/usuarios', methods=['GET'])
 def usuarios():
+    
     db = get_db_connection()
     cursor = db.cursor()
 
+    page = request.args.get('page', 1, type=int)
+    per_page = 5  # Número de usuarios por página
+    offset = (page - 1) * per_page
+
+    cedula = request.args.get('cedula', '')
+
+    # Consulta base
     sql = """
         SELECT u.pkiduser, u.nombre, u.cedula, u.celular, u.correo, u.rol_id, r.nombrerol 
         FROM usuarios u
         LEFT JOIN rol r ON u.rol_id = r.pkidrol
     """
-    cursor.execute(sql)
-    columnas = [col[0] for col in cursor.description]  # Obtener los nombres de las columnas
-    usuarios = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]  # Convertir a diccionario
+    
+    params = []
+    if cedula:
+        sql += " WHERE u.cedula LIKE %s"
+        params.append(f"%{cedula}%")
 
+    # Paginación
+    sql += " LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])
+
+    cursor.execute(sql, params)
+    columnas = [col[0] for col in cursor.description]
+    usuarios = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    # Consulta para los roles
     cursor.execute("SELECT pkidrol, nombrerol FROM rol")
     columnas_roles = [col[0] for col in cursor.description]
     roles = [dict(zip(columnas_roles, fila)) for fila in cursor.fetchall()]
 
+    # Contar el total de usuarios
+    if cedula:
+        cursor.execute("SELECT COUNT(*) FROM usuarios WHERE cedula LIKE %s", (f"%{cedula}%",))
+    else:
+        cursor.execute("SELECT COUNT(*) FROM usuarios")
+
+    total_usuarios = cursor.fetchone()[0]
+    total_pages = (total_usuarios + per_page - 1) // per_page
+
     cursor.close()
     db.close()
 
-    return render_template('admin/usuarios.html', usuarios=usuarios, roles=roles)
     
+    response = make_response(render_template('admin/usuarios.html', 
+        usuarios=usuarios, 
+        roles=roles, 
+        page=page, 
+        total_pages=total_pages, 
+        cedula_buscar=cedula
+
+    ))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    if 'pkiduser' not in session:
+        flash('Debes iniciar sesión primero', 'danger')
+        return redirect(url_for('ingresar'))
+    
+    return response
 # Crear un usuario
 @app.route('/admin/usuarios', methods=['POST'])
 def crear_usuario():
@@ -213,51 +259,6 @@ def crear_usuario():
     
     return redirect(url_for('usuarios'))
 
-#@app.route('/admin/usuarios/editar/<int:pkiduser>')
-#def obtener_usuario(pkiduser):
-#    db = get_db_connection()
-#    cursor = db.cursor()
-#    cursor.execute("SELECT * FROM usuarios WHERE pkiduser = %s", (pkiduser,))
-#    usuario = cursor.fetchone()
-#    db.close()
-
-#    if not usuario:
-#        return "Usuario no encontrado", 404
-
-#    return render_template('admin/usuarios.html', usuario=usuario)
-
-#@app.route('/admin/usuarios/actualizar/<int:pkiduser>', methods=['POST'])
-#def actualizar_usuario(pkiduser):
-    #if request.method == 'POST':
-    #    nombre = request.form['nombre']
-    #    cedula = request.form['cedula']
-    #    celular = request.form['celular']
-    #    correo = request.form['correo']
-    #    rol_id = request.form['rol_id']
-
-    #    db = get_db_connection()
-    #    cursor = db.cursor()
-    #    cursor.execute("""
-    #        UPDATE usuarios 
-    #        SET nombre=%s, cedula=%s, celular=%s, correo=%s, rol_id=%s 
-    #        WHERE pkiduser=%s
-    #    """, (nombre, cedula, celular, correo, rol_id, pkiduser))
-    #    db.commit()
-    #    db.close()
-
-#        return redirect(url_for('usuarios'))
-
-# Eliminar usuario
-#@app.route('/admin/usuarios/eliminar/<int:pkiduser>', methods=['DELETE'])
-#def eliminar_usuario(pkiduser):
-#    db = get_db_connection()
-#    cursor = db.cursor()
-#    cursor.execute("DELETE FROM usuarios WHERE pkiduser=%s", (pkiduser,))
-#    db.commit()
-#    cursor.close()
-#    db.close()
-
-#    return jsonify({"mensaje": "Usuario eliminado correctamente"})
 @app.route('/delete/<int:pkiduser>')
 def delete(pkiduser):
     db = get_db_connection()
@@ -306,9 +307,67 @@ def editar_usuario(pkiduser):
     return redirect(url_for('usuarios')) 
 
 
-@app.route('/inmuebles')
-def Inmuebles():
-    return "Página de Inmuebles"
+@app.route('/inmueble')
+def inmueble():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    page = request.args.get('page', 1, type=int)
+    per_page = 5  # Número de usuarios por página
+    offset = (page - 1) * per_page
+
+    anden = request.args.get('anden', '')
+
+    # Consulta base
+    sql = """
+        SELECT i.pkidinmueble, i.numeroinmueble, i.anden 
+        FROM inmueble i
+    """
+    
+    params = []
+    if anden:
+        sql += " WHERE i.anden LIKE %s"
+        params.append(f"%{anden}%")
+
+    # Paginación
+    sql += " LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])
+
+    cursor.execute(sql, params)
+    columnas = [col[0] for col in cursor.description]
+    inmueble = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+    
+    if anden:
+        cursor.execute("SELECT COUNT(*) FROM inmueble WHERE anden LIKE %s", (f"%{anden}%",))
+    else:
+        cursor.execute("SELECT COUNT(*) FROM inmueble")
+
+    total_inmueble = cursor.fetchone()[0]
+    total_pages = (total_inmueble + per_page - 1) // per_page
+
+    cursor.close()
+    db.close()
+
+    
+    response = make_response(render_template('admin/inmueble.html', 
+        inmueble=inmueble, 
+        page=page, 
+        total_pages=total_pages, 
+        anden_buscar=anden
+
+    ))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    if 'pkidinmueble' not in session:
+        flash('Debes iniciar sesión primero', 'danger')
+        return redirect(url_for('ingresar'))
+    
+    return response
+
+@app.route('/admin/inmueble', methods=['POST'])
+def crear_inmueble():
+    return 
 
 @app.route('/residentes')
 def Residentes():
