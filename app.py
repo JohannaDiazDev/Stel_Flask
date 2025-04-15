@@ -228,9 +228,8 @@ def usuarios():
         cedula_buscar=cedula
 
     ))
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
+    response.headers['Cache-Control'] = 'no-store'
+    
     if 'pkiduser' not in session:
         flash('Debes iniciar sesión primero', 'danger')
         return redirect(url_for('ingresar'))
@@ -307,67 +306,24 @@ def editar_usuario(pkiduser):
     return redirect(url_for('usuarios')) 
 
 
-@app.route('/inmueble')
+
+@app.route('/admin/inmueble')
 def inmueble():
-    db = get_db_connection()
-    cursor = db.cursor()
+    # Distribución de los andenes
+    andenes = {
+        1: {'min': 1, 'max': 31},
+        2: {'min': 32, 'max': 56},
+        3: {'min': 64, 'max': 87},
+        4: {'min': 88, 'max': 101},
+        5: {'min': 102, 'max': 115},
+        6: {'min': 116, 'max': 139},
+        7: {'min': 140, 'max': 163},
+        8: {'min': 164, 'max': 187},
+        9: {'min': 188, 'max': 213},
+        10: {'min': 214, 'max': 240}
+    }
 
-    page = request.args.get('page', 1, type=int)
-    per_page = 5  # Número de usuarios por página
-    offset = (page - 1) * per_page
-
-    anden = request.args.get('anden', '')
-
-    # Consulta base
-    sql = """
-        SELECT i.pkidinmueble, i.numeroinmueble, i.anden 
-        FROM inmueble i
-    """
-    
-    params = []
-    if anden:
-        sql += " WHERE i.anden LIKE %s"
-        params.append(f"%{anden}%")
-
-    # Paginación
-    sql += " LIMIT %s OFFSET %s"
-    params.extend([per_page, offset])
-
-    cursor.execute(sql, params)
-    columnas = [col[0] for col in cursor.description]
-    inmueble = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
-    
-    if anden:
-        cursor.execute("SELECT COUNT(*) FROM inmueble WHERE anden LIKE %s", (f"%{anden}%",))
-    else:
-        cursor.execute("SELECT COUNT(*) FROM inmueble")
-
-    total_inmueble = cursor.fetchone()[0]
-    total_pages = (total_inmueble + per_page - 1) // per_page
-
-    cursor.close()
-    db.close()
-
-    
-    response = make_response(render_template('admin/inmueble.html', 
-        inmueble=inmueble, 
-        page=page, 
-        total_pages=total_pages, 
-        anden_buscar=anden
-
-    ))
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    if 'pkidinmueble' not in session:
-        flash('Debes iniciar sesión primero', 'danger')
-        return redirect(url_for('ingresar'))
-    
-    return response
-
-@app.route('/admin/inmueble', methods=['POST'])
-def crear_inmueble():
-    return 
+    return render_template('admin/inmueble.html', andenes=andenes)
 
 @app.route('/residentes')
 def Residentes():

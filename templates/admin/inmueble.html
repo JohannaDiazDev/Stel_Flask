@@ -1,194 +1,115 @@
 {% extends 'admin/base_dash.html' %}
 
 {% block content %}
-<div class="container mx-auto py-8">
-    <h2 class="text-2xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Inmuebles <i class="bi bi-house-door-fill"></i></h2>
-    <div class="flex justify-between items-center mt-3 gap-3">
-        <button type="button" class="btn btn-success" style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modal1">
-            Registrar Inmueble <i class="bi bi-house-add-fill"></i>
-        </button>
-        <form method="GET" action="{{url_for('inmueble')}}" class="flex items-center space-x-2">
-            <input type="number" name="anden" placeholder="Buscar por anden" value="{{anden_buscar}}">
-            <button type="submit" class="btn btn-primary"style="background-color: #1E4C40"><i class="bi bi-search"></i></button>
-        </form>
-    </div>
-    <!-- Modal -->
-    <div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content shadow p-3 mb-5">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Inmueble<i class="bi bi-house-add-fill"></i></h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="inmuebleForm" action="{{ url_for('crear_inmueble') }}" method="post">
-                        <input type="hidden" id="pkidinmueble" name="pkidinmueble">
-                        <div class="mb-2">
-                            <label for="number">Número Inmueble</label>
-                            <input type="number" id="numeroinmueble" name="numeroinmueble" required class="border rounded px-2 py-1 w-full"> 
-                            <span id="error-numeroinmueble" class="error-msg" style="color: red;"></span>
-                        </div>
-                        <div class="mb-2">
-                            <label for="number">Anden</label>
-                            <input type="number" id="anden" name="anden" required class="border rounded px-2 py-1 w-full">
-                            <span id="error-anden" class="error-msg" style="color: red;"></span>
 
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-success" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" id="crear_inmueble" class="btn btn-primary" style="background-color: #1E4C40;">Guardar</button>
-                        </div>
-                    </form>
-                </div>
+
+    <h1 class="text-3xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Inmuebles <i class="bi bi-house-door-fill"></i></h1>
+    <div class="flex justify-end p-6">
+        <div class="bg-white shadow-lg rounded-xl p-4 flex items-center space-x-2 border border-[#1E4C40]">
+            <i class="bi bi-binoculars-fill text-[#1E4C40] text-xl"></i>
+            <div>
+                <input type="number" id="buscarCasa" oninput="buscarCasa()" placeholder="Ingrese el inmueble"
+                    class="w-full px-4 py-2 border border-[#1E4C40] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E4C40]">
+                <p id="resultadoBusqueda" class="mt-2 text-center text-[#1E4C40] font-semibold text-sm"></p>
             </div>
         </div>
     </div>
 
-    <table class="w-4/5 mt-7 border mx-auto text-sm shadow-lg p-3 mb-5">
-        <thead>
-            <tr class="bh-[#1E4C40] text-white justify-center items-center">
-                <th class="border border-gray-300 px-2 py-1 text-center">Número Inmueble</th>
-                <th class="border border-gray-300 px-2 py-1 text-center">Anden</th>
-                <th class="border border-gray-300 px-2 py-1 text-center">Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="userTable">
-            {% for inmuebles in inmueble %}
-            <tr class="hover:bg-gray-100">
-
-                <td class="border border-gray-300 px-4 py-2 text-center">{{inmuebles.numeroinmueble}}</td>
-                <td class="border border-gray-300 px-4 py-2 text-center">{{inmuebles.anden}}</td>
-                <td class="border border-gray-300 px-4 py-2 text-center">
-                    <div class="flex justify-center gap-2">
-                        <button type="button" class="bg-[#1E4C40] p-2 rounded text-white hover:bg-[#163A30]" data-bs-toggle="modal" data-bs-target="#modal{{inmuebles.pkidinmueble}}">
-                            <i class="bi bi-house-exclamation-fill"></i>
-                        </button>
-                        <a href="{{ url_for('delete', pkidinmueble=inmuebles.pkidinmueble) }}" class="bg-[#a11129] p-2 rounded text-white hover:bg-red-700">
-                            <i class="bi bi-house-x-fill"></i>
-                        </a>
-                    </div>
-                </td>
-            </tr>
-
-            <div class="modal fade" id="modal{{inmuebles.pkidinmueble}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"></div>>
-                <div class="modal-dialog">
-                    <div class="modal-content shadow p-3 mb-5">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">{{inmuebles.pkidinmueble}}</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="{{ url_for('editar_inmueble', pkidinmueble=inmuebles.pkidinmueble) }}" method="POST">
-                                <div class="mb-2">
-                                    <label for="number">Número Inmueble</label>
-                                    <input type="number" id="numeroinmueble" name="numeroinmueble" value="{{inmuebles.numeroinmueble}}" required class="border rounded px-2 py-1 w-full"> 
-                                    <span id="error-numeroinmueble" class="error-msg" style="color: red;"></span>
-                                </div>
-                                <div class="mb-2">
-                                    <label for="number">Anden</label>
-                                    <input type="number" id="anden" name="anden" value="{{inmuebles.anden}}" required class="border rounded px-2 py-1 w-full">
-                                    <span id="error-anden" class="error-msg" style="color: red;"></span>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Guardar <i class="bi bi-floppy-fill"></i> </button>
-                                  </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-4 ">
+        {% for num, datos in andenes.items() %}
+          <div class="relative group">
+            <div class="bg-gradient-to-br from-[#4CAF8B] to-[#1E4C40]/80 group-hover:bg-[#1E4C40] group-hover:text-white text-[#1E4C40] font-bold p-6 rounded-xl shadow-xl/30 cursor-pointer transition-all duration-300 flex flex-col items-center justify-center">
+              <i class="bi bi-houses text-4xl mb-2"></i>
+              Andén {{ num }}
+              <button type="button" class="bg-gradient-to-r from-[#1E4C40] to-[#4CAF8B] hover:bg-[#FAF9EC] hover:text-white text-white font-semibold py-2 px-4 rounded shadow-md transition-all duration-300"
+                data-bs-toggle="modal" data-bs-target="#modal{{ num }}">
+                Ver Casas
+              </button>
             </div>
-            {% endfor %}
-        </tbody>
-    </table>
-    <div class="flex justify-center mt-4">
-        <ul class="flex list-none">
-            {% if page > 1 %}
-            <li>
-                <a href="?page={{ page - 1 }}{% if anden_buscar %}&anden={{ anden_buscar }}{% endif %}" 
-                   class="px-3 py-1 mx-1 bg-[#1E4C40] text-white rounded hover:bg-gray-300">
-                    « 
-                </a>
-            </li>
-            {% endif %}
-    
-            {% for i in range(1, total_pages + 1) %}
-            <li>
-                <a href="?page={{ i }}{% if anden_buscar %}&anden={{ anden_buscar }}{% endif %}" 
-                   class="px-3 py-1 mx-1 rounded {% if page == i %}bg-[#1E4C40] text-white{% else %}bg-gray-200 text-white hover:bg-gray-300{% endif %}">
-                    {{ i }}
-                </a>
-            </li>
-            {% endfor %}
-    
-            {% if page < total_pages %}
-            <li>
-                <a href="?page={{ page + 1 }}{% if anden_buscar %}&anden={{ anden_buscar }}{% endif %}" 
-                   class="px-3 py-1 mx-1 bg-[#1E4C40] text-white rounded hover:bg-gray-300">
-                    »
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-    </div>
-</div>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("inmuebleForm");
-
-        form.addEventListener("submit", function (event) {
-            let isValid = true;
-            let errors = {};
-
-            const numeroinmueble = parseInt(document.getElementById("numeroinmueble").value.trim(), 10);
-            const anden = parseInt(document.getElementById("anden").value.trim(), 10);
-
-            const andenRanges = {
-                1: { min: 1, max: 31 },
-                2: { min: 32, max: 56 },
-                3: { min: 64, max: 87 },
-                4: { min: 88, max: 101 },
-                5: { min: 102, max: 115 },
-                6: { min: 116, max: 139 },
-                7: { min: 140, max: 163 },
-                8: { min: 164, max: 187 },
-                9: { min: 188, max: 213 },
-                10: { min: 214, max: 240 }
-            };
-
-            // Validar si `anden` está en el rango 1-10
-            if (anden < 1 || anden > 10 || isNaN(anden)) {
-                errors.anden = "El Andén debe estar entre 1 y 10.";
-                isValid = false;
+          </div>
+      
+          <!-- Modal para este Andén -->
+          <div class="modal fade" id="modal{{ num }}" tabindex="-1" aria-labelledby="modalLabel{{ num }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header bg-[#1E4C40] text-[#1E4C40]">
+                    <h5 class="modal-title text-[#1E4C40]" id="modalLabel{{ anden }}">Casas en el Andén {{ anden }}</h5> <!-- Este es el título del modal -->
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                <div class="modal-body">
+                  <div class="grid grid-cols-5 gap-2">
+                    {% for casa in range(datos['min'], datos['max'] + 1) %}
+                    <div id="casa-{{ casa }}" class="casita p-2 bg-gradient-to-br from-[#CDE7DF] to-[#8FBFAF] rounded text-center text-xs hover:bg-[#1E4C40] hover:text-white transition cursor-pointer shadow-md">
+                        <i class="bi bi-house-door-fill text-lg"></i>
+                        <p class="mt-1 font-bold">Casa {{ casa }}</p>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <script>
+        const andenes = {
+          1: { min: 1, max: 31 },
+          2: { min: 32, max: 56 },
+          3: { min: 64, max: 87 },
+          4: { min: 88, max: 101 },
+          5: { min: 102, max: 115 },
+          6: { min: 116, max: 139 },
+          7: { min: 140, max: 163 },
+          8: { min: 164, max: 187 },
+          9: { min: 188, max: 213 },
+          10: { min: 214, max: 240 }
+        };
+      
+        let timer;
+        
+        function buscarCasa() {
+          clearTimeout(timer); // Limpiar cualquier temporizador previo
+      
+          timer = setTimeout(() => {
+            const numero = parseInt(document.getElementById("buscarCasa").value);
+            const resultado = document.getElementById("resultadoBusqueda");
+      
+            // Limpiar resaltado previo
+            document.querySelectorAll('.casita').forEach(casita => {
+              casita.classList.remove('resaltado');
+            });
+      
+            if (!numero) {
+              resultado.textContent = "";
+              return;
             }
-
-            // Validar si `numeroinmueble` está en el rango específico del `anden`
-            if (anden in andenRanges) {
-                const range = andenRanges[anden];
-                if (numeroinmueble < range.min || numeroinmueble > range.max || isNaN(numeroinmueble)) {
-                    errors.numeroinmueble = `El número de inmueble para el Andén ${anden} debe estar entre ${range.min} y ${range.max}.`;
-                    isValid = false;
+      
+            let encontrado = false;
+            for (const [anden, rango] of Object.entries(andenes)) {
+              if (numero >= rango.min && numero <= rango.max) {
+                resultado.textContent = `La casa ${numero} está en el Andén ${anden}`;
+                
+                // Resaltar la casita correspondiente
+                const casaElement = document.querySelector(`#casa-${numero}`);
+                if (casaElement) {
+                  casaElement.classList.add('resaltado');
                 }
-            } else {
-                errors.numeroinmueble = "El número de inmueble debe estar en un rango válido.";
-                isValid = false;
+      
+                // Abrir el modal automáticamente
+                const modal = new bootstrap.Modal(document.getElementById(`modal${anden}`));
+                modal.show();
+      
+                encontrado = true;
+                break;
+              }
             }
-
-            // Mostrar errores en la interfaz
-            document.querySelectorAll(".error-msg").forEach(el => el.innerText = ""); // Limpiar errores anteriores
-            for (const key in errors) {
-                const errorElement = document.getElementById(`error-${key}`);
-                if (errorElement) {
-                    errorElement.innerText = errors[key];
-                }
+      
+            if (!encontrado) {
+              resultado.textContent = `No se encontró la casa ${numero} en los andenes`;
             }
-
-            // Si hay errores, detener el envío del formulario
-            if (!isValid) {
-                event.preventDefault();
-            }
-        });
-    });
-</script>
+          }, 500); // Espera 500ms después de que el usuario deje de escribir
+        }
+      </script>
 
 
 {% endblock %}
