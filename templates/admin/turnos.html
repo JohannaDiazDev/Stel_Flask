@@ -1,0 +1,60 @@
+{% extends 'admin/base_dash.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-6">
+    <h2 class="text-3xl font-bold mb-4 text-center text-[#1E4C40]">Turnos del Guarda <i class="bi bi-calendar-week"></i></h2>
+
+    <!-- Botón para abrir el modal -->
+    <div class="flex justify-end mb-4">
+        <button onclick="document.getElementById('modal').classList.remove('hidden')" 
+                class="bg-[#1E4C40] text-white px-4 py-2 rounded hover:bg-[#16352F]">
+            Registrar Turno <i class="bi bi-plus-square-dotted"></i>
+        </button>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md relative">
+            <button onclick="document.getElementById('modal').classList.add('hidden')" 
+                    class="absolute top-2 right-2 text-gray-500 hover:text-red-500">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <h3 class="text-xl font-semibold mb-4 text-[#1E4C40] text-center">Registrar Turno</h3>
+            <form method="POST" class="space-y-3">
+                <select name="usuario_id" class="w-full p-2 border rounded" required>
+                    <option value="">Selecciona un Trabajador</option>
+                    {% for g in guardas %}
+                        <option value="{{ g.pkiduser }}">{{ g.nombre }}</option>
+                    {% endfor %}
+                </select>
+                <input type="date" name="fecha" class="w-full p-2 border rounded" required>
+                <input type="time" name="hora_inicio" class="w-full p-2 border rounded" required>
+                <input type="time" name="hora_fin" class="w-full p-2 border rounded" required>
+
+                <button type="submit" class="w-full bg-[#1E4C40] text-white py-2 rounded hover:bg-[#16352F]">
+                    Registrar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cronograma -->
+    {% set dias = turnos | groupby('fecha') %}
+    {% for fecha, turnos_dia in dias %}
+        <div class="mt-8">
+            <h3 class="text-xl font-bold text-[#1E4C40] mb-2">
+                {{ fecha | datetimeformat('%A, %d de %B') | capitalize }}
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for turno in turnos_dia %}
+                    <div class="bg-white border-l-4 border-[#1E4C40] p-4 shadow-md rounded-md">
+                        <h4 class="text-lg font-semibold text-[#1E4C40]">{{ turno.nombre }}</h4>
+                        <p><strong>Inicio:</strong> {{ turno.hora_inicio }}</p>
+                        <p><strong>Fin:</strong> {{ turno.hora_fin }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

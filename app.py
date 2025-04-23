@@ -2,11 +2,14 @@ from flask import Flask, render_template, url_for, jsonify, request, session, fl
 import re, time
 from flask_mysqldb import MySQL
 from flask_bcrypt import Bcrypt
+from datetime import datetime
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
 import MySQLdb
 import pymysql
 import mysql.connector
+import locale
+
 app = Flask (__name__)
 bcrypt = Bcrypt(app)
 app.config['MYSQL_HOST'] = 'localhost'
@@ -25,6 +28,20 @@ bcrypt = Bcrypt()
 def inicio():
     return render_template('inicio.html')
 
+@app.template_filter('datetimeformat')
+def datetimeformat(value, format='%A, %d de %B'):
+    # Configura el locale a español
+    try:
+        locale.setlocale(locale.LC_TIME, 'es_ES')
+    except locale.Error:
+        try:
+            locale.setlocale(locale.LC_TIME, 'es_CO.utf8')  # Otra alternativa
+        except:
+            locale.setlocale(locale.LC_TIME, '')  # Por defecto
+
+    if isinstance(value, str):
+        value = datetime.strptime(value, '%Y-%m-%d')
+    return value.strftime(format)
 #@app.route('/usuarios')
 #def mostrar_usuarios():
 #    usuarios = Usuarios.query.all()  # Obtiene todos los usuarios
@@ -298,12 +315,16 @@ def editar_usuario(pkiduser):
         flash("Usuario actualizado correctamente", "success")
         return redirect(url_for('usuarios'))
 
-    # Si es una petición GET, recupera los datos del usuario
     cursor.execute("SELECT * FROM usuarios WHERE pkiduser = %s", (pkiduser,))
     usuario = cursor.fetchone()
+
+    # También recupera los roles
+    cursor.execute("SELECT * FROM roles")
+    roles = cursor.fetchall()
+
     db.close()
 
-    return redirect(url_for('usuarios')) 
+    return redirect(url_for('usuarios', usuario=usuario, roles=roles)) 
 
 
 
@@ -329,16 +350,207 @@ def inmueble():
 def Residentes():
     return "Página de Residentes"
 
-@app.route('/trabajadores')
-def Trabajadores():
-    return "Página de Trabajadores"
+@app.route('/turnos', methods=['GET', 'POST'])
+def turnos():
+    db = get_db_connection()
+    cursor = db.cursor()
 
-@app.route('/multas')
-def Multas():
-    return "Página de Multas"
+    # Consulta guardas al principio
+    cursor.execute("SELECT pkiduser, nombre FROM usuarios WHERE rol_id = 3")
+    columnas = [col[0] for col in cursor.description]
+    guardas = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    if request.method == 'POST':
+        usuario_id = request.form['usuario_id']
+        fecha = request.form['fecha']
+        hora_inicio = request.form['hora_inicio']
+        hora_fin = request.form['hora_fin']
+
+        # Insertar turno
+        cursor.execute("""
+            INSERT INTO turnos (usuario_id, fecha, hora_inicio, hora_fin)
+            VALUES (%s, %s, %s, %s)
+        """, (usuario_id, fecha, hora_inicio, hora_fin))
+        db.commit()
+        cursor.close()
+        db.close()
+
+        # Redirigir para evitar reenviar formulario al recargar
+        return redirect(url_for('turnos'))
+
+    # Consulta turnos solo si es GET
+    cursor.execute("""
+        SELECT t.*, u.nombre 
+        FROM turnos t
+        JOIN usuarios u ON t.usuario_id = u.pkiduser
+        ORDER BY t.fecha DESC, t.hora_inicio ASC
+    """)
+    columnas = [col[0] for col in cursor.description]
+    turnos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    cursor.close()
+    db.close()
+
+    return render_template('/admin/turnos.html', guardas=guardas, turnos=turnos)
+
+
+
+@app.route('/admin/multa', methods=['GET'])
+def multa():
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    offset = (page - 1) * per_page
+    tipo = request.args.get('tipo', '')
+
+    # --- Consulta de multas con nombre de administradora ---
+    sql = """
+        SELECT m.pkidmulta, m.fecha, m.inmueble_id, m.tipo, m.valor, u.nombre AS nombre_trabajador, m.fecha_pago
+        FROM multa m
+        LEFT JOIN inmueble i ON m.inmueble_id = i.pkidinmueble
+        LEFT JOIN trabajador t ON m.trabajador_id = t.pkidtrabajador
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+    """
+
+    params = []
+    if tipo:
+        sql += " WHERE m.tipo LIKE %s"
+        params.append(f"%{tipo}%")
+
+    sql += " LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])
+
+    cursor.execute(sql, params)
+    columnas = [col[0] for col in cursor.description]
+    multas = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    # --- Inmuebles ---
+    cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
+    columnas_inmueble = [col[0] for col in cursor.description]
+    inmuebles = [dict(zip(columnas_inmueble, fila)) for fila in cursor.fetchall()]
+
+    # --- Solo administradora como trabajadora ---
+    cursor.execute("""
+        SELECT t.pkidtrabajador, u.nombre
+        FROM trabajador t
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+        WHERE u.pkiduser = 1
+    """)
+    columnas_trabajador = [col[0] for col in cursor.description]
+    trabajadores = [dict(zip(columnas_trabajador, fila)) for fila in cursor.fetchall()]
+
+    # --- Usuarios ---
+    cursor.execute("SELECT pkiduser, nombre FROM usuarios")
+    columnas_usuario = [col[0] for col in cursor.description]
+    usuarios = [dict(zip(columnas_usuario, fila)) for fila in cursor.fetchall()]
+
+    # --- Paginación ---
+    if tipo:
+        cursor.execute("SELECT COUNT(*) FROM multa WHERE tipo LIKE %s", (f"%{tipo}%",))
+    else:
+        cursor.execute("SELECT COUNT(*) FROM multa")
+    total_multa = cursor.fetchone()[0]
+    total_pages = (total_multa + per_page - 1) // per_page
+
+    cursor.close()
+    db.close()
+
+    response = make_response(render_template('admin/multa.html', 
+        multas=multas, 
+        usuarios=usuarios,
+        inmuebles=inmuebles,
+        trabajadores=trabajadores, 
+        page=page, 
+        total_pages=total_pages, 
+        tipo_buscar=tipo
+    ))
+
+    response.headers['Cache-Control'] = 'no-store'
+    
+
+    if 'pkiduser' not in session:
+        flash('Debes iniciar sesión primero', 'danger')
+        return redirect(url_for('ingresar'))
+
+    return response
+
+
+@app.route('/admin/multa', methods=['POST'])
+def crear_multa():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    fecha = request.form['fecha']
+    inmueble_id = request.form['inmueble_id']
+    tipo = request.form['tipo']
+    valor = request.form['valor']
+    trabajador_id = request.form['trabajador_id']
+    fecha_pago = request.form['fecha_pago']
+
+    sql = "INSERT INTO multa (fecha, inmueble_id, tipo, valor, trabajador_id, fecha_pago) VALUES (%s, %s, %s, %s, %s, %s)"
+    valores = (fecha, inmueble_id, tipo, valor, trabajador_id, fecha_pago)
+
+    cursor.execute(sql, valores)
+    db.commit()
+    cursor.close()
+    db.close()
+    return redirect(url_for('multa'))
+
+@app.route('/delete_multa/<int:pkidmulta>')
+def delete_multa(pkidmulta):
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM multa WHERE pkidmulta = %s", (pkidmulta,))
+    db.commit()
+    db.close()
+    return redirect(url_for('multa'))
+
+@app.route('/admin/multa/<int:pkidmulta>/editar_multa', methods=['GET','POST'])
+def editar_multa(pkidmulta):
+    db = get_db_connection()
+    cursor = db.cursor()
+    
+    if request.method == 'POST':
+
+        fecha = request.form.get('fecha')
+        inmueble_id = request.form.get('inmueble_id')
+        tipo = request.form.get('tipo')
+        valor = request.form.get('valor')
+        trabajador_id = request.form.get('trabajador_id')
+        fecha_pago = request.form.get('fecha_pago')
+
+        sql = """UPDATE multa SET fecha = %s, inmueble_id = %s, tipo = %s, valor = %s, trabajador_id =%s, fecha_pago = %s WHERE pkidmulta = %s"""
+        valores = (fecha, inmueble_id, tipo, valor, trabajador_id, fecha_pago, pkidmulta)
+        cursor.execute(sql, valores)
+        db.commit()
+        db.close()
+
+        flash("Multa actualizada correctamente", "success")
+        return redirect(url_for('multa'))
+    
+    cursor.execute("SELECT * FROM multa WHERE pkidmulta = %s", (pkidmulta,))
+    multa = cursor.fetchone()
+    cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
+    inmuebles = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT t.pkidtrabajador, u.nombre 
+        FROM trabajador t 
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser 
+        WHERE u.pkiduser = 1
+    """)
+    trabajadores = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    return render_template('admin/multa.html', multa=multa, inmuebles=inmuebles, trabajadores=trabajadores)
 
 @app.route('/cartera')
-def Cartera():
+def cartera():
     return "Página de Cartera"
 
 @app.route('/visitantes')
@@ -356,6 +568,14 @@ def dashboard_guarda():
 @app.route('/dashboard_residente')
 def dashboard_residente():
     return 'pagina residente'
+
+@app.route('/Correspondencia')
+def Correspondencia():
+    return 'pagina correspondencia'
+
+@app.route('/Novedades')
+def Novedades():
+    return 'pagina novedades'
 
 @app.route('/logout')
 def logout():

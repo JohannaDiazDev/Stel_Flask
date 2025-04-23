@@ -1,0 +1,298 @@
+{% extends 'admin/base_dash.html' %}
+
+{% block content %}
+
+<div class="container mx-auto py-8">
+    <h2 class="text-2xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Multas <i class="bi bi-cash-coin"></i></h2>
+    <div class="flex justify-between items-center mt-3 gap-3">
+        <button type="button" class=" btn btn-success" style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modal1">
+            Registrar Multa <i class="bi bi-cash-coin"></i>
+        </button>
+        <form method="GET" action="{{url_for('multa')}}" class="flex items-center space-x-2">
+            <input type="text" name="tipo" placeholder="Tipo de multa" value="{{tipo_buscar}}" class="border rounded px-2 py-1">
+            <button type="submit" class="btn btn-primary" style="background-color: #1E4C40;"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+
+    <div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content shadow-lg p-3 mb-5">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="ModalLabel">Registrar Multa <i class="bi bi-cash-coin"></i></h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="multaForm" action="{{ url_for('crear_multa') }}" method="post">
+                        <input type="hidden" id="pkidmulta" name="pkidmulta">
+                        <div class="mb-2">
+                            <label for="text">Fecha</label>
+                            <input type="datetime-local" id="fecha" name="fecha" required class="border rounded px-2 py-1">
+                            <span id="error-fecha" class="error-msg" style="color: red;"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="inmueble_id">Inmueble</label>
+                            <select name="inmueble_id" required class="border rounded px-2 py-1">
+                                {% for inmueble in inmuebles %}
+                                    <option value="{{ inmueble.pkidinmueble }}">{{ inmueble.numeroinmueble }}</option>
+                                {% endfor %}    
+                            </select>
+                            <span class="error-inmueble text-red-500" id="error-inmueble"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="tipo">Tipo</label>
+                            <select name="tipo" id="tipo" required class="border rounded px-2 py-1">
+                                <option value="Ruido Excesivo">Ruido Excesivo</option>
+                                <option value="Estacionamiento indebido">Estacionamiento indebido</option>
+                                <option value="Mascota sin correa">Mascota sin correa</option>
+                                <option value="Problemas con los vecinos">Problemas con los vecinos</option>
+                                <option value="Daños a zonas comunes">Daños a zonas comunes</option>
+                                <option value="Problemas con mascotas">Problemas con mascotas</option>
+                                <option value="Inasistencia asamblea">Inasistencia asamblea</option>
+                            </select>
+                            <span class="error-tipo text-red-500" id="error-tipo"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="valor">Valor</label>
+                            <input type="number" name="valor" required class="border rounded px-2 py-1">
+                            <span class="error-valor text-red-500" id="error-valor"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="trabajador_id">Trabajador</label>
+                            <select name="trabajador_id" required class="border rounded px-2 py-1">
+                                {% for trabajador in trabajadores %}
+                                    <option value="{{ trabajador.pkidtrabajador }}">{{ trabajador.nombre }}</option>
+                                {% endfor %}  
+                            </select>
+                            <span class="error-trabajador text-red-500" id="error-trabajador"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="fecha_pago">Fecha de pago</label>
+                            <input type="datetime-local" name="fecha_pago" class="border rounded px-2 py-1">
+                            <span class="error-fecha_pago text-red-500" id="error-fecha_pago"></span>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" id="crear_multa" class="btn btn-primary" style="background-color: #1E4C40;">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <table class="w-4/5 mt-7 border mx-auto text-sm shadow-lg p-3 mb-5">
+        <thead>
+            <tr class="bg-[#1E4C40] text-white justify-center items-center">
+                <th class="border border-gray-300 px-2 py-1 text-center">Fecha</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Inmueble</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Tipo</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Valor</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Trabajador</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Fecha pago</th>
+                <th class="border border-gray-300 px-2 py-1 text-center" colspan="2">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="multaTable">
+            {% for multa in multas %}
+            <tr class="hover:bg-gray-100">
+                <td class="border border-gray-300 px-4 py-2 text-center">{{multa.fecha.strftime('%Y-%m-%d %H:%M:%S')}}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{multa.inmueble_id }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{multa.tipo}}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{multa.valor}}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{multa.nombre_trabajador}}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{multa.fecha_pago}}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">
+                    <div>
+                        <button type="button" class="btn btn-sm btn-warning"style="background-color: #1E4C40; border-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modal{{multa.pkidmulta}}">
+                            <i class="bi bi-cash-coin text-white"></i>
+                        </button>
+                        <td class="border border-gray-300 px-1 py-2 text-center">
+                            <a href="{{ url_for('delete_multa', pkidmulta=multa.pkidmulta) }}">
+                                <i class="bi bi-eraser-fill text-[#a11129] text-xl"></i>
+                            </a>
+                        </td>
+                    </div> 
+                </td>
+            </tr>
+            <div class="modal fade" id="modal{{multa.pkidmulta}}" tabindex="-1" aria-labelledby="ModalLabel1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content shadow-lg p-3 mb-5">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="ModalLabel1">{{multa.pkidmulta}}</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="{{ url_for('editar_multa', pkidmulta=multa.pkidmulta) }}" method="post">
+                                <div class="mb-2">
+                                    <label for="datetime">Fecha</label>
+                                    <input type="datetime" id="fecha" name="fecha" value="{{multa.fecha}}" required class="border rounded px-2 py-1">
+                                    <span id="error-fecha" class="error-msg" style="color: red;"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="inmueble_id">Inmueble</label>
+                                    <select name="inmueble_id" required class="border rounded px-2 py-1">
+                                        {% for inmueble in inmuebles %}
+                                            <option value="{{ inmueble.pkidinmueble }}" {% if multa.inmueble_id == inmueble.pkidinmueble %}selected{% endif %}>
+                                                {{ inmueble.numeroinmueble }}
+                                            </option>
+                                        {% endfor %}   
+                                    </select>
+                                    <span class="error-inmueble text-red-500" id="error-inmueble"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="tipo">Tipo</label>
+                                    <select name="tipo" id="tipo" required class="border rounded px-2 py-1">
+                                        {% set tipos = ["Ruido Excesivo", "Estacionamiento indebido", "Mascota sin correa", 
+                                            "Problemas con los vecinos", "Daños a zonas comunes", 
+                                            "Problemas con mascotas", "Inasistencia asamblea"] %}
+                                        {% for tipo_opcion in tipos %}
+                                            <option value="{{ tipo_opcion }}" {% if multa.tipo == tipo_opcion %}selected{% endif %}>{{ tipo_opcion }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="error-tipo text-red-500" id="error-tipo"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="valor">Valor</label>
+                                    <input type="number" name="valor" value="{{ multa.valor }}"required class="border rounded px-2 py-1">
+                                    <span class="error-valor text-red-500" id="error-valor"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="trabajador_id">Trabajador</label>
+                                    <select name="trabajador_id" required class="border rounded px-2 py-1">
+                                        {% for trabajador in trabajadores %}
+                                            <option value="{{ trabajador.pkidtrabajador }}" {% if multa.trabajador_id == trabajador.pkidtrabajador  %}selected{% endif %}>
+                                                {{ trabajador.nombre }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="error-trabajador text-red-500" id="error-trabajador"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="fecha_pago">Fecha de pago</label>
+                                    <input type="date" value="{{ multa.fecha_pago }}" class="border rounded px-2 py-1">
+                                    <span class="error-fecha_pago text-red-500" id="error-fecha_pago"></span>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-success" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Guardar <i class="bi bi-floppy-fill"></i> </button>
+
+
+                                </div>
+                            </form>    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}    
+        </tbody>
+    </table>
+    <div class="flex justify-center mt-4">
+        <ul class="flex list-none">
+            {% if page > 1 %}
+            <li>
+                <a href="?page={{ page - 1 }}{% if tipo_buscar %}&tipo={{ tipo_buscar }}{% endif %}" 
+                   class="px-3 py-1 mx-1 bg-[#1E4C40] text-white rounded hover:bg-gray-300">
+                    « 
+                </a>
+            </li>
+            {% endif %}
+    
+            {% for i in range(1, total_pages + 1) %}
+            <li>
+                <a href="?page={{ i }}{% if tipo_buscar %}&tipo={{ tipo_buscar }}{% endif %}" 
+                   class="px-3 py-1 mx-1 rounded {% if page == i %}bg-[#1E4C40] text-white{% else %}bg-gray-200 text-white hover:bg-gray-300{% endif %}">
+                    {{ i }}
+                </a>
+            </li>
+            {% endfor %}
+    
+            {% if page < total_pages %}
+            <li>
+                <a href="?page={{ page + 1 }}{% if tipo_buscar %}&tipo={{ tipo_buscar }}{% endif %}" 
+                   class="px-3 py-1 mx-1 bg-[#1E4C40] text-white rounded hover:bg-gray-300">
+                    »
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const forms = document.querySelectorAll('form[action*="editar_multa"]');
+
+        forms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                const fecha = form.querySelector('input[name="fecha"]');
+                const valor = form.querySelector('input[name="valor"]');
+                const tipo = form.querySelector('select[name="tipo"]');
+                const inmueble = form.querySelector('select[name="inmueble_id"]');
+                const trabajador = form.querySelector('select[name="trabajador_id"]');
+                const fechaPago = form.querySelector('input[name="fecha_pago"]');
+
+                const errorFecha = form.querySelector('#error-fecha');
+                const errorTipo = form.querySelector('#error-tipo');
+                const errorValor = form.querySelector('#error-valor');
+                const errorInmueble = form.querySelector('#error-inmueble');
+                const errorTrabajador = form.querySelector('#error-trabajador');
+                const errorFechaPago = form.querySelector('#error-fecha_pago');
+
+                // Limpiar errores anteriores
+                errorFecha.textContent = '';
+                errorTipo.textContent = '';
+                errorValor.textContent = '';
+                errorInmueble.textContent = '';
+                errorTrabajador.textContent = '';
+                errorFechaPago.textContent = '';
+
+                let valid = true;
+                const today = new Date().toISOString().split('T')[0];
+
+                if (!tipo.value) {
+                    errorTipo.textContent = 'El tipo de multa es obligatorio';
+                    valid = false;
+                }
+
+                if (!fecha.value) {
+                    errorFecha.textContent = 'La fecha de la multa es obligatoria';
+                    valid = false;
+                } else if (fecha.value !== today) {
+                    errorFecha.textContent = 'La fecha de la multa debe ser la fecha actual';
+                    valid = false;
+                }
+
+                if (!valor.value) {
+                    errorValor.textContent = 'El valor de la multa es obligatorio';
+                    valid = false;
+                } else {
+                    const valorNum = parseFloat(valor.value);
+                    if (isNaN(valorNum) || valorNum < 50000 || valorNum > 250000) {
+                        errorValor.textContent = 'El valor debe estar entre 50,000 y 250,000';
+                        valid = false;
+                    }
+                }
+
+                if (!inmueble.value) {
+                    errorInmueble.textContent = 'El inmueble es obligatorio';
+                    valid = false;
+                }
+
+                if (!trabajador.value) {
+                    errorTrabajador.textContent = 'El trabajador es obligatorio';
+                    valid = false;
+                }
+
+                if (fechaPago.value && fecha.value && fechaPago.value < fecha.value) {
+                    errorFechaPago.textContent = 'La fecha de pago debe ser igual o posterior a la fecha de multa';
+                    valid = false;
+                }
+
+                if (!valid) {
+                    e.preventDefault(); // Detener el envío si hay errores
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
+<!--VAMOS EN ARREGLAR LA FECHA DE PAGO AL EDITAR-->

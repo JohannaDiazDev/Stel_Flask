@@ -27,7 +27,7 @@ from flask_bcrypt import Bcrypt
 
 bcrypt = Bcrypt()
 
-password = "A@m2L*"
+password = "al@12"
 hashed = bcrypt.generate_password_hash(password).decode('utf-8')
 
 print("Hash generado:", hashed)

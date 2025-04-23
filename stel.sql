@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-04-2025 a las 02:01:34
+-- Tiempo de generación: 23-04-2025 a las 04:44:05
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -81,13 +81,21 @@ INSERT INTO `inmueble` (`pkidinmueble`, `numeroinmueble`, `anden`) VALUES
 
 CREATE TABLE `multa` (
   `pkidmulta` int(11) NOT NULL,
+  `fecha` datetime NOT NULL,
+  `inmueble_id` int(11) NOT NULL,
+  `tipo` varchar(50) NOT NULL,
   `valor` decimal(10,2) NOT NULL,
   `trabajador_id` int(11) NOT NULL,
-  `fecha` datetime NOT NULL,
-  `fecha_pago` datetime DEFAULT NULL,
-  `inmueble_id` int(11) NOT NULL,
-  `tipo` varchar(50) NOT NULL
+  `fecha_pago` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `multa`
+--
+
+INSERT INTO `multa` (`pkidmulta`, `fecha`, `inmueble_id`, `tipo`, `valor`, `trabajador_id`, `fecha_pago`) VALUES
+(1, '2025-04-16 23:56:24', 1, 'Estacionamiento indebido', 170000.00, 1, NULL),
+(2, '2025-04-16 23:27:00', 1, 'Ruido Excesivo', 160000.00, 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -183,7 +191,30 @@ CREATE TABLE `trabajador` (
 --
 
 INSERT INTO `trabajador` (`pkidtrabajador`, `usuario_id`, `rol_id`, `empresa`, `cargo`) VALUES
-(1, 3, 3, 'Vigias Col', 'Guardia de Seguridad');
+(1, 1, 1, 'Administradores Col', 'Administrador');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `turnos`
+--
+
+CREATE TABLE `turnos` (
+  `pkidturno` int(11) NOT NULL,
+  `usuario_id` int(11) DEFAULT NULL,
+  `fecha` date DEFAULT NULL,
+  `hora_inicio` time DEFAULT NULL,
+  `hora_fin` time DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `turnos`
+--
+
+INSERT INTO `turnos` (`pkidturno`, `usuario_id`, `fecha`, `hora_inicio`, `hora_fin`) VALUES
+(10, 3, '2025-04-22', '06:00:00', '18:00:00'),
+(11, 4, '2025-04-22', '18:00:00', '06:00:00'),
+(12, 3, '2025-04-23', '06:00:00', '18:00:00');
 
 -- --------------------------------------------------------
 
@@ -206,9 +237,10 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`pkiduser`, `rol_id`, `cedula`, `correo`, `contraseña`, `celular`, `nombre`) VALUES
-(1, 1, '14896542', 'alba_am@gmail.com', 'al@12', '3104987985', 'Alba Amaya'),
-(2, 2, '1047965406', 'danr@gmail.com', 'dan@r', '3114987098', 'Daniel Reynolds'),
-(3, 3, '56789012', 'juandelgado@gmail.com', 'Jda3s', '3219546650', 'Juan Delgado');
+(1, 1, '14896542', 'alba_am@gmail.com', '$2b$12$/FPCCWf2v6/RsYqpppA1Y.Md4GLcz9V2nmbk4BdKauy6l9hfLQ7QG', '3104987985', 'Alba Amaya'),
+(2, 2, '1047965406', 'danr@gmail.com', '$2b$12$9Z7/6NNzRCFG9Bka8JhO4uMIiIiFUYpUxsBdEC9LxwNeMWdRCMh0u', '3114987098', 'Daniel Reynolds'),
+(3, 3, '56789012', 'juandelgado@gmail.com', '$2b$12$NCShdIVJvYu2/RiPg.3s5OwRfnNnvcFm5FdOXu2sRAqJBYXWHnf3y', '3219546650', 'Juan Delgado'),
+(4, 3, '1014321659', 'isa_gar@gmail.com', 'I5@gr', '3151123080', 'Isabella García');
 
 -- --------------------------------------------------------
 
@@ -301,6 +333,13 @@ ALTER TABLE `trabajador`
   ADD KEY `rol_id` (`rol_id`);
 
 --
+-- Indices de la tabla `turnos`
+--
+ALTER TABLE `turnos`
+  ADD PRIMARY KEY (`pkidturno`),
+  ADD KEY `usuario_id` (`usuario_id`);
+
+--
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -344,7 +383,7 @@ ALTER TABLE `inmueble`
 -- AUTO_INCREMENT de la tabla `multa`
 --
 ALTER TABLE `multa`
-  MODIFY `pkidmulta` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `pkidmulta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `novedades`
@@ -377,10 +416,16 @@ ALTER TABLE `trabajador`
   MODIFY `pkidtrabajador` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de la tabla `turnos`
+--
+ALTER TABLE `turnos`
+  MODIFY `pkidturno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `pkiduser` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `pkiduser` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `visitante`
@@ -441,6 +486,12 @@ ALTER TABLE `residente`
 ALTER TABLE `trabajador`
   ADD CONSTRAINT `trabajador_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`pkiduser`),
   ADD CONSTRAINT `trabajador_ibfk_2` FOREIGN KEY (`rol_id`) REFERENCES `rol` (`pkidrol`);
+
+--
+-- Filtros para la tabla `turnos`
+--
+ALTER TABLE `turnos`
+  ADD CONSTRAINT `turnos_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`pkiduser`);
 
 --
 -- Filtros para la tabla `usuarios`
