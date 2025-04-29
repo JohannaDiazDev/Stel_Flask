@@ -59,6 +59,7 @@
                         <div class="mb-2">
                             <label for="trabajador_id">Trabajador</label>
                             <select name="trabajador_id" required class="border rounded px-2 py-1">
+                                <option value="">Seleccione un Trabajador</option>
                                 {% for trabajador in trabajadores %}
                                     <option value="{{ trabajador.pkidtrabajador }}">{{ trabajador.nombre }}</option>
                                 {% endfor %}  
@@ -99,18 +100,16 @@
                 <td class="border border-gray-300 px-4 py-2 text-center">{{multa.tipo}}</td>
                 <td class="border border-gray-300 px-4 py-2 text-center">{{multa.valor}}</td>
                 <td class="border border-gray-300 px-4 py-2 text-center">{{multa.nombre_trabajador}}</td>
-                <td class="border border-gray-300 px-4 py-2 text-center">{{multa.fecha_pago}}</td>
-                <td class="border border-gray-300 px-4 py-2 text-center">
-                    <div>
-                        <button type="button" class="btn btn-sm btn-warning"style="background-color: #1E4C40; border-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modal{{multa.pkidmulta}}">
-                            <i class="bi bi-cash-coin text-white"></i>
-                        </button>
-                        <td class="border border-gray-300 px-1 py-2 text-center">
-                            <a href="{{ url_for('delete_multa', pkidmulta=multa.pkidmulta) }}">
-                                <i class="bi bi-eraser-fill text-[#a11129] text-xl"></i>
-                            </a>
-                        </td>
-                    </div> 
+                <td class="border border-gray-300 px-4 py-2 text-center">{{multa.fecha_pago if multa.fecha_pago else ''}}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-warning"style="background-color: #1E4C40; border-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modal{{multa.pkidmulta}}">
+                        <i class="bi bi-cash-coin text-white"></i>
+                    </button>
+                </td>     
+                <td class="border border-gray-300 px-1 py-2 text-center">
+                    <a href="{{ url_for('delete_multa', pkidmulta=multa.pkidmulta) }}">
+                        <i class="bi bi-eraser-fill text-[#a11129] text-xl"></i>
+                    </a>
                 </td>
             </tr>
             <div class="modal fade" id="modal{{multa.pkidmulta}}" tabindex="-1" aria-labelledby="ModalLabel1" aria-hidden="true">
@@ -157,9 +156,11 @@
                                 </div>
                                 <div class="mb-2">
                                     <label for="trabajador_id">Trabajador</label>
-                                    <select name="trabajador_id" required class="border rounded px-2 py-1">
+                                    <select name="trabajador_id" required class="border rounded px-2 py-1 w-full">
+                                        <option value="">Seleccione un Trabajador</option>
                                         {% for trabajador in trabajadores %}
-                                            <option value="{{ trabajador.pkidtrabajador }}" {% if multa.trabajador_id == trabajador.pkidtrabajador  %}selected{% endif %}>
+                                            <option value="{{ trabajador.pkidtrabajador }}" 
+                                                {% if trabajador.pkidtrabajador == multa[5] %} selected {% endif %}>
                                                 {{ trabajador.nombre }}
                                             </option>
                                         {% endfor %}
@@ -168,7 +169,7 @@
                                 </div>
                                 <div class="mb-2">
                                     <label for="fecha_pago">Fecha de pago</label>
-                                    <input type="date" value="{{ multa.fecha_pago }}" class="border rounded px-2 py-1">
+                                    <input type="datetime-local" class="form-control" name="fecha_pago" value="{{ multa.fecha_pago.strftime('%Y-%m-%d') if multa.fecha_pago else '' }}">
                                     <span class="error-fecha_pago text-red-500" id="error-fecha_pago"></span>
                                 </div>
                                 <div class="modal-footer">
@@ -295,4 +296,3 @@
 </script>
 
 {% endblock %}
-<!--VAMOS EN ARREGLAR LA FECHA DE PAGO AL EDITAR-->

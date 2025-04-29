@@ -1,0 +1,294 @@
+{% extends 'admin/base_dash.html' %}
+
+{% block content %}
+
+<div class="container mx-auto py-8">
+    <h2 class="text-2xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Visitantes <i class="bi bi-person-walking"></i></h2>
+    <div class="flex justify-between items-center mt-3 gap-3">
+        <button type="button" class="btn btn-success font-bold" style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modall">
+            Registrar Visitante <i class="bi bi-person-raised-hand"></i>
+        </button>
+        <form method="GET" action="{{url_for('visitante')}}" class="flex items-center space-x-2">
+            <input type="text" name="cedula" placeholder="Cedula" value="{{cedula_buscar}}" class="border rounded px-2 py-1">
+            <button type="submit" class="btn btn-primary" style="background-color: #1E4C40;"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+    
+    <div class="modal fade" id="modall" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content shadow-lg p-3 mb-5">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="ModalLabel">Registrar Visitante<i class="bi bi-person-walking"></i></h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="visitanteForm" action="{{ url_for('crear_visitante') }}" method="post">
+                        <input type="hidden" id="pkidvisitante" name="pkidvisitante">
+                        <div class="mb-2">
+                            <label for="text">Fecha</label>
+                            <input type="datetime-local" id="fecha" name="fecha" required class="border rounded px-2 py-1">
+                            <span id="error-fecha" class="error-msg" style="color: red;"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="inmueble_id">Inmueble</label>
+                            <select name="inmueble_id" required class="border rounded px-2 py-1">
+                                {% for inmueble in inmuebles %}
+                                    <option value="{{inmueble.pkidinmueble}}">{{inmueble.numeroinmueble}}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="error-inmueble text-red-500" id="error-inmueble"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="autorizado">¿Autorizado?</label>
+                            <select name="autorizado" required class="border rounded px-2 py-1">
+                                <option value="si">Si</option>
+                                <option value="no">No</option>
+                            </select>
+                            <span class="error-autorizado text-red-500" id="error-autorizado"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="text">Nombre</label>
+                            <input type="text" id="nombre" name="nombre" required class="border rounded px-2 py-1">
+                            <span class="error-nombre text-red-500" id="error-nombre"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="numer">Cedula</label>
+                            <input type="number" id="cedula" name="cedula" required class="border rounded px-2 py-1">
+                            <span class="error-cedula text-red-500" id="error-cedula"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label for="ingresa_carro">¿Ingresa Carro?</label>
+                            <select name="ingresa_carro" id="ingresa_carro">
+                                <option value="1">Si</option>
+                                <option value="2">No</option>
+                            </select>
+                           <span class="error-carro text-red-500" id="error-carro"></span>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success" style="background-color: #a11129;">Cancelar</button>
+                            <button type="submit" id="crear_visitante" class="btn btn-primary" style="background-color: #1E4C40;">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="w-4/5 mt-7 border mx-auto text-sm shadow-lg p-3 mb-5">
+        <thead>
+            <tr class="bg-[#1E4C40] text-white justify-center items-center">
+                <th class="border border-gray-300 px-2 py-1 text-center">Fecha</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Inmueble</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">¿Autorizado?</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Nombre</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Cedula</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">¿Ingresa Carro?</th>
+                <th class="border border-gray-300 px-2 py-1 text-center" colspan="2">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="visitanteTable">
+            {% for visitante in visitantes %}
+                <tr class="hover:bg-gray-100">
+                    <td class="border border-gray-300 px-4 py-2 text-center">{{visitante.fecha.strftime('%Y-%m-%d %H:%M%S')}}</td>
+                    <td class="border border-gray-300 px-4 py-2 text-center">{{visitante.inmueble_id}}</td>
+                    <td class="border border-gray-300 px-4 py-2 text-center">
+                        {{ 'Sí' if visitante.autorizado == 1 else 'No' }}
+                    </td>
+                    <td class="border border-gray-300 px-4 py-2 text-center">{{visitante.nombre}}</td>
+                    <td class="border border-gray-300 px-4 py-2 text-center">{{visitante.cedula}}</td>
+                    <td class="border border-gray-300 px-4 py-2 text-center">
+                        {{ 'Sí' if visitante.ingresa_carro == 1 else 'No' }}
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-warning"style="background-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modal{{visitante.pkidvisitante}}">
+                            <i class="bi bi-person-raised-hand text-white"></i> 
+                        </button>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-2 text-center">
+                        <a href="{{ url_for('delete_visitante', pkidvisitante=visitante.pkidvisitante) }}">
+                            <i class="bi bi-person-x-fill text-[#a11129] text-xl"></i>
+                        </a>
+                    </td>
+                </tr>
+                <div class="modal fade" id="modal{{visitante.pkidvisitante}}" tabindex="-1" aria-labelledby="ModalLabell" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content shadow-lg p-3 mb-5">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="ModalLabel">{{visitante.pkidvisitante}}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{{ url_for('editar_visitante', pkidvisitante=visitante.pkidvisitante) }}">
+                                    <div class="mb-2">
+                                        <label for="datetime">Fecha</label>
+                                        <input type="datetime" id="fecha" name="fecha" value="{{visitante.fecha}}" required class="border rounded px-2 py-1">
+                                        <span id="error-fecha" class="error-msg" style="color:rgb(186, 5, 5);"></span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="inmueble_id">Inmueble</label>
+                                        <select name="inmueble_id" required class="border rounded px-2 py-1">
+                                            {% for inmueble in inmuebles%}
+                                                <option value="{{ inmueble.pkidinmueble }}" {% if visitante.inmueble_id == inmueble.pkidinmueble %}selected{% endif %}>
+                                                    {{ inmueble.numeroinmueble }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <span class="error-inmueble text-red-500" id="error-inmueble"></span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="autorizado">¿Autorizado?</label>
+                                        <select name="autorizado" required class="border rounded px-2 py-1">
+                                            <option value="1"{% if visitante.autorizado == 1 %}selected{% endif %}>Si</option>
+                                            <option value="2"{% if visitante.autorizado == 2 %}selected{% endif %}>No</option>
+                                        </select>
+                                        <span class="error-autorizado text-red-500" id="error-autorizado"></span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="nombre">Nombre</label>
+                                        <input type="text" id="nombre" name="nombre" value="{{ visitante.nombre }}" required class="border rounded px-2 py-1">
+                                    </div>
+                                    <span id="error-nombre text-red-500" id="error-nombre"></span>
+                                    <div class="mb-2">
+                                        <label for="cedula">Cédula</label>
+                                        <input type="number" id="cedula" name="cedula" value="{{ visitante.cedula }}" required class="border rounded px-2 py-1">
+                                        <span class="error-cedula text-red-500" id="error-cedula"></span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="ingresa_carro">¿Ingresa Carro?</label>
+                                        <select name="ingresa_carro" required class="border rounded px-2 py-1">
+                                            <option value="si"{% if visitante.ingresa_carro == si %}selected{% endif %}>Si</option>
+                                            <option value="no"{% if visitante.ingresa_carro == no %}selected{% endif %}>No</option>
+                                        </select>
+                                        <span class="error-carro text-red-500" id="error-carro"></span>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Guardar<i class="bi bi-person-walking"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="flex justify-center mt-4">
+        <ul class="flex list-none">
+            {% if page > 1%}
+                <li>
+                    <a href="?page={{ page - 1 }}{% if cedula_buscar %}&cedula={{ cedula_buscar }}{% endif %}"
+                        class="px-3 py-1 mx-1 bg-[#1E4C40] text-white rounded hover:bg-gray-300">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for i in range(1, total_pages + 1) %}
+                <li>
+                    <a href="?page={{ i }}{% if cedula_buscar %}&cedula={{ cedula_buscar }}{% endif %}"
+                        class="px-3 py-1 mx-1 rounded {% if page == i %}bg-[#1E4C40] text-white{% else %}bg-gray-200 text-white hover:bg-gray-300{% endif %}">
+                        {{ i }}
+                    </a>
+                </li>
+            {% endfor %}
+
+            {% if page < total_pages %}
+                <li>
+                    <a href="?page={{ page + 1 }}{% if cedula_buscar %}&cedula={{ cedula_buscar }}{% endif %}"
+                        class="px-3 py-1 mx-1 bg-[#1E4C40] text-white rounded hover:bg-gray-300">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        const forms= document.querySelectorAll('form[action*="editar_visitante"]');
+
+        forms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                const fecha = form.querySelector('input[name="fecha"]'); 
+                const inmueble = form.querySelector('select[name="inmueble_id"]');
+                const autorizado = form.querySelector('select[name="autorizado"]');
+                const nombre = form.querySelector('input[name="nombre"]'); 
+                const cedula = form.querySelector('input[name="cedula"]'); 
+                const ingresa_carro = form.querySelector('select[name="ingresa_carro"]');
+
+                const errorFecha = form.querySelector('#error-fecha');
+                const errorInmueble = form.querySelector('#error-inmueble'); 
+                const errorAutorizado = form.querySelector('#error-autorizado'); 
+                const errorNombre = form.querySelector('#error-nombre'); 
+                const errorCedula = form.querySelector('#error-cedula'); 
+                const errorIngresa_carro = form.querySelector('#error-ingresa_carro'); 
+
+                errorFecha.textContent = '';
+                errorInmueble.textContent = '';
+                errorAutorizado.textContent = '';
+                errorNombre.textContent = '';
+                errorCedula.textContent = '';
+                errorIngresa_carro.textContent = '';
+
+                let valid = true;
+                const today = new Date().toISOString().split('T')[0];
+
+                if (!fecha.value) {
+                    errorFecha.textContent = 'La fecha es obligatoria';
+                    valid = false;
+                } else if (fecha.value !== today) {
+                    errorFecha.textContent = 'La fecha debe ser la actual';
+                    valid = false;
+                }
+
+                if (!inmueble.value) {
+                    errorInmueble.textContent = 'El inmueble es obligatorio';
+                    valid = false;
+                }
+
+                if (!autorizado.value) {
+                    errorAutorizado.textContent = 'El campo autorizado es obligatorio';
+                    valid = false;
+                }
+
+                if (!nombre.value.trim()) {
+                    errorNombre.textContent = 'El nombre es obligatorio';
+                    valid = false;
+                } else if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(nombre.value)) {
+                    errorNombre.textContent = 'El nombre solo debe contener letras y espacios';
+                    valid = false;
+                } else if (nombre.value.length < 3 || nombre.value.length > 50) {
+                    errorNombre.textContent = 'El nombre debe tener entre 3 y 50 caracteres';
+                    valid = false;
+                } else {
+                    errorNombre.textContent = '';
+                }                
+
+                if (!cedula.value.trim()) {
+                    errorCedula.textContent = 'La cédula es obligatoria';
+                    valid = false;
+                } else if (!/^\d+$/.test(cedula.value)) {
+                    errorCedula.textContent = 'La cédula debe contener solo números';
+                    valid = false;
+                } else if (cedula.value.length < 4 || cedula.value.length > 10) {
+                    errorCedula.textContent = 'La cédula debe tener entre 4 y 10 dígitos';
+                    valid = false;
+                } else {
+                    errorCedula.textContent = '';   
+                }
+
+                if (!ingresa_carro.value) {
+                    errorIngresa_carro.textContent = 'El campo es obligatorio';
+                    valid = false;
+                }
+
+                if (!valid) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

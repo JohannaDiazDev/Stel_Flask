@@ -164,8 +164,8 @@ def dashboard_admin():
     cursor.execute("SELECT COUNT(*) FROM cartera where estado = 'Paz y Salvo'")
     paz_y_salvo = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) FROM cartera where estado = 'Mora'")
-    mora = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM cartera where estado = 'Moroso'")
+    moroso = cursor.fetchone()[0]
 
     cursor.close()
     db.close()
@@ -175,7 +175,7 @@ def dashboard_admin():
                                              parqueadero_count=parqueadero_count,
                                              multas_count=multas_count,
                                              paz_y_salvo=paz_y_salvo,
-                                             mora=mora))
+                                             moroso=moroso))
     
     # Agregar cabeceras para evitar caché
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
@@ -497,7 +497,11 @@ def crear_multa():
     db.commit()
     cursor.close()
     db.close()
-    return redirect(url_for('multa'))
+    cursor.execute("SELECT pkidtrabajador, nombre FROM trabajador")
+    trabajadores = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return redirect(url_for('multa', trabajadores,trabajadores))
 
 @app.route('/delete_multa/<int:pkidmulta>')
 def delete_multa(pkidmulta):
@@ -546,16 +550,259 @@ def editar_multa(pkidmulta):
 
     cursor.close()
     db.close()
-
+        
     return render_template('admin/multa.html', multa=multa, inmuebles=inmuebles, trabajadores=trabajadores)
 
-@app.route('/cartera')
+@app.route('/admin/cartera', methods=['GET'])
 def cartera():
-    return "Página de Cartera"
+    db = get_db_connection()
+    cursor = db.cursor()
 
-@app.route('/visitantes')
-def Visitantes():
-    return "Página de Visitantes"
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    offset = (page - 1) * per_page
+    estado = request.args.get('estado', '')
+
+    sql = """
+        SELECT c.pkidestado, c.fecha_actual, c.inmueble_id, c.estado, c.saldo, u.nombre AS nombre_trabajador, c.observaciones
+        FROM cartera c
+        LEFT JOIN inmueble i ON c.inmueble_id = i.pkidinmueble
+        LEFT JOIN trabajador t ON c.trabajador_id = t.pkidtrabajador
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+    """
+
+    params = []
+    if estado:
+        sql += " WHERE c.estado LIKE %s"
+        params.append(f"%{estado}%")
+    sql += " LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])
+
+    cursor.execute(sql,params)
+    columnas = [col[0] for col in cursor.description]
+    carteras = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
+    columnas_inmueble = [col[0] for col in cursor.description]
+    inmuebles = [dict(zip(columnas_inmueble, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("""
+        SELECT t.pkidtrabajador, u.nombre
+        FROM trabajador t
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+        WHERE u.pkiduser = 1
+    """)
+    columnas_trabajador = [col[0] for col in cursor.description]
+    trabajadores = [dict(zip(columnas_trabajador, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkiduser, nombre FROM usuarios")
+    columnas_usuario = [col[0] for col in cursor.description]
+    usuarios = [dict(zip(columnas_usuario, fila)) for fila in cursor.fetchall()]
+
+    if estado:
+        cursor.execute("SELECT COUNT(*) FROM cartera WHERE estado LIKE %s", (f"%{estado}%",))
+    else:
+        cursor.execute("SELECT COUNT(*) FROM cartera")
+    total_cartera = cursor.fetchone()[0]
+    total_pages = (total_cartera + per_page - 1 ) // per_page
+
+    cursor.close()
+    db.close()
+
+    response = make_response(render_template('admin/cartera.html',
+        carteras = carteras, usuarios = usuarios, inmuebles = inmuebles,
+        trabajadores = trabajadores, page=page, total_pages=total_pages,estado_buscar=estado
+    ))
+    response.headers['Cache-Control'] = 'no-store'
+
+    if 'pkiduser' not in session:
+        flash('Debes iniciar sesión primero','danger')
+        return redirect(url_for('ingresar'))
+    return response
+
+@app.route('/admin/cartera', methods=['POST'])
+def crear_cartera():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    fecha_actual = request.form['fecha_actual']
+    inmueble_id = request.form['inmueble_id']
+    estado = request.form['estado']
+    saldo = request.form['saldo'] 
+    trabajador_id = request.form['trabajador_id']
+    observaciones = request.form['observaciones']
+
+    sql = "INSERT INTO cartera (fecha_actual, inmueble_id, estado, saldo, trabajador_id, observaciones) VALUES (%s, %s, %s, %s, %s, %s)"
+    valores = (fecha_actual, inmueble_id, estado, saldo, trabajador_id, observaciones)
+
+    cursor.execute(sql,valores)
+    db.commit()
+    
+    cursor.execute("SELECT pkidtrabajador FROM trabajador")
+    trabajadores = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return redirect(url_for('cartera', trabajadores=trabajadores))
+
+@app.route('/delete_cartera/<int:pkidestado>')
+def delete_cartera(pkidestado):
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM cartera WHERE pkidestado = %s", (pkidestado,))
+    db.commit()
+    db.close()
+    return redirect(url_for('cartera'))
+
+@app.route('/admin/cartera/<int:pkidestado>/editar_cartera', methods=['GET','POST'])
+def editar_cartera(pkidestado):
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    if request.method == 'POST':
+        fecha_actual = request.form.get('fecha_actual')
+        inmueble_id = request.form.get('inmueble_id')
+        estado = request.form.get('estado')
+        saldo = request.form.get('saldo')
+        trabajador_id = request.form.get('trabajador_id')
+        observaciones = request.form.get('observaciones')
+
+        sql = """UPDATE cartera SET fecha_actual = %s, inmueble_id = %s, estado = %s, saldo = %s, trabajador_id = %s, observaciones = %s WHERE pkidestado = %s """
+        valores = (fecha_actual, inmueble_id, estado, saldo, trabajador_id, observaciones, pkidestado)
+        cursor.execute(sql,valores)
+        db.commit()
+        db.close()
+        flash("Cartera actualizada correctamente", "success")
+        return redirect(url_for('cartera'))
+
+    cursor.execute("SELECT * FROM cartera WHERE pkidestado = %s", (pkidestado,))
+    cartera = cursor.fetchone()
+    cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
+    inmuebles = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT t.pkidtrabajador, u.nombre
+        FROM trabajador t
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+        WHERE u.pkiduser = 1
+    """)
+    trabajadores = cursor.fetchall()
+
+    cursor.close()
+    db.close() 
+
+    return render_template('admin/cartera.html', cartera=cartera, inmuebles=inmuebles, trabajadores=trabajadores)
+
+@app.route('/admin/visitante', methods=['GET'])
+def visitante():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    offset = (page - 1)* per_page
+    cedula = request.args.get('cedula','')
+
+    sql = """
+        SELECT v.pkidvisitante, v.fecha, v.inmueble_id, v.autorizado, v.nombre, v.cedula, v.ingresa_carro
+        FROM visitante v
+        LEFT JOIN inmueble i ON v.inmueble_id = i.pkidinmueble
+    """
+    params = []
+    if cedula:
+        sql += " WHERE v.cedula LIKE %s"
+        params.append(f"%{cedula}%")
+    sql += "LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])
+
+    cursor.execute(sql, params)
+    columnas = [col[0] for col in cursor.description]
+    visitantes = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
+    columnas_inmueble = [col[0] for col in cursor.description]
+    inmuebles = [dict(zip(columnas_inmueble, fila)) for fila in cursor.fetchall()]
+
+    if cedula:
+        cursor.execute("SELECT COUNT(*) FROM visitante WHERE cedula LIKE %s", (f"%{cedula}%",))
+    else:
+        cursor.execute("SELECT COUNT(*) FROM visitante")
+    total_visitante = cursor.fetchone()[0]
+    total_pages = (total_visitante + per_page - 1)// per_page
+
+    cursor.close()
+    db.close()
+    response = make_response(render_template('admin/visitante.html',
+        visitantes=visitantes, inmuebles=inmuebles, page=page,
+        total_pages=total_pages,cedula_buscar=cedula
+    ))
+    response.headers['Cache-Control'] = 'no-store'
+
+    if 'pkiduser' not in session:
+        flash('Debes iniciar sesión primero', 'Danger')
+        return redirect(url_for('ingresar'))
+    return response
+
+@app.route('/admin/visitante', methods=['POST'])
+def crear_visitante():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    fecha = request.form['fecha'] 
+    inmueble_id = request.form['inmueble_id']
+    autorizado = request.form['autorizado']
+    nombre = request.form['nombre']
+    cedula = request.form['cedula']
+    ingresa_carro = request.form['ingresa_carro']
+
+    sql= "INSERT INTO visitante (fecha, inmueble_id, autorizado, nombre, cedula, ingresa_carro) VALUES (%s,%s,%s,%s,%s,%s)"
+    valores = (fecha, inmueble_id, autorizado, nombre, cedula, ingresa_carro)
+
+    cursor.execute(sql,valores)
+    db.commit()
+    cursor.execute("SELECT pkidinmueble FROM inmueble")
+    inmuebles = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return redirect(url_for('visitante', inmuebles=inmuebles))
+
+@app.route('/delete_visitante/<int:pkidvisitante>')
+def delete_visitante(pkidvisitante):
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM visitante WHERE pkidvisitante = %s", (pkidvisitante,))
+    db.commit()
+    db.close()
+    return redirect(url_for('visitante'))
+
+@app.route('/admin/visitante/<int:pkidvisitante>/editar_visitante', methods=['POST'])
+def editar_visitante(pkidvisitante):
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    if request.method == 'POST':
+        fecha = request.form.get('fecha')
+        inmueble_id = request.form.get('inmueble_id') 
+        autorizado = request.form.get('autorizado') 
+        nombre = request.form.get('nombre')
+        cedula = request.form.get('cedula')
+        ingresa_carro = request.form.get('ingresa_carro')
+
+        sql = "UPDATE visitante SET fecha = %s, inmueble_id = %s, autorizado = %s, nombre = %s, cedula = %s, ingresa_carro = %s WHERE pkidvisitante = %s"
+        valores = (fecha, inmueble_id, autorizado, nombre, cedula, ingresa_carro, pkidvisitante)
+        cursor.execute(sql,valores)
+        db.commit()
+        db.close()
+
+        flash("Visitante actualizado correctamente", "success")
+        return redirect(url_for('visitante'))
+    cursor.execute("SELECT * FROM visitante WHERE pkidvisitante = %s", (pkidvisitante))
+    visitante = cursor.fetchone()
+    cursor.execute("SELECT * FROM inmueble")
+    inmuebles = cursor.fetchall()
+    cursor.close()
+    db.close()
+
+    return render_template('admin/visitante.html', visitante=visitante, inmuebles=inmuebles)
 
 @app.route('/parqueadero')
 def Parqueadero():

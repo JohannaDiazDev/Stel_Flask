@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="Dashboard">
-    <h1 class="dashboard-title">Dashboard <i class="bi bi-collection-fill font-bold text-[#1E4C40] text-2xl"></i></h1>
+    <h1 class="dashboard-title text-[#1E4C40]">Dashboard <i class="bi bi-collection-fill font-bold text-[#1E4C40] text-2xl"></i></h1>
     <div class="row row-cols-2 row-cols-md-2 g-3 justify-content-center">
         <div class="col">
             <div class="card-Dashboard">
@@ -39,7 +39,7 @@
                 <img src="{{url_for('static', filename='/cartera.jpg')}}" alt="multa">
                 <div class="card-body">
                     <p class="card-text text-[#1E4C40]">Paz y Salvo: <strong>{{ paz_y_salvo }}</strong></p>
-                    <p class="card-text text-danger">Mora: <strong>{{ mora }}</strong></p>
+                    <p class="card-text text-danger">Mora: <strong>{{ moroso }}</strong></p>
                 </div>
             </div>
         </div>
