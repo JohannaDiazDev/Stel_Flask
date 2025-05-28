@@ -1,0 +1,105 @@
+{% extends 'admin/base_dash.html' %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-center text-[#1E4C40] mb-6"><i class="bi bi-car-front-fill"></i> Resumen - {{ mes_actual }} <i class="fa fa-motorcycle"></i></h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white shadow-xl rounded-2xl p-4 border-l-8 border-[#1E4C40]-500">
+            <p class="text-[#1E4C40] font-semibold text-center">Total de Cupos</p>
+            <p class="text-sm font-semibold text-[#1E4C40] text-center"><i class="bi bi-car-front-fill text-xl"></i> ocupados : {{ carros_ocupados }}</p>
+            <p class="text-sm text-[#1E4C40] font-semibold text-center"><i class="fa fa-motorcycle text-xl"></i> ocupados : {{ motos_ocupadas }}</p>
+            <h2 class="text-2xl font-bold text-[#1E4C40] text-center">Total: {{ total_cupos }}</h2>
+        </div>
+
+        <div class="bg-white shadow-xl rounded-2xl p-4 border-l-8 border-red-500">
+            <p class="text-[#1E4C40] font-semibold text-center">Cupos Ocupados</p>
+            <h2 class="text-2xl font-bold text-red-600 text-center">{{ ocupado }}</h2>
+        </div>
+
+        <div class="bg-white shadow-xl rounded-2xl p-4 border-l-8 border-green-500">
+            <p class="text-[#1E4C40] font-semibold text-center">Cupos Disponibles</p>
+            <h2 class="text-2xl font-bold text-green-600 text-center">{{ disponible }}</h2>
+        </div>
+
+        <div class="bg-white shadow-xl rounded-2xl p-4 border-l-8 border-yellow-500">
+            <p class="text-[#1E4C40] font-semibold text-center">Ingresos Recaudados</p>
+            <h2 class="text-2xl font-bold text-yellow-600 text-center">${{ "{:,.0f}".format(total_ingresos) }}</h2>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-4xl mx-auto mt-12 bg-white rounded-2xl shadow-lg p-6">
+    <h2 class="text-xl font-bold text-center text-[#1E4C40] mb-4">Ingresos Totales por Mes - {{ hoy.year }}</h2>
+    <canvas id="ingresosPorMesChart" height="100"></canvas>
+</div>
+
+<script>
+    const mesesGraf = {{ meses_graf | tojson | safe }};
+    const ingresosGraf = {{ ingresos_graf | tojson | safe }};
+
+    const ctxMes = document.getElementById('ingresosPorMesChart').getContext('2d');
+    const ingresosPorMesChart = new Chart(ctxMes, {
+        type: 'bar',
+        data: {
+            labels: mesesGraf,
+            datasets: [{
+                label: 'Ingresos ($)',
+                data: ingresosGraf,
+                backgroundColor: 'rgba(30, 76, 64, 0.7)',
+                borderColor: 'rgba(30, 76, 64, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        // Formatear números con coma y prefijo $
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#1E4C40',
+                        font: { weight: 'bold' }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+
+<div class="flex justify-between items-center mt-6">
+    {% if mes_actual_num > 1 %}
+        <a href="{{ url_for('parqueadero', mes=mes_actual_num - 1) }}" class="px-3 py-1 rounded-lg bg-[#1E4C40] text-white font-semibold">
+            <i class="bi bi-arrow-left-circle"></i>
+            {{ meses[mes_actual_num - 2].nombre }}
+        </a>
+    {% else %}
+        <span></span>
+    {% endif %}
+
+    <p class="text-[#1E4C40] font-semibold text-center">
+        Mes: {{ mes_actual }}
+    </p>
+
+    {% if mes_actual_num < 12 %}
+        <a href="{{ url_for('parqueadero', mes=mes_actual_num + 1) }}" class="px-3 py-1 rounded-lg bg-[#1E4C40] text-white font-semibold">
+            {{ meses[mes_actual_num].nombre }}
+            <i class="bi bi-arrow-right-circle"></i>
+        </a>
+    {% else %}
+        <span></span>
+    {% endif %}
+</div>
+
+{% endblock %}
+

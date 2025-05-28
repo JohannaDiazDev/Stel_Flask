@@ -6,9 +6,12 @@ from datetime import datetime
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
 import MySQLdb
-import pymysql
-import mysql.connector
+from datetime import datetime
+import calendar
 import locale
+locale.setlocale(locale.LC_TIME, 'Spanish_Colombia')
+from collections import defaultdict
+
 
 app = Flask (__name__)
 bcrypt = Bcrypt(app)
@@ -804,9 +807,94 @@ def editar_visitante(pkidvisitante):
 
     return render_template('admin/visitante.html', visitante=visitante, inmuebles=inmuebles)
 
-@app.route('/parqueadero')
-def Parqueadero():
-    return "Página de Parqueadero"
+@app.route('/admin/parqueadero', methods=['GET','POST'])
+def parqueadero():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    hoy = datetime.now()
+    mes = request.args.get('mes', hoy.month, type=int)
+    mes_nombre = datetime(2025, mes, 1).strftime('%B').capitalize()
+    meses = [{'Valor': i, 'nombre': datetime(2025, i, 1).strftime('%B').capitalize()} for i in range(1, 13)]
+
+    cupos_carros = 56
+    cupos_motos = 43
+    total_cupos = cupos_carros + cupos_motos
+
+    cursor.execute("""
+        SELECT COUNT(*) FROM parqueadero
+        WHERE MONTH(fecha) = %s AND (estado = 'ocupado' OR estado = 'disponible')
+    """, (mes,))
+    ocupado = cursor.fetchone()[0]
+
+    disponible = total_cupos - ocupado
+
+    cursor.execute("""
+        SELECT COUNT(*) FROM parqueadero
+        WHERE MONTH(fecha) = %s AND estado = 'ocupado' AND tipo = 'carro'
+    """, (mes,))
+    carros_ocupados = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT COUNT(*) FROM parqueadero
+        WHERE MONTH(fecha) = %s AND estado = 'ocupado' AND tipo = 'moto'
+    """, (mes,))
+    motos_ocupadas = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT SUM(tarifa) FROM parqueadero
+        WHERE tarifa IS NOT NULL AND MONTH(fecha) = %s AND YEAR(fecha) = %s
+    """, (mes, hoy.year))
+    fila = cursor.fetchone()
+    total_ingresos = fila[0] if fila and fila[0] is not None else 0
+
+
+    cursor.execute("""
+        SELECT MONTH(fecha), SUM(tarifa) FROM parqueadero
+        WHERE tarifa IS NOT NULL AND YEAR(fecha) = %s
+        GROUP BY MONTH(fecha)
+        ORDER BY MONTH(fecha)
+    """, (hoy.year,))
+    resultados_mes = cursor.fetchall()
+
+    meses_graf = [datetime(2025, i, 1).strftime('%B').capitalize() for i in range(1, 13)]
+    ingresos_graf = [0] * 12
+    for m, ingreso in resultados_mes:
+        ingresos_graf[m - 1] = ingreso or 0
+
+    pagina = request.args.get('pagina', 1, type=int)
+    por_pagina = 10
+    offset = (pagina - 1) * por_pagina
+
+    cursor.execute("""
+        SELECT COUNT(*) FROM parqueadero
+        WHERE tarifa IS NOT NULL AND hora_salida IS NOT NULL AND MONTH(fecha) = %s
+    """, (mes,))
+    total_registros = cursor.fetchone()[0]
+    total_paginas = (total_registros + por_pagina - 1) // por_pagina
+
+    cursor.execute("""
+        SELECT * FROM parqueadero WHERE tarifa IS NOT NULL AND hora_salida IS NOT NULL AND MONTH(fecha) =%s
+        ORDER BY fecha DESC LIMIT %s OFFSET %s
+    """, (mes, por_pagina, offset))
+    registros = cursor.fetchall()
+    
+    cursor.close()
+    db.close()
+
+    response = make_response(render_template('admin/parqueadero.html',
+                total_cupos=total_cupos, ocupado=ocupado, hoy=hoy,
+                disponible=disponible, total_ingresos=total_ingresos, 
+                cupos_carros=cupos_carros, cupos_motos=cupos_motos, carros_ocupados=carros_ocupados,
+                mes_actual=mes_nombre, mes_actual_num=mes, meses=meses, motos_ocupadas=motos_ocupadas,
+                meses_graf=meses_graf, ingresos_graf=ingresos_graf, registros=registros,pagina=pagina,
+                total_paginas=total_paginas))
+    response.headers['Cache-Control'] = 'no-store'
+
+    if 'pkiduser' not in session:
+        flash('Debes iniciar sesión primero', 'Danger')
+        return redirect(url_for('ingresar'))
+    return response
 
 @app.route('/dashboard_guarda')
 def dashboard_guarda():
