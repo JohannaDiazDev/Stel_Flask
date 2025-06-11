@@ -896,6 +896,155 @@ def parqueadero():
         return redirect(url_for('ingresar'))
     return response
 
+@app.route('/admin/correspondencia', methods=['GET','POST'])
+def correspondencia():
+    db = get_db_connection()
+    cursor = db.cursor()
+    if request.method == 'POST':
+
+        fecha_recibido = request.form['fecha_recibido']
+        tipo = request.form['tipo']
+        descripcion = request.form['descripcion']
+        trabajador_id = 1
+        inmueble_id = None
+
+        sql = """
+            INSERT INTO correspondencia (trabajador_id, inmueble_id, fecha_recibido, descripcion, tipo, estado)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(sql,(trabajador_id, inmueble_id, fecha_recibido, descripcion, tipo,'generado'))
+        db.commit()
+        cursor.close()
+    flash('Carta registrada exitosamente.', 'success')
+    response = make_response(render_template('admin/correspondencia.html'))
+
+    response.headers['Cache-Control'] = 'no-store'
+
+    if 'pkiduser' not in session:
+        flash('Debes iniciar sesión primero', 'danger')
+        return redirect(url_for('ingresar'))
+
+    return response
+
+@app.route('/admin/novedades', methods=['GET'])
+def novedades():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    offset = (page - 1) * per_page
+    estado = request.args.get('estado', '').strip().lower()
+
+    sql = """
+        SELECT n.pkidnovedad, u.nombre AS nombre_trabajador, n.fecha, n.inmueble_id, n.tipo, n.asunto, n.descripcion, n.estado 
+        FROM novedades n
+        LEFT JOIN trabajador t ON n.trabajador_id = t.pkidtrabajador
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+        LEFT JOIN inmueble i ON n.inmueble_id = i.pkidinmueble
+    """
+    params = []
+    if estado:
+        sql += "WHERE n.estado LIKE %s"
+        params.append(f"%{estado}%")
+    sql += " LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])            
+
+    cursor.execute(sql, params)
+    resultados = cursor.fetchall()
+    
+
+    columnas = ['pkidnovedad', 'nombre_trabajador', 'fecha', 'inmueble_id', 'tipo', 'asunto', 'descripcion', 'estado']
+    novedades = [dict(zip(columnas, fila)) for fila in resultados]
+
+    # Obtener datos auxiliares
+    cursor.execute("SELECT t.pkidtrabajador, u.nombre FROM trabajador t LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser")
+    columnas_trabajador = [col[0] for col in cursor.description]
+    trabajadores = [dict(zip(columnas_trabajador, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkiduser, nombre FROM usuarios")
+    columnas_usuario = [col[0] for col in cursor.description]
+    usuarios = [dict(zip(columnas_usuario, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
+    columnas_inmueble = [col[0] for col in cursor.description]
+    inmuebles = [dict(zip(columnas_inmueble, fila)) for fila in cursor.fetchall()]
+
+    if estado:
+        cursor.execute("SELECT COUNT(*) FROM novedades WHERE estado LIKE %s", (f"%{estado}%",))
+    else:
+        cursor.execute("SELECT COUNT(*) FROM novedades")
+    total_novedad = cursor.fetchone()[0]
+    total_pages = (total_novedad + per_page - 1) // per_page    
+
+    cursor.close()
+    db.close()
+    response = make_response(render_template('admin/novedades.html', novedades=novedades,page=page,total_pages=total_pages, estado_buscar=estado, 
+        resultados=resultados, trabajadores=trabajadores, inmuebles=inmuebles, usuarios=usuarios))
+
+    response.headers['Cache-Control'] = 'no-store'
+
+    if 'pkiduser' not in session:
+        flash('Debes iniciar sesión primero', 'danger')
+        return redirect(url_for('ingresar'))
+
+    return response
+
+@app.route('/admin/novedades', methods=['POST'])
+def crear_novedad():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    trabajador_id = request.form['trabajador_id']
+    fecha = request.form['fecha']
+    inmueble_id = request.form['inmueble_id'] or None
+    tipo = request.form['tipo']
+    asunto = request.form['asunto']
+    descripcion = request.form['descripcion']
+    estado = request.form['estado']
+
+    sql = """
+        INSERT INTO novedades (trabajador_id, fecha, inmueble_id, tipo, asunto, descripcion, estado)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """
+    valores = (trabajador_id, fecha, inmueble_id, tipo, asunto, descripcion, estado)
+
+    cursor.execute(sql, valores)
+    db.commit()
+
+    cursor.close()
+    db.close()
+
+    flash('Novedad registrada exitosamente.', 'success')
+    return redirect(url_for('novedades'))
+
+@app.route('/admin/novedades/<int:pkidnovedad>/editar_novedad', methods=['GET','POST'])
+def editar_novedad(pkidnovedad):
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    if request.method == 'POST':
+
+        trabajador_id = request.form.get('trabajador_id')
+        fecha = request.form.get('fecha') 
+        inmueble_id = request.form.get('inmueble_id') or None
+        tipo = request.form.get('tipo')
+        asunto = request.form.get('asunto')
+        descripcion = request.form.get('descripcion')
+        estado = request.form.get('estado')
+
+        sql = """UPDATE novedades SET trabajador_id = %s, fecha = %s, inmueble_id = %s, tipo = %s, asunto = %s, descripcion = %s, estado = %s WHERE pkidnovedad = %s"""
+        valores = (trabajador_id, fecha, inmueble_id, tipo, asunto, descripcion, estado, pkidnovedad)
+        cursor.execute(sql, valores)
+        db.commit()
+        db.close()
+        flash("Novedad actualizada correctamente","success")
+        return redirect(url_for('novedades'))
+    cursor.execute("SELECT * FROM novedades WHERE pkidnovedad = %s", (pkidnovedad,))
+    novedad = cursor.fetchone()
+    cursor.close()
+    db.close()
+    return render_template('admin/novedades.html', novedad=novedad)
 @app.route('/dashboard_guarda')
 def dashboard_guarda():
     return 'pagina guarda'
@@ -904,13 +1053,7 @@ def dashboard_guarda():
 def dashboard_residente():
     return 'pagina residente'
 
-@app.route('/Correspondencia')
-def Correspondencia():
-    return 'pagina correspondencia'
 
-@app.route('/Novedades')
-def Novedades():
-    return 'pagina novedades'
 
 @app.route('/logout')
 def logout():

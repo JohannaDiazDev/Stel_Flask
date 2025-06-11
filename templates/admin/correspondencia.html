@@ -1,0 +1,145 @@
+{% extends 'admin/base_dash.html' %}
+
+{% block content %}
+<h1 class="text-xl font-bold mb-4 text-[#1E4C40] text-center">Cartas Administración <i class="bi bi-envelope"></i></h1>
+
+<div class="flex gap-4 mb-4 justify-between items-center">
+    <button onclick="insertarModelo('asamblea')" class="btn btn-secondary font-bold" style="background-color: #1E4C40;">Citación a Asamblea <i class="bi bi-people-fill"></i></button>
+    <button onclick="insertarModelo('anden')" class="btn btn-secondary font-bold" style="background-color: #1E4C40;">Reunión por Andén <i class="bi bi-houses-fill"></i></button>
+    <button onclick="insertarModelo('parqueadero')" class="btn btn-secondary font-bold" style="background-color: #1E4C40;">Reunión Parqueadero <i class="bi bi-car-front-fill"></i></button>
+    <button onclick="insertarModelo('eventos')" class="btn btn-secondary font-bold" style="background-color: #1E4C40;">Evento <i class="bi bi-calendar4-event"></i></button>
+</div>
+
+<form method="POST" action="{{ url_for('correspondencia') }}" id="form-carta" onsubmit="copiarContenido()">
+    <div class="relative w-full max-w-xs mb-4">
+      <input type="date" name="fecha_recibido" required
+        class="w-full p-2 pr-10 bg-[#1E4C40] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E4C40] text-white placeholder-white shadow-sm appearance-none">
+      <i class="bi bi-calendar-week-fill text-white absolute right-3 top-1/2 transform mb-1 top-2.5 pointer-events-none"></i>
+    </div>
+
+    <div id="area-carta" class="bg-white p-6 rounded-xl shadow-md">
+        <div id="carta-editable" contenteditable="true" 
+            class="border p-6 bg-white rounded-xl h-96 overflow-auto mb-4 shadow-lg leading-relaxed text-justify text-gray-800 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#1E4C40]">
+        </div>
+    </div>
+
+    <input type="hidden" name="tipo" value="Carta Administración">
+    <input type="hidden" name="descripcion" id="descripcion-hidden">
+
+    <div class="flex gap-4">
+        <button type="submit" class="btn btn-secondary" style="background-color: #1E4C40;" onclick="copiarContenido()">Guardar <i class="bi bi-floppy2"></i></button>
+        <button type="button" onclick="window.print()" class="btn bg-[#A61B1B] text-white hover:bg-[#8B1616]">Imprimir <i class="bi bi-printer-fill"></i></button>
+        <button type="button" onclick="cancelarCarta()" class="btn btn-outline bg-yellow-400 text-white hover:bg-yellow-300">Cancelar <i class="bi bi-x-square-fill"></i></button>
+    </div>    
+</form>
+
+<script>
+    function insertarModelo(tipo) {
+        const carta = document.getElementById('carta-editable');
+        let texto = '';
+        if (tipo === 'asamblea' ) {
+            texto =  `<p class="text-center"><strong>CONJUNTO RESIDENCIAL</strong></p>
+            <p class="text-center"><strong>QUINTAS DEL RECREO ETAPA 1 P.H.</strong></p>
+            <p class="text-center"><strong>Nit. 830132858-1</strong></p><br>
+            <p><strong>CONVOCATORIA ASAMBLEA GENERAL ORDINARIA DE COPROPIETARIOS</strong></p>
+            <p><strong>Señor(a)</strong></p>
+            <p><strong>COPROPIETARIO(A)</strong></p>
+            <p><strong>CONJUNTO RESIDENCIAL QUINTAS DEL RECREO ETAPA 1</strong></p>
+            <p><strong>CIUDAD</strong></p>
+            <p><strong>Asamblea: <u>__________</u></strong></p>
+            <p><strong>Fecha: </strong</p>
+            <p><strong></strong>Hora: <u>_____</u></p>
+            <p><strong></strong>Medio: Presencial</p><br><br>
+            <p>En mi calidad de Administradora y Representante Legal del <strong>Conjunto Residencial Quintas Del Recreo Etapa I Propiedad Horizontal</strong></p
+            <p>en cumplimiento de las funciones Legales y Estatutarias consagradas en el reglamento de propiedad horizontal artículo 39 de la Ley 675 de 2001,</p>
+            <p>me permito convocar a todos los copropietarios a la celebración de la <strong>ASAMBLEA GENERAL ORDINARIA,</strong> la cual se llevará a cabo el <u>_____</u>, en el <u>____</u></p><br>    
+            <p>Atentamente,<br><strong>Administración.</strong></p>`;    
+        } else if (tipo === 'anden') {
+            texto =  `<p class="text-center"><strong>CONJUNTO RESIDENCIAL</strong></p>
+            <p class="text-center"><strong>QUINTAS DEL RECREO ETAPA 1 P.H.</strong></p>
+            <p class="text-center"><strong>Nit. 830132858-1</strong></p>
+            <p><strong>Reunión Andén</strong></p>
+            <p><strong>Señores Copropietarios del andén <u>___</u>:</strong></p>
+            <p>Se le convoca a una reunión para tratar temas relacionados con su andén, el día <u>___</u> a las <u>____</u>.</p><br>
+            <p>Atentamente,<br><strong>Administración</strong></p>`;
+        } else if (tipo === 'parqueadero') {
+            texto =  `<p class="text-center"><strong>CONJUNTO RESIDENCIAL</strong></p>
+            <p class="text-center"><strong>QUINTAS DEL RECREO ETAPA 1 P.H.</strong></p>
+            <p class="text-center"><strong>Nit. 830132858-1</strong></p>
+            <p><strong>Reunión de Parqueadero</strong></p>
+            <p><strong>Señor(a) Copropietario(a)</strong></p>
+            <p>Me permito convocarlo a una reunión sobre el uso y organización del parqueadero, el día <u>___</u> a las <u>___</u>.</p>
+            <p>Atentamente,<br><strong>Administración</strong></p>`;
+        } else if (tipo === 'eventos') {
+            texto =  `
+            <div class="bg-[#FFF6E5] p-6 rounded-xl border-2 border-[#A65B00] shadow-md relative">
+                <div class="absolute -top-4 left-4 bg-[#A65B00] text-white px-3 py-1 rounded-full text-sm flex items-center gap-2 shadow">
+                    <i class="bi bi-stars"></i> Evento Especial
+                </div>
+                <h1 class="text-center text-2xl font-bold text-[#A65B00] mb-4"><u>__________</u></h1>
+                <p class="mb-2 text-center">Queridos <u>______</u> del conjunto,</p>
+                <p class="mb-2 text-center">Con mucho cariño los invitamos a celebrar su día en una tarde llena de amor, alegría y gratitud.</p>
+                <p class="mb-2 font-semibold text-center text-[#A65B00]">¡Los esperamos!</p>
+                <p class="mb-2 text-center"><strong>El día <u>___</u> a las <u>_____</u></strong></p>
+                <p class="mb-4 text-center"><strong>En <u>______</u> del Conjunto.</strong></p>
+                <p class="text-center">Atentamente,<br><strong>Administración</strong></p>
+            </div>`;
+        }
+        document.querySelector('input[name="tipo"]').value = "Carta Administración - " + tipo.charAt(0).toUpperCase() + tipo.slice(1);
+        carta.innerHTML = texto;
+    }
+
+    function copiarContenido(){
+        const contenido = document.getElementById('carta-editable').innerHTML;
+        document.getElementById('descripcion-hidden').value = contenido;
+    }
+
+    function cancelarCarta() {
+        const carta = document.getElementById('carta-editable');
+        carta.innerHTML = '<p class="text-gray-400">Seleccione un modelo</p>';
+    }
+</script>
+<p class="text-sm text-red-600 mt-2">
+  Nota: Para imprimir correctamente la carta sin encabezados ni URL, desactive la opción "Encabezados y pies de página" en la ventana de impresión, más configuraciones.
+</p>
+<style>
+    @media print {
+    /* Ocultar todo menos el área de la carta */
+        body * {
+            visibility: hidden !important;
+        }
+
+        #area-carta, #area-carta * {
+            visibility: visible !important;
+            box-shadow: none !important;   /* Quitar sombra */
+            border: none !important;       /* Quitar bordes */
+            padding: 0 !important;         /* Quitar padding */
+            margin: 0 !important;      
+        }
+
+        /* Forzar que el contenedor sea visible y ocupe todo el ancho */
+        #area-carta {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem;
+            background: white;
+        }
+
+        /* Forzar que carta editable se muestre todo */
+        #carta-editable {
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            display: block !important;
+        }
+
+        @page {
+            size: letter;
+            margin: 1in;
+        }
+    }
+
+</style>
+{% endblock %}

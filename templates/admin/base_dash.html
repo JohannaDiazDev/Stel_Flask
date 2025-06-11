@@ -27,7 +27,18 @@
             {% block content %} 
             {% endblock %}
         </div>
-    
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4">
+                {% for category, message in messages %}
+                    <div class="p-2 rounded text-white {{ 'bg-[#1E4C40]' if category == 'success' else 'bg-red-600' }}">
+                    {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
     
 
         {% include 'footer.html'%}
