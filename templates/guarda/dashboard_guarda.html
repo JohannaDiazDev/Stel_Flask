@@ -1,0 +1,107 @@
+{% extends 'guarda/dash_guarda.html' %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<div class="Dashboard px-4 py-6">
+    <h1 class="dashboard-tittle text-[#1E4C40] font-bold text-4xl flex justify-center items-center gap-6 mb-20">
+        Dashboard Guarda <i class="bi bi-box text-4xl font-bold"></i>
+    </h1>
+    <div class="flex flex-nowrap justify-center gap-14 overflow-x-auto px-4 mt-6">
+        <div class="bg-white rounded-2xl shadow-lg p-6 flex-1 min-w-[300px] max-w-[350px] h-[420px]">
+            <div class="card-Dashboard">
+                <div class="card-header text-xl mb-2">Parqueadero <i class="bi bi-p-square-fill"></i></div>
+                <div class="card-body">
+                    <p class="card-text text-[#1E4C40] mb-4">Registros: <strong>{{ parqueadero_contar }}</strong></p>
+                    <canvas id="parqueaderoChart" class="w-full h-48"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg p-6 flex-1 min-w-[300px] max-w-[350px] h-[420px]">
+            <div class="card-Dashboard">
+                <div class="card-header text-xl mb-2">Novedades <i class="bi bi-exclamation-octagon-fill"></i></div>
+                <div class="card-body">
+                    <p class="card-text text-[#1E4C40] mb-4">Registradas: <strong>{{ novedades_contar }}</strong></p>
+                    <canvas id="novedadesChart" class="w-full h-48"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg p-6 flex-1 min-w-[300px] max-w-[350px] h-[420px]">
+            <div class="card-Dashboard">
+                <div class="card-header text-xl mb-2">Correspondencia <i class="bi bi-boxes"></i></div>
+                <div class="card-body">
+                    <p class="card-text text-[#1E4C40] mb-4">Correspondencia por entregar: <strong>{{ correspondencia_contar }}</strong></p>
+                    <canvas id="correspondenciaChart" class="w-full h-48"></canvas>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+    const chartOptions = {
+        type: 'doughnut',
+        options: {
+            plugins: {legend: {display: false } },
+            cutout: '70%',
+            responsive: true,
+        }
+    };
+
+    new Chart(document.getElementById('parqueaderoChart'), {
+        ...chartOptions,
+        data: {
+            labels: ['Ocupados','Disponibles'],
+            datasets: [{
+                data: [{{ parqueadero_contar }}, 50 - {{ parqueadero_contar }}],
+                backgroundColor: ['#38726C', '#CFE0D9']
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('correspondenciaChart'), {
+        type: 'bar',
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        },
+        data: {
+            labels: ['No Entregados', 'Entregadas'],
+            datasets: [{
+                label: 'Correspondencia',
+                data: [{{ correspondencia_contar }}, 20 - {{ correspondencia_contar }}],
+                backgroundColor: ['#023047', '#3C6E71']
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('novedadesChart'), {
+        type: 'bar',
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { beginAtZero: true }
+            }
+        },
+        data: {
+            labels: ['Pendiente', 'Proceso', 'Resuelto'],
+            datasets: [{
+                label: 'Novedades',
+                data: [{{ novedades_contar }}, 3, 4],
+                backgroundColor: ['#A44A3F', '#F6F4D2', '#D4E09B']
+            }]
+        }
+    });
+
+</script>
+{% endblock %}

@@ -11,7 +11,7 @@ import calendar
 import locale
 locale.setlocale(locale.LC_TIME, 'Spanish_Colombia')
 from collections import defaultdict
-
+from functools import wraps
 
 app = Flask (__name__)
 bcrypt = Bcrypt(app)
@@ -26,6 +26,15 @@ def get_db_connection():
 # Inicializar extensiones
 mysql = MySQL(app)
 bcrypt = Bcrypt()
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'pkiduser' not in session:
+            flash('Debes iniciar sesión primero','danger')
+            return redirect(url_for('ingresar'))
+        return f(*args,**kwargs)
+    return decorated_function
 
 @app.route('/')
 def inicio():
@@ -96,14 +105,17 @@ def ingresar():
         correo = request.form['correo']
         contraseña = request.form['contraseña']
         
-
-        # Conectar a la base de datos
         db = get_db_connection()
         cursor = db.cursor()
         cursor.execute("SELECT pkiduser, contraseña, rol_id FROM usuarios WHERE correo = %s", (correo,))
         user = cursor.fetchone()
         cursor.close()
         db.close()
+
+        if user is None:
+            flash('❌ Usuario no encontrado', 'danger')
+            return redirect(url_for('ingresar'))
+        
         print(f"Contraseña ingresada: {contraseña}")
         print(f"Hash en la BD: {user[1]}")
         print(f"¿Coincide?: {bcrypt.check_password_hash(user[1], contraseña)}")
@@ -147,11 +159,8 @@ def ingresar():
 
 
 @app.route('/admin/dashboard_admin')
-def dashboard_admin():
-    """if 'pkiduser' not in session:
-        flash('Debes iniciar sesión primero', 'danger')
-        return redirect(url_for('ingresar'))
-    """    
+@login_required
+def dashboard_admin():   
     db = get_db_connection()
     cursor = db.cursor()
 
@@ -183,14 +192,11 @@ def dashboard_admin():
     # Agregar cabeceras para evitar caché
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    if 'pkiduser' not in session:
-        flash('Debes iniciar sesión primero', 'danger')
-        return redirect(url_for('ingresar'))
-    
+    response.headers['Expires'] = '0' 
     return response
 
 @app.route('/admin/usuarios', methods=['GET'])
+@login_required
 def usuarios():
     
     db = get_db_connection()
@@ -238,8 +244,7 @@ def usuarios():
 
     cursor.close()
     db.close()
-
-    
+  
     response = make_response(render_template('admin/usuarios.html', 
         usuarios=usuarios, 
         roles=roles, 
@@ -249,11 +254,6 @@ def usuarios():
 
     ))
     response.headers['Cache-Control'] = 'no-store'
-    
-    if 'pkiduser' not in session:
-        flash('Debes iniciar sesión primero', 'danger')
-        return redirect(url_for('ingresar'))
-    
     return response
 # Crear un usuario
 @app.route('/admin/usuarios', methods=['POST'])
@@ -329,10 +329,18 @@ def editar_usuario(pkiduser):
 
     return redirect(url_for('usuarios', usuario=usuario, roles=roles)) 
 
-
-
 @app.route('/admin/inmueble')
+@login_required
 def inmueble():
+    rol_id = session.get('rol_id')
+
+    if rol_id == 1:
+        base_template = 'admin/base_dash.html'
+    elif rol_id == 3:
+        base_template = 'guarda/dash_guarda.html'
+    else:
+        flash('Acesso no autorizado', 'danger')
+        return redirect(url_for('ingresar')) 
     # Distribución de los andenes
     andenes = {
         1: {'min': 1, 'max': 31},
@@ -346,14 +354,14 @@ def inmueble():
         9: {'min': 188, 'max': 213},
         10: {'min': 214, 'max': 240}
     }
+    return render_template('admin/inmueble.html', andenes=andenes, base_template=base_template)
 
-    return render_template('admin/inmueble.html', andenes=andenes)
-
-@app.route('/residentes')
+@app.route('/residentes')#----------------------------------------revisar#
 def Residentes():
     return "Página de Residentes"
 
 @app.route('/turnos', methods=['GET', 'POST'])
+@login_required
 def turnos():
     db = get_db_connection()
     cursor = db.cursor()
@@ -396,9 +404,8 @@ def turnos():
 
     return render_template('/admin/turnos.html', guardas=guardas, turnos=turnos)
 
-
-
 @app.route('/admin/multa', methods=['GET'])
+@login_required
 def multa():
 
     db = get_db_connection()
@@ -472,14 +479,7 @@ def multa():
     ))
 
     response.headers['Cache-Control'] = 'no-store'
-    
-
-    if 'pkiduser' not in session:
-        flash('Debes iniciar sesión primero', 'danger')
-        return redirect(url_for('ingresar'))
-
     return response
-
 
 @app.route('/admin/multa', methods=['POST'])
 def crear_multa():
@@ -557,6 +557,7 @@ def editar_multa(pkidmulta):
     return render_template('admin/multa.html', multa=multa, inmuebles=inmuebles, trabajadores=trabajadores)
 
 @app.route('/admin/cartera', methods=['GET'])
+@login_required
 def cartera():
     db = get_db_connection()
     cursor = db.cursor()
@@ -617,10 +618,6 @@ def cartera():
         trabajadores = trabajadores, page=page, total_pages=total_pages,estado_buscar=estado
     ))
     response.headers['Cache-Control'] = 'no-store'
-
-    if 'pkiduser' not in session:
-        flash('Debes iniciar sesión primero','danger')
-        return redirect(url_for('ingresar'))
     return response
 
 @app.route('/admin/cartera', methods=['POST'])
@@ -696,10 +693,21 @@ def editar_cartera(pkidestado):
     return render_template('admin/cartera.html', cartera=cartera, inmuebles=inmuebles, trabajadores=trabajadores)
 
 @app.route('/admin/visitante', methods=['GET'])
+@login_required
 def visitante():
     db = get_db_connection()
     cursor = db.cursor()
 
+    rol_id = session.get('rol_id')
+
+    if rol_id == 1:
+        base_template = 'admin/base_dash.html'
+    elif rol_id == 3:
+        base_template = 'guarda/dash_guarda.html'
+    else:
+        flash('Acesso no autorizado', 'danger')
+        return redirect(url_for('ingresar')) 
+           
     page = request.args.get('page', 1, type=int)
     per_page = 5
     offset = (page - 1)* per_page
@@ -736,13 +744,9 @@ def visitante():
     db.close()
     response = make_response(render_template('admin/visitante.html',
         visitantes=visitantes, inmuebles=inmuebles, page=page,
-        total_pages=total_pages,cedula_buscar=cedula
+        total_pages=total_pages,cedula_buscar=cedula,base_template=base_template
     ))
     response.headers['Cache-Control'] = 'no-store'
-
-    if 'pkiduser' not in session:
-        flash('Debes iniciar sesión primero', 'Danger')
-        return redirect(url_for('ingresar'))
     return response
 
 @app.route('/admin/visitante', methods=['POST'])
@@ -782,6 +786,9 @@ def editar_visitante(pkidvisitante):
     db = get_db_connection()
     cursor = db.cursor()
 
+    if session.get('rol_id') == 1:
+        flash('No tienes permiso para editar visitantes.', 'danger')
+        return redirect(url_for('visitante'))
     if request.method == 'POST':
         fecha = request.form.get('fecha')
         inmueble_id = request.form.get('inmueble_id') 
@@ -808,6 +815,7 @@ def editar_visitante(pkidvisitante):
     return render_template('admin/visitante.html', visitante=visitante, inmuebles=inmuebles)
 
 @app.route('/admin/parqueadero', methods=['GET','POST'])
+@login_required
 def parqueadero():
     db = get_db_connection()
     cursor = db.cursor()
@@ -890,13 +898,10 @@ def parqueadero():
                 meses_graf=meses_graf, ingresos_graf=ingresos_graf, registros=registros,pagina=pagina,
                 total_paginas=total_paginas))
     response.headers['Cache-Control'] = 'no-store'
-
-    if 'pkiduser' not in session:
-        flash('Debes iniciar sesión primero', 'Danger')
-        return redirect(url_for('ingresar'))
     return response
 
 @app.route('/admin/correspondencia', methods=['GET','POST'])
+@login_required
 def correspondencia():
     db = get_db_connection()
     cursor = db.cursor()
@@ -919,14 +924,10 @@ def correspondencia():
     response = make_response(render_template('admin/correspondencia.html'))
 
     response.headers['Cache-Control'] = 'no-store'
-
-    if 'pkiduser' not in session:
-        flash('Debes iniciar sesión primero', 'danger')
-        return redirect(url_for('ingresar'))
-
     return response
 
 @app.route('/admin/novedades', methods=['GET'])
+@login_required
 def novedades():
     db = get_db_connection()
     cursor = db.cursor()
@@ -953,7 +954,6 @@ def novedades():
     cursor.execute(sql, params)
     resultados = cursor.fetchall()
     
-
     columnas = ['pkidnovedad', 'nombre_trabajador', 'fecha', 'inmueble_id', 'tipo', 'asunto', 'descripcion', 'estado']
     novedades = [dict(zip(columnas, fila)) for fila in resultados]
 
@@ -983,11 +983,6 @@ def novedades():
         resultados=resultados, trabajadores=trabajadores, inmuebles=inmuebles, usuarios=usuarios))
 
     response.headers['Cache-Control'] = 'no-store'
-
-    if 'pkiduser' not in session:
-        flash('Debes iniciar sesión primero', 'danger')
-        return redirect(url_for('ingresar'))
-
     return response
 
 @app.route('/admin/novedades', methods=['POST'])
@@ -1045,9 +1040,64 @@ def editar_novedad(pkidnovedad):
     cursor.close()
     db.close()
     return render_template('admin/novedades.html', novedad=novedad)
+
 @app.route('/dashboard_guarda')
+@login_required
 def dashboard_guarda():
-    return 'pagina guarda'
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM parqueadero")
+    parqueadero_contar = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM correspondencia")
+    correspondencia_contar = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM novedades")
+    novedades_contar = cursor.fetchone()[0]
+
+    cursor.close()
+    db.close()
+
+    response = make_response(render_template('guarda/dashboard_guarda.html',
+                parqueadero_contar=parqueadero_contar, correspondencia_contar=correspondencia_contar,
+                novedades_contar=novedades_contar))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+@app.route('/inmueble_guarda')
+@login_required
+def inmueble_guarda():
+    # Distribución de los andenes
+    andenes = {
+        1: {'min': 1, 'max': 31},
+        2: {'min': 32, 'max': 56},
+        3: {'min': 64, 'max': 87},
+        4: {'min': 88, 'max': 101},
+        5: {'min': 102, 'max': 115},
+        6: {'min': 116, 'max': 139},
+        7: {'min': 140, 'max': 163},
+        8: {'min': 164, 'max': 187},
+        9: {'min': 188, 'max': 213},
+        10: {'min': 214, 'max': 240}
+    }
+    return render_template('guarda/inmueble_guarda.html', andenes=andenes)
+
+@app.route('/visitante_guarda')
+def visitante_guarda():
+    return 'pagina visitante'
+
+@app.route('/parqueadero_guarda')
+def parqueadero_guarda():
+    return 'pagina parqueadero'
+
+@app.route('/correspondencia_guarda')
+def correspondencia_guarda():
+    return 'pagina correspondencia'
+
+@app.route('/novedades_guarda')
+def novedades_guarda():
+    return 'novedades guarda'
 
 @app.route('/dashboard_residente')
 def dashboard_residente():

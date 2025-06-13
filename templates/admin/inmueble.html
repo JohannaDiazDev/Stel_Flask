@@ -1,115 +1,117 @@
-{% extends 'admin/base_dash.html' %}
+{% extends base_template %}
 
 {% block content %}
 
 
-    <h1 class="text-3xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Inmuebles <i class="bi bi-house-door-fill"></i></h1>
-    <div class="flex justify-end p-6">
-        <div class="bg-white shadow-lg rounded-xl p-4 flex items-center space-x-2 border border-[#1E4C40]">
-            <i class="bi bi-binoculars-fill text-[#1E4C40] text-2xl"></i>
-            <div>
-                <input type="number" id="buscarCasa" oninput="buscarCasa()" placeholder="Ingrese el inmueble"
-                    class="w-full px-4 py-2 border border-[#1E4C40] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E4C40]">
-                <p id="resultadoBusqueda" class="mt-2 text-center text-[#1E4C40] font-semibold text-sm"></p>
-            </div>
+  <h1 class="text-3xl font-bold mb-4 text-[#1E4C40] text-center justify-end">Inmuebles <i class="bi bi-house-door-fill"></i></h1>
+  <div class="bg-white shadow rounded-lg p-4 mb-6 w-full">
+    <div class="flex justify-end">
+        <div class="relative w-full max-w-md">
+          <i class="bi bi-binoculars-fill absolute right-3 top-1/2 transform -translate-y-1/2 text-[#1E4C40] text-lg"></i>
+          <input type="number" id="buscarCasa" oninput="buscarCasa()" placeholder="Ingrese el inmueble"
+              class="w-full pr-10 pl-4 py-2 border border-[#1E4C40] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E4C40]">
         </div>
     </div>
+    <p id="resultadoBusqueda" class="mt-2 text-right text-[#1E4C40] font-semibold text-sm"></p>
+  </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-4 ">
-        {% for num, datos in andenes.items() %}
-          <div class="relative group">
-            <div class="bg-gradient-to-br from-[#4CAF8B] to-[#1E4C40]/80 group-hover:bg-[#1E4C40] group-hover:text-white text-[#1E4C40] font-bold p-6 rounded-xl shadow-xl/30 cursor-pointer transition-all duration-300 flex flex-col items-center justify-center">
-              <i class="bi bi-houses text-4xl mb-2"></i>
-              Andén {{ num }}
-              <button type="button" class="bg-gradient-to-r from-[#1E4C40] to-[#4CAF8B] hover:bg-[#FAF9EC] hover:text-white text-white font-semibold py-2 px-4 rounded shadow-md transition-all duration-300"
-                data-bs-toggle="modal" data-bs-target="#modal{{ num }}">
-                Ver Casas
-              </button>
-            </div>
+
+
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-4 ">
+      {% for num, datos in andenes.items() %}
+        <div class="relative group">
+          <div class="bg-gradient-to-br from-[#4CAF8B] to-[#1E4C40]/80 group-hover:bg-[#1E4C40] group-hover:text-white text-[#1E4C40] font-bold p-6 rounded-xl shadow-xl/30 cursor-pointer transition-all duration-300 flex flex-col items-center justify-center">
+            <i class="bi bi-houses text-4xl mb-2"></i>
+            Andén {{ num }}
+            <button type="button" class="bg-gradient-to-r from-[#1E4C40] to-[#4CAF8B] hover:bg-[#FAF9EC] hover:text-white text-white font-semibold py-2 px-4 rounded shadow-md transition-all duration-300"
+              data-bs-toggle="modal" data-bs-target="#modal{{ num }}">
+              Ver Casas
+            </button>
           </div>
-      
-          <!-- Modal para este Andén -->
-          <div class="modal fade" id="modal{{ num }}" tabindex="-1" aria-labelledby="modalLabel{{ num }}" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-              <div class="modal-content">
-                <div class="modal-header bg-[#1E4C40] text-[#1E4C40]">
-                    <h5 class="modal-title text-[#1E4C40]" id="modalLabel{{ anden }}">Casas en el Andén {{ anden }}</h5> <!-- Este es el título del modal -->
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+    
+        <!-- Modal para este Andén -->
+        <div class="modal fade" id="modal{{ num }}" tabindex="-1" aria-labelledby="modalLabel{{ num }}" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header bg-[#1E4C40] text-[#1E4C40]">
+                  <h5 class="modal-title text-[#1E4C40]" id="modalLabel{{ anden }}">Casas en el Andén {{ anden }}</h5> <!-- Este es el título del modal -->
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+              <div class="modal-body">
+                <div class="grid grid-cols-5 gap-2">
+                  {% for casa in range(datos['min'], datos['max'] + 1) %}
+                  <div id="casa-{{ casa }}" class="casita p-2 bg-gradient-to-br from-[#CDE7DF] to-[#8FBFAF] rounded text-center text-xs hover:bg-[#1E4C40] hover:text-white transition cursor-pointer shadow-md">
+                      <i class="bi bi-house-door-fill text-lg"></i>
+                      <p class="mt-1 font-bold">Casa {{ casa }}</p>
                   </div>
-                <div class="modal-body">
-                  <div class="grid grid-cols-5 gap-2">
-                    {% for casa in range(datos['min'], datos['max'] + 1) %}
-                    <div id="casa-{{ casa }}" class="casita p-2 bg-gradient-to-br from-[#CDE7DF] to-[#8FBFAF] rounded text-center text-xs hover:bg-[#1E4C40] hover:text-white transition cursor-pointer shadow-md">
-                        <i class="bi bi-house-door-fill text-lg"></i>
-                        <p class="mt-1 font-bold">Casa {{ casa }}</p>
-                    </div>
-                    {% endfor %}
-                  </div>
+                  {% endfor %}
                 </div>
               </div>
             </div>
           </div>
-        {% endfor %}
-      </div>
-      <script>
-        const andenes = {
-          1: { min: 1, max: 31 },
-          2: { min: 32, max: 56 },
-          3: { min: 64, max: 87 },
-          4: { min: 88, max: 101 },
-          5: { min: 102, max: 115 },
-          6: { min: 116, max: 139 },
-          7: { min: 140, max: 163 },
-          8: { min: 164, max: 187 },
-          9: { min: 188, max: 213 },
-          10: { min: 214, max: 240 }
-        };
+        </div>
+      {% endfor %}
+    </div>
+    <script>
+      const andenes = {
+        1: { min: 1, max: 31 },
+        2: { min: 32, max: 56 },
+        3: { min: 64, max: 87 },
+        4: { min: 88, max: 101 },
+        5: { min: 102, max: 115 },
+        6: { min: 116, max: 139 },
+        7: { min: 140, max: 163 },
+        8: { min: 164, max: 187 },
+        9: { min: 188, max: 213 },
+        10: { min: 214, max: 240 }
+      };
+    
+      let timer;
       
-        let timer;
-        
-        function buscarCasa() {
-          clearTimeout(timer); // Limpiar cualquier temporizador previo
-      
-          timer = setTimeout(() => {
-            const numero = parseInt(document.getElementById("buscarCasa").value);
-            const resultado = document.getElementById("resultadoBusqueda");
-      
-            // Limpiar resaltado previo
-            document.querySelectorAll('.casita').forEach(casita => {
-              casita.classList.remove('resaltado');
-            });
-      
-            if (!numero) {
-              resultado.textContent = "";
-              return;
-            }
-      
-            let encontrado = false;
-            for (const [anden, rango] of Object.entries(andenes)) {
-              if (numero >= rango.min && numero <= rango.max) {
-                resultado.textContent = `La casa ${numero} está en el Andén ${anden}`;
-                
-                // Resaltar la casita correspondiente
-                const casaElement = document.querySelector(`#casa-${numero}`);
-                if (casaElement) {
-                  casaElement.classList.add('resaltado');
-                }
-      
-                // Abrir el modal automáticamente
-                const modal = new bootstrap.Modal(document.getElementById(`modal${anden}`));
-                modal.show();
-      
-                encontrado = true;
-                break;
+      function buscarCasa() {
+        clearTimeout(timer); // Limpiar cualquier temporizador previo
+    
+        timer = setTimeout(() => {
+          const numero = parseInt(document.getElementById("buscarCasa").value);
+          const resultado = document.getElementById("resultadoBusqueda");
+    
+          // Limpiar resaltado previo
+          document.querySelectorAll('.casita').forEach(casita => {
+            casita.classList.remove('resaltado');
+          });
+    
+          if (!numero) {
+            resultado.textContent = "";
+            return;
+          }
+    
+          let encontrado = false;
+          for (const [anden, rango] of Object.entries(andenes)) {
+            if (numero >= rango.min && numero <= rango.max) {
+              resultado.textContent = `La casa ${numero} está en el Andén ${anden}`;
+              
+              // Resaltar la casita correspondiente
+              const casaElement = document.querySelector(`#casa-${numero}`);
+              if (casaElement) {
+                casaElement.classList.add('resaltado');
               }
+    
+              // Abrir el modal automáticamente
+              const modal = new bootstrap.Modal(document.getElementById(`modal${anden}`));
+              modal.show();
+    
+              encontrado = true;
+              break;
             }
-      
-            if (!encontrado) {
-              resultado.textContent = `No se encontró la casa ${numero} en los andenes`;
-            }
-          }, 500); // Espera 500ms después de que el usuario deje de escribir
-        }
-      </script>
+          }
+    
+          if (!encontrado) {
+            resultado.textContent = `No se encontró la casa ${numero} en los andenes`;
+          }
+        }, 500); // Espera 500ms después de que el usuario deje de escribir
+      }
+    </script>
 
 
 {% endblock %}

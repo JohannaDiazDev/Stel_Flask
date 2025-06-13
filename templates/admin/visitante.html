@@ -1,18 +1,10 @@
-{% extends 'admin/base_dash.html' %}
+{% extends base_template %}
 
 {% block content %}
 
 <div class="container mx-auto py-8">
     <h2 class="text-2xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Visitantes <i class="bi bi-person-walking"></i></h2>
-    <div class="flex justify-between items-center mt-3 gap-3">
-        <button type="button" class="btn btn-success font-bold" style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modall">
-            Registrar Visitante <i class="bi bi-person-raised-hand"></i>
-        </button>
-        <form method="GET" action="{{url_for('visitante')}}" class="flex items-center space-x-2">
-            <input type="text" name="cedula" placeholder="Cedula" value="{{cedula_buscar}}" class="border rounded px-2 py-1">
-            <button type="submit" class="btn btn-primary" style="background-color: #1E4C40;"><i class="bi bi-search"></i></button>
-        </form>
-    </div>
+    
     
     <div class="modal fade" id="modall" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -65,7 +57,7 @@
                            <span class="error-carro text-red-500" id="error-carro"></span>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-success" style="background-color: #a11129;">Cancelar</button>
+                            <button type="button" class="btn btn-success" data-bs-dismiss="modal" style="background-color: #a11129;">Cancelar</button>
                             <button type="submit" id="crear_visitante" class="btn btn-primary" style="background-color: #1E4C40;">Guardar</button>
                         </div>
                     </form>
@@ -73,8 +65,22 @@
             </div>
         </div>
     </div>
-
-    <table class="w-4/5 mt-7 border mx-auto text-sm shadow-lg p-3 mb-5">
+    <div class="bg-white shadow rounded-lg p-4 mb-6 w-full"> 
+        <div class="flex justify-between items-end flex-wrap gap-4">
+            {% if session.get('rol_id') == 3 %}
+            <button type="button" class="btn btn-success font-bold" style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modall">
+                Registrar Visitante <i class="bi bi-person-raised-hand"></i>
+            </button>
+            {% endif %}
+            
+            <form method="GET" action="{{ url_for('visitante') }}" class="relative w-full max-w-md">
+                <i class="bi bi-search absolute right-3 top-1/2 transform -translate-y-1/2 text-[#1E4C40] text-lg"></i>
+                <input type="text" name="cedula" placeholder="Cédula" value="{{ cedula_buscar }}"
+                    class="w-full pr-10 pl-4 py-2 border border-[#1E4C40] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E4C40]">
+            </form> 
+        </div>
+    </div>
+    <table class="w-full border text-sm shadow-lg rounded-lg">
         <thead>
             <tr class="bg-[#1E4C40] text-white justify-center items-center">
                 <th class="border border-gray-300 px-2 py-1 text-center">Fecha</th>
@@ -83,7 +89,9 @@
                 <th class="border border-gray-300 px-2 py-1 text-center">Nombre</th>
                 <th class="border border-gray-300 px-2 py-1 text-center">Cedula</th>
                 <th class="border border-gray-300 px-2 py-1 text-center">¿Ingresa Carro?</th>
-                <th class="border border-gray-300 px-2 py-1 text-center" colspan="2">Acciones</th>
+                {% if session.get('rol_id') != 1 %}
+                    <th class="border border-gray-300 px-2 py-1 text-center">Acciones</th>
+                {% endif %}    
             </tr>
         </thead>
         <tbody id="visitanteTable">
@@ -99,17 +107,20 @@
                     <td class="border border-gray-300 px-4 py-2 text-center">
                         {{ 'Sí' if visitante.ingresa_carro == 1 else 'No' }}
                     </td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-warning"style="background-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modal{{visitante.pkidvisitante}}">
-                            <i class="bi bi-person-raised-hand text-white"></i> 
-                        </button>
-                    </td>
-                    <td class="border border-gray-300 px-4 py-2 text-center">
+                    {% if session.get('rol_id') != 1 %}
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-warning"style="background-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modal{{visitante.pkidvisitante}}">
+                                <i class="bi bi-person-raised-hand text-white"></i> 
+                            </button>
+                        </td>
+                    {% endif %}    
+                    <!--<td class="border border-gray-300 px-4 py-2 text-center">
                         <a href="{{ url_for('delete_visitante', pkidvisitante=visitante.pkidvisitante) }}">
                             <i class="bi bi-person-x-fill text-[#a11129] text-xl"></i>
                         </a>
-                    </td>
+                    </td>-->
                 </tr>
+                {% if session.get('rol_id') != 1 %}
                 <div class="modal fade" id="modal{{visitante.pkidvisitante}}" tabindex="-1" aria-labelledby="ModalLabell" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content shadow-lg p-3 mb-5">
@@ -170,6 +181,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>
