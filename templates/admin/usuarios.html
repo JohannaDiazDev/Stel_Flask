@@ -4,21 +4,19 @@
  
  <div class="container mx-auto py-8">
     <h2 class="text-2xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Usuarios <i class="bi bi-people-fill"></i></h2>
-    
-    <div class="flex justify-between items-center mb-4">
-        <button type="button" class="btn btn-success"style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modal1">
-            Registrar Usuario <i class="bi bi-person-plus"></i>
-        </button>
-        <form method="GET" action="{{ url_for('usuarios') }}" class="flex items-center gap-2">
-            <input type="text" name="cedula" placeholder="Buscar por cédula..." value="{{ cedula_buscar }}" class="border rounded px-2 py-1" />
-            <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">
-                Buscar <i class="bi bi-search"></i>
+    <div class="bg-white shadow rounded-lg p-4 mb-6 w-full">
+        <div class="flex justify-between items-end flex-wrap gap-4">
+            <button type="button" class="btn btn-success"style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modal1">
+                Registrar Usuario <i class="bi bi-person-plus"></i>
             </button>
-        </form>
+            <form method="GET" action="{{ url_for('usuarios') }}" class="relative w-full max-w-md">
+                <i class="bi bi-search absolute right-3 top-1/2 transform -translate-y-1/2 text-[#1E4C40] text-lg"></i>
+                <input type="text" name="cedula" placeholder="Cédula" value="{{ cedula_buscar }}"
+                    class="w-full pr-10 pl-4 py-2 border border-[#1E4C40] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E4C40]">
+            </form>
+        </div>
     </div>
-    
 
-       
     <!-- Modal -->
     <div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">

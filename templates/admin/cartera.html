@@ -4,14 +4,18 @@
 
 <div class="container mx-auto py-8">
     <h2 class="text-2xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Cartera <i class="bi bi-wallet"></i></h2>
-    <div class="flex justify-between items-center mt-3 gap-3">
-        <button type="button" class="btn btn-success" style="background-color: #1E4c40; border-color: #1E4c40;" data-bs-toggle="modal" data-bs-target="#modall">
-            Registrar Cartera <i class="bi bi-bank"></i>
-        </button>
-        <form method="GET" action="{{ url_for('cartera') }}" class="flex items-center space-x-2">
-            <input type="text" name="estado" placeholder="Estado" value="{{estado_buscar}}" class="border rounded px-2 py-1">
-            <button type="submit" class="btn btn-primary" style="background-color: #1E4c40;"><i class="bi bi-search"></i></button>
-        </form>
+    <div class="bg-white shadow rounded-lg p-4 mb-6 w-full">
+        <div class="flex justify-between items-end flex-wrap gap-4">
+            <button type="button" class="btn btn-success" style="background-color: #1E4c40; border-color: #1E4c40;" data-bs-toggle="modal" data-bs-target="#modall">
+                Registrar Cartera <i class="bi bi-bank"></i>
+            </button>
+            <form method="GET" action="{{ url_for('cartera') }}" class="relative w-full max-w-md">
+                <i class="bi bi-search absolute right-3 top-1/2 transform -translate-y-1/2 text-[#1E4C40] text-lg"></i>
+                <input type="text" name="estado" placeholder="Estado" value="{{estado_buscar}}" 
+                class="w-full pr-10 pl-4 py-2 border border-[#1E4C40] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E4C40]">
+                
+            </form>
+        </div>
     </div>
 
     <div class="modal fade" id="modall" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
@@ -77,7 +81,7 @@
             </div>
         </div>
     </div>
-    <table class="w-4/5 mt-7 border mx-auto text-sm shadow-lg p-3 mb-5">
+    <table class="w-full border text-sm shadow-lg rounded-lg">
         <thead>
             <tr class="bg-[#1E4C40] text-white justify-center items-center">
                <th class="border border-gray-300 px-2 py-1 text-center">Fecha</th>

@@ -1,0 +1,201 @@
+{% extends 'guarda/dash_guarda.html' %}
+
+{% block content %}
+
+<h1 class="text-4xl font-bold mb-6 text-[#1E4C40] text-center">Correspondencia <i class="bi bi-boxes"></i></h1>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-white">
+    <form action="{{ url_for('registrar_correspondencia' )}}" method="post">
+        <input type="hidden" name="trabajador_id" value="{{ session['trabajador_id'] }}">
+        <input type="hidden" name="tipo" value="luz">
+        <input type="hidden" name="descripcion" value="Recibo de Luz">
+        <input type="hidden" name="fecha_recibido" value="{{ fecha_recibido }}">
+        <input type="hidden" name="estado" value="Recibido">
+        <button class="bg-yellow-500 p-3 rounded-xl shadow hover:bg-yellow-600 w-full">
+            <i class="bi bi-lightbulb-fill text-3xl mb-2"></i><br>Recibo Luz
+        </button>
+    </form>
+    <form action="{{ url_for('registrar_correspondencia' )}}" method="post">
+        <input type="hidden" name="trabajador_id" value="{{ session['trabajador_id'] }}">
+        <input type="hidden" name="tipo" value="agua">
+        <input type="hidden" name="descripcion" value="Recibo del Agua">
+        <input type="hidden" name="fecha_recibido" value="{{ fecha_recibido }}">
+        <input type="hidden" name="estado" value="Recibido">
+        <button class="bg-blue-400 p-3 rounded-xl shadow hover:bg-blue-500 w-full">
+            <i class="bi bi-droplet-fill text-3xl mb-2"></i><br>Recibo Agua
+        </button>
+    </form>
+    <form action="{{ url_for('registrar_correspondencia' )}}" method="post">
+        <input type="hidden" name="trabajador_id" value="{{ session['trabajador_id'] }}">
+        <input type="hidden" name="tipo" value="gas">
+        <input type="hidden" name="descripcion" value="Recibo del Gas">
+        <input type="hidden" name="fecha_recibido" value="{{ fecha_recibido }}">
+        <input type="hidden" name="estado" value="Recibido">
+        <button class="bg-red-500 p-3 rounded-xl shadow hover:bg-red-600 w-full">
+            <i class="bi bi-fire text-3xl mb-2"></i><br>Recibo Gas
+        </button>
+    </form>
+    
+    <button class="bg-[#1E4C40] p-3 rounded-xl shadow hover:bg-green-700 w-full" data-bs-toggle="modal" data-bs-target="#modalPaquete">
+        <i class="bi bi-box-fill text-3xl mb-2"></i><br>Paquete
+    </button>
+    
+</div>
+
+<!-- Modal de Bootstrap -->
+<div class="modal fade" id="modalPaquete" tabindex="-1" aria-labelledby="modalPaqueteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-lg p-3 mb-5">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalPaqueteLabel">Registrar Paquete <i class="bi bi-box"></i></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{{ url_for('registrar_correspondencia') }}">
+                    <input type="hidden" name="tipo" value="paquete">
+                    <input type="hidden" name="fecha_recibido" value="{{ fecha_recibido }}">
+                    <input type="hidden" name="estado" value="Recibido">
+                    <input type="hidden" name="trabajador_id" value="{{ session['trabajador_id'] }}">
+
+                    <div class="mb-2">
+                        <label for="inmueble_id" class="block text-sm font-medium text-[#1E4C40]">Inmueble</label>
+                        <select name="inmueble_id" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            <option value="">Seleccione un inmueble</option>
+                            {% for inmueble in inmuebles %}
+                                <option value="{{ inmueble.pkidinmueble }}">{{ inmueble.numeroinmueble }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="descripcion" class="block text-sm font-medium text-[#1E4C40]">Descripción</label>
+                        <textarea name="descripcion" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" required></textarea>
+                    </div>
+
+                    <div class="modal-footer flex justify-end gap-3 pt-4 border-t mt-4">
+                        <button type="submit" class="bg-[#1E4C40] text-white px-4 py-2 rounded-lg shadow hover:bg-[#163A30] transition">
+                            <i class="bi bi-check-circle-fill"></i> Registrar
+                        </button>
+                        <button type="button" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-300 transition" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle-fill"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<h2 class="text-xl text-[#1E4C40] font-bold mt-6 mb-4 text-center justify-center">Historial </h2>
+<div class="overflow-x-auto rounded-lg shadow mt-4" style="min-height: 300px;">
+    <table class="w-full border text-sm shadow-lg rounded-lg">
+        <thead>
+            <tr class="bg-[#1E4C40] text-white justify-center items-center">
+                <th class="border border-gray-300 px-2 py-1 text-center">Inmueble</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Fecha Recibido</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Fecha Entrega</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Descripción</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Tipo</th>
+                <th class="border border-gray-300 px-2 py-1 text-center">Estado</th>
+                <th class="border border-gray-300 px-2 py-1 text-center" colspan="2">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in correspondencias %}
+                <tr class="border-t hover:bg-[#1E4C40]-100">
+                    <td class="border border-[#1E4C40]-200 px-4 py-2 text-center">{{ c.inmueble_id or 'General'}}</td>
+                    <td class="border border-[#1E4C40]-200 px-4 py-2 text-center">{{ c.fecha_recibido }}</td>
+                    <td class="border border-[#1E4C40]-200 px-4 py-2 text-center">{{ c.fecha_entrega or ''}}</td>
+                    <td class="border border-[#1E4C40]-200 px-4 py-2 text-center">{{ c.descripcion }}</td>
+                    <td class="border border-[#1E4C40]-200 px-4 py-2 text-center">{{ c.tipo }}</td>
+                    <td class="border border-[#1E4C40]-200 px-4 py-2 text-center">{{ c.estado }}</td>
+                    <td class="border border-[#1E4C40]-200 px-4 py-2 text-center">
+                          <button 
+                            class="btn btn-sm text-white bg-[#1E4C40] hover:bg-[#163A30]"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalEditar{{ c.pkidcorrespondencia }}">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </td>
+                </tr>
+            {% else %}   
+                <tr>
+                    <td colspan="6" class="px-4 py-4 text-center text-[#1E4C40]">No se han registrado correspondencias</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+   
+{% for c in correspondencias %}
+    <div class="modal fade" id="modalEditar{{ c.pkidcorrespondencia }}" tabindex="-1" aria-labelledby="modalLabel{{ c.pkidcorrespondencia }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content p-3 shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel{{ c.pkidcorrespondencia }}">Editar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for('editar_correspondencia') }}" method="post">
+                    <input type="hidden" name="pkidcorrespondencia" value="{{ c.pkidcorrespondencia}}">
+                    <div class="modal-body">
+                        <div class="mb-2">
+                            <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
+                            <input type="text" name="tipo" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" required value="{{ c.tipo }}">
+                        </div>
+                        <div class="mb-2">
+                            <label for="descripcion" class="block text-sm font-medium text-[#1E4C40]">Descripción</label>
+                            <textarea name="descripcion" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" required value="{{ c.descripcion}}" ></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label for="estado" class="block text-sm font-medium text-[#1E4C40]">Estado</label>
+                            <select name="estado" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" required>
+                               {% set estados = ['Entregado', 'No Entregado'] %}
+                               {% for estado_opcion in estados %}
+                                <option value="{{ estado_opcion }}"{% if c.estado == estado_opcion %}selected{% endif %}>{{ estado_opcion }}</option>
+                               {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label for="fecha_entrega" class="block text-sm font-medium text-[#1E4C40]">Fecha de Entrega</label>
+                            <input type="datetime-local" name="fecha_entrega" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
+                                value="{{ c.fecha_entrega|replace(' ', 'T') if c.fecha_entrega else '' }}">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success" style="background-color: #1E4C40;">Guardar</button>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+<div class="sticky bottom-0 left-0 bg-white py-3 shadow-md flex justify-center z-40 border-t border-gray-300">
+    <div class="flex justify-center space-x-2">
+        {% if pagina_actual > 1 %}
+            <a href="{{ url_for('correspondencia_guarda', page=pagina_actual-1) }}"
+               class="px-3 py-1 bg-[#1E4C40] text-white rounded hover:bg-[#163A30]">
+                <i class="bi bi-chevron-double-left"></i>
+            </a>
+        {% endif %}
+
+        {% for p in range(1, total_paginas + 1) %}
+            <a href="{{ url_for('correspondencia_guarda', page=p) }}"
+               class="px-3 py-1 rounded transition 
+                      {% if p == pagina_actual %}
+                          bg-[#1E4C40] text-white
+                      {% else %}
+                          bg-gray-200 text-[#1E4C40] hover:bg-gray-300
+                      {% endif %}">
+                {{ p }}
+            </a>
+        {% endfor %}
+
+        {% if pagina_actual < total_paginas %}
+            <a href="{{ url_for('correspondencia_guarda', page=pagina_actual+1) }}"
+               class="px-3 py-1 bg-[#1E4C40] text-white rounded hover:bg-[#163A30]">
+                <i class="bi bi-chevron-double-right"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

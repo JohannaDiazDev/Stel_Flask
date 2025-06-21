@@ -109,8 +109,8 @@ def ingresar():
         cursor = db.cursor()
         cursor.execute("SELECT pkiduser, contraseña, rol_id FROM usuarios WHERE correo = %s", (correo,))
         user = cursor.fetchone()
-        cursor.close()
-        db.close()
+        #cursor.close()
+        #db.close()
 
         if user is None:
             flash('❌ Usuario no encontrado', 'danger')
@@ -136,11 +136,23 @@ def ingresar():
             elif session.get('rol_id') == 2:  
                 response = make_response(redirect(url_for('dashboard_residente', _t=timestamp), code=303))
             elif session.get('rol_id') == 3:  
+                cursor.execute("SELECT pkidtrabajador FROM trabajador WHERE usuario_id = %s", (user[0],))
+                trabajador = cursor.fetchone()
+
+                if trabajador:
+                    session['trabajador_id'] = trabajador[0]
+                else:
+                    flash('No se encontró trabajador asociado a este usuario', 'danger')
+                    return redirect(url_for('ingresar'))
+
                 response = make_response(redirect(url_for('dashboard_guarda', _t=timestamp), code=303))
             else:
                 flash('Rol no reconocido', 'danger')
+                cursor.close()
+                db.close()
                 return redirect(url_for('ingresar'))
-
+            cursor.close()
+            db.close()
             # Configurar cabeceras para evitar caché
             response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
             response.headers['Pragma'] = 'no-cache'
@@ -905,6 +917,7 @@ def parqueadero():
 def correspondencia():
     db = get_db_connection()
     cursor = db.cursor()
+    
     if request.method == 'POST':
 
         fecha_recibido = request.form['fecha_recibido']
@@ -1083,17 +1096,290 @@ def inmueble_guarda():
     }
     return render_template('guarda/inmueble_guarda.html', andenes=andenes)
 
-@app.route('/visitante_guarda')
-def visitante_guarda():
-    return 'pagina visitante'
-
-@app.route('/parqueadero_guarda')
+@app.route('/guarda/parqueadero_guarda')
+@login_required
 def parqueadero_guarda():
-    return 'pagina parqueadero'
+    if session.get('rol_id') != 3:
+        flash('No tienes permisos para acceder', 'danger')
+        return redirect(url_for('ingresar'))
+    db = get_db_connection()
+    cursor = db.cursor()
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    offset = (page - 1) * per_page
+    estado = request.args.get('estado', '') 
+
+    sql = """
+        SELECT p.*, u.nombre AS nombre_residente, v.nombre
+        FROM parqueadero p
+        LEFT JOIN residente r ON p.residente_id = r.pkidresidente
+        LEFT JOIN usuarios u ON r.usuario_id = u.pkiduser
+        LEFT JOIN visitante v ON p.visitante_id = v.pkidvisitante       
+    """
+    params = []
+    if estado:
+        sql += " WHERE p.estado LIKE %s"
+        params.append(f"%{estado}%")
+
+    sql += " LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])
+
+    cursor.execute(sql,params)
+    columnas = [col[0] for col in cursor.description]
+    parqueos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+    cursor.execute("""
+        SELECT r.pkidresidente, u.nombre AS nombre_residente
+        FROM residente r
+        LEFT JOIN usuarios u ON r.usuario_id = u.pkiduser
+    """)
+    columnas_residente = [col[0] for col in cursor.description]
+    residentes = [dict(zip(columnas_residente, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkidvisitante, nombre FROM visitante")
+    columnas_visitante = [col[0] for col in cursor.description]
+    visitantes = [dict(zip(columnas_visitante, fila)) for fila in cursor.fetchall()]
+
+    if estado:
+        cursor.execute("SELECT COUNT(*) FROM parqueadero WHERE estado LIKE %s", (f"%{estado}%",))
+    else:
+        cursor.execute("SELECT COUNT(*) FROM parqueadero")
+    total_parqueadero = cursor.fetchone()[0]
+    total_pages = (total_parqueadero + per_page - 1 ) // per_page
+
+    cursor.close()
+    db.close()
+
+    response = make_response(render_template('guarda/parqueadero_guarda.html',
+        parqueos=parqueos, residentes=residentes,visitantes=visitantes, page=page,total_pages=total_pages,estado_buscar=estado))
+
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+@app.route('/guarda/parqueadero_guarda', methods=['POST'])
+def registrar_parqueo():
+    if session.get('rol_id') != 3:
+        flash('No tienes permisos para registrar parqueaderos', 'danger')
+        return redirect(url_for('ingresar'))
+    
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    cupo = request.form['cupo']
+    residente_id = request.form.get('residente_id') or None
+    visitante_id = request.form.get('visitante_id') or None
+    estado = request.form['estado'] 
+    fecha = request.form['fecha']
+    tipo = request.form['tipo']
+    placa = request.form['placa']
+    hora_salida = None
+    tarifa = 0
+
+    cursor.execute("""
+        INSERT INTO parqueadero (cupo, tarifa, residente_id, visitante_id, estado, fecha, tipo, placa, hora_salida)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (cupo, tarifa, residente_id, visitante_id, estado, fecha, tipo, placa, hora_salida))
+    db.commit()
+    cursor.close()
+    db.close()
+    return redirect(url_for('parqueadero_guarda'))
+
+@app.route('/guarda/parqueadero_guarda/<int:pkidparqueadero>/editar_parqueo', methods=['GET', 'POST'])
+def editar_parqueo(pkidparqueadero):
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    if request.method == 'POST':
+        cupo = request.form['cupo']
+        residente_id = request.form.get('residente_id') or None
+        visitante_id = request.form.get('visitante_id') or None
+        estado = request.form['estado']
+        fecha_str = request.form['fecha']
+        tipo = request.form['tipo']
+        placa = request.form['placa']
+        hora_salida_str = request.form.get('hora_salida')
+
+        # Parseamos fecha y hora
+        formato_fecha = "%Y-%m-%dT%H:%M:%S" if len(fecha_str) > 16 else "%Y-%m-%dT%H:%M"
+        entrada = datetime.strptime(fecha_str, formato_fecha)
+        fecha = entrada.strftime("%Y-%m-%d %H:%M:%S")
+
+        hora_salida = None
+        tarifa = 0
+
+        if visitante_id and hora_salida_str:
+            formato_salida = "%Y-%m-%dT%H:%M:%S" if len(hora_salida_str) > 16 else "%Y-%m-%dT%H:%M"
+            salida = datetime.strptime(hora_salida_str, formato_salida)
+            hora_salida = salida.strftime("%Y-%m-%d %H:%M:%S")
+
+            horas = (salida - entrada).total_seconds() / 3600
+            horas = max(1, int(horas + 0.5))
+            tarifa = horas * 1500
+        elif residente_id:
+            if tipo == 'carro':
+                tarifa = 62000
+            elif tipo == 'moto':
+                tarifa = 40000
+
+        cursor.execute("""
+            UPDATE parqueadero
+            SET cupo=%s, tarifa=%s, residente_id=%s, visitante_id=%s, estado=%s,
+                fecha=%s, tipo=%s, placa=%s, hora_salida=%s
+            WHERE pkidparqueadero = %s
+        """, (cupo, tarifa, residente_id, visitante_id, estado, fecha, tipo, placa, hora_salida, pkidparqueadero))
+        db.commit()
+        flash("Parqueadero actualizado correctamente", "success")
+
+    cursor.execute("""
+        SELECT p.*, u.nombre AS nombre_residente, v.nombre
+        FROM parqueadero p
+        LEFT JOIN residente r ON p.residente_id = r.pkidresidente
+        LEFT JOIN usuarios u ON r.usuario_id = u.pkiduser
+        LEFT JOIN visitante v ON p.visitante_id = v.pkidvisitante
+    """)
+    columnas = [col[0] for col in cursor.description]
+    parqueos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("""
+        SELECT r.pkidresidente, u.nombre AS nombre_residente
+        FROM residente r
+        LEFT JOIN usuarios u ON r.usuario_id = u.pkiduser
+    """)
+    columnas_residente = [col[0] for col in cursor.description]
+    residentes = [dict(zip(columnas_residente, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkidvisitante, nombre FROM visitante")
+    columnas_visitante = [col[0] for col in cursor.description]
+    visitantes = [dict(zip(columnas_visitante, fila)) for fila in cursor.fetchall()]
+
+    page = 1
+    per_page = 2
+    total_parqueadero = len(parqueos)
+    total_pages = (total_parqueadero + per_page - 1) // per_page
+    cursor.close()
+    db.close()
+
+    return render_template('guarda/parqueadero_guarda.html',
+        parqueos=parqueos,
+        residentes=residentes,
+        visitantes=visitantes,
+        page=page,
+        total_pages=total_pages,
+        estado_buscar=""
+    )
 
 @app.route('/correspondencia_guarda')
+@login_required
 def correspondencia_guarda():
-    return 'pagina correspondencia'
+
+    page = int(request.args.get('page', 1))
+    por_pagina = 10
+    offset = (page - 1) * por_pagina
+
+    db = get_db_connection()
+    cursor = db.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM correspondencia")
+    total_registros = cursor.fetchone()[0]
+    total_paginas = (total_registros + por_pagina - 1) // por_pagina
+
+    trabajador_id = session.get('trabajador_id')
+    sql = """
+        SELECT c.pkidcorrespondencia, u.nombre AS nombre_trabajador, c.inmueble_id, c.fecha_recibido, c.fecha_entrega, 
+        c.descripcion, c.tipo, c.estado FROM correspondencia c
+        LEFT JOIN trabajador t ON c.trabajador_id = t.pkidtrabajador
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+        LEFT JOIN inmueble i ON c.inmueble_id = i.pkidinmueble
+        WHERE c.trabajador_id = %s
+        ORDER BY c.fecha_recibido DESC
+        LIMIT %s OFFSET %s
+    """
+    cursor.execute(sql, (trabajador_id, por_pagina, offset))
+    columnas = [col[0] for col in cursor.description]
+    correspondencias = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("""SELECT t.pkidtrabajador, u.nombre FROM trabajador t 
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser""")
+    col_trabajador = [col[0] for col in cursor.description]
+    trabajadores = [dict(zip(col_trabajador, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkiduser, nombre FROM usuarios")
+    col_usuario = [col[0] for col in cursor.description]
+    usuarios = [dict(zip(col_usuario, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
+    col_inmueble = [col[0] for col in cursor.description]
+    inmuebles = [dict(zip(col_inmueble, fila)) for fila in cursor.fetchall()]
+
+    cursor.close()
+    db.close()
+    response = make_response(render_template('guarda/correspondencia_guarda.html', correspondencias=correspondencias,
+        trabajadores=trabajadores, usuarios=usuarios, inmuebles=inmuebles,total_paginas=total_paginas,
+        pagina_actual=page,))
+
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+@app.route('/guarda/correspondencia_guarda', methods=['POST'])
+@login_required
+def registrar_correspondencia():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    trabajador_id = request.form['trabajador_id']
+    inmueble_id = request.form.get('inmueble_id') or None
+    fecha_str = request.form.get('fecha_recibido', '').strip()
+    fecha_entrega = request.form.get('fecha_entrega') or None
+    descripcion = request.form['descripcion']
+    tipo = request.form['tipo']
+    estado = request.form['estado']
+
+    if fecha_str:
+        formato = "%Y-%m-%dT%H:%M:%S" if len(fecha_str) > 16 else "%Y-%m-%dT%H:%M"
+        fecha_recibido = datetime.strptime(fecha_str, formato).strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        # Si no se envía fecha, usar la actual
+        fecha_recibido = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    sql = "INSERT INTO correspondencia (trabajador_id, inmueble_id, fecha_recibido, fecha_entrega, descripcion, tipo, estado) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    valores = (trabajador_id, inmueble_id, fecha_recibido, fecha_entrega, descripcion, tipo, estado)
+    cursor.execute(sql, valores)
+    db.commit()
+
+    cursor.execute("""
+        SELECT t.pkidtrabajador, u.nombre 
+        FROM trabajador t
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+    """)
+    trabajadores = cursor.fetchall()
+    cursor.close()
+    db.close()
+    flash('Correspondencia registrada correctamente', 'success')
+    return redirect(url_for('correspondencia_guarda', trabajadores=trabajadores))
+
+@app.route('/guarda/correspondencia_guarda/editar_correspondencia', methods=['GET','POST'])
+def editar_correspondencia():
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    pkidcorrespondencia = request.form['pkidcorrespondencia'] 
+    tipo = request.form['tipo']
+    descripcion = request.form['descripcion']
+    estado = request.form['estado'] 
+    fecha_entrega = request.form.get('fecha_entrega') or None
+
+    sql = """
+        UPDATE correspondencia
+        SET tipo = %s, descripcion = %s, estado = %s, fecha_entrega = %s
+        WHERE pkidcorrespondencia = %s
+    """
+    valores = (tipo, descripcion, estado, fecha_entrega, pkidcorrespondencia)
+    cursor.execute(sql, valores)
+    db.commit()
+    cursor.close()
+    db.close()
+    flash("Correspondencia actualizada correctamente", "success")
+    return redirect(url_for('correspondencia_guarda'))
+
 
 @app.route('/novedades_guarda')
 def novedades_guarda():

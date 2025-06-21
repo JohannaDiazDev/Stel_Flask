@@ -1,0 +1,234 @@
+{% extends 'guarda/dash_guarda.html' %}
+
+{% block content %}
+
+<h1 class="text-xl font-bold text-center text-[#1E4C40] mb-6">Parqueadero <i class="bi bi-car-front-fill"></i></h1>
+
+<div class="bg-white shadow rounded-lg p-4 mb-6 w-full">
+    <div class="flex justify-between items-end flex-wrap gap-4">
+        <button type="button" class="btn btn-success font-bold" style="background-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modalParqueo">
+            Registrar <i class="bi bi-file-plus"></i>
+        </button>
+        <form method="GET" action="{{ url_for('parqueadero_guarda') }}" class="relative w-full max-w-md">
+            <i class="bi bi-search absolute right-3 top-1/2 transform -translate-y-1/2 text-[#1E4C40] text-lg"></i>
+            <input type="text" name="estado" placeholder="Buscar estado" value="{{ estado_buscar }}" 
+            class="w-full pr-10 pl-4 py-2 border border-[#1E4C40] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E4C40]">
+        </form>
+    </div>
+</div>
+
+<table class="w-full border text-sm shadow-lg rounded-lg">
+    <thead>
+        <tr class="bg-[#1E4C40] text-white justify-center items-center">
+            <th class="border border-gray-300 px-2 py-1 text-center">Cupo</th>
+            <th class="border border-gray-300 px-2 py-1 text-center">Tarifa</th>
+            <th class="border border-gray-300 px-2 py-1 text-center">Residente</th>
+            <th class="border border-gray-300 px-2 py-1 text-center">Visitante</th>
+            <th class="border border-gray-300 px-2 py-1 text-center">Estado</th>
+            <th class="border border-gray-300 px-2 py-1 text-center">Fecha</th>
+            <th class="border border-gray-300 px-2 py-1 text-center">Tipo</th>
+            <th class="border border-gray-300 px-2 py-1 text-center">Placa</th>
+            <th class="border border-gray-300 px-2 py-1 text-center">Hora Salida</th>
+            <th class="border border-gray-300 px-2 py-1 text-center" colspan="2">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in parqueos %}
+        <tr class="hover:bg-gray-100">
+            <td class="border border-gray-300 px-4 py-2 text-center">{{p.cupo}}</td>
+            <td class="border border-gray-300 px-4 py-2 text-center">{{p.tarifa}}</td>
+            <td class="border border-gray-300 px-4 py-2 text-center">{{p.nombre_residente or ''}}</td>
+            <td class="border border-gray-300 px-4 py-2 text-center">{{p.nombre or ''}}</td>
+            <td class="border border-gray-300 px-4 py-2 text-center">{{p.estado}}</td>
+            <td class="border border-gray-300 px-4 py-2 text-center">{{p.fecha}}</td>
+            <td class="border border-gray-300 px-4 py-2 text-center">{{p.tipo}}</td>
+            <td class="border border-gray-300 px-4 py-2 text-center">{{p.placa}}</td>
+            <td class="border border-gray-300 px-4 py-2 text-center">{{p.hora_salida.strftime('%Y-%m-%d %H:%M:%S') if p.hora_salida else '-'}}</td>
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-warning" style="background-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modalEditarParqueo{{p.pkidparqueadero}}">
+                    <i class="bi bi-pencil-square text-white"></i>
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Modal Registrar -->
+<div class="modal fade" id="modalParqueo" tabindex="-1" aria-labelledby="modalParqueoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-[#1E4C40] text-white">
+                <h5 class="modal-title font-bold" id="modalParqueoLabel">Registrar</h5>
+                <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('registrar_parqueo') }}">
+                <div class="modal-body grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                    <div class="mb-2">
+                        <label for="cupo" class="block text-sm font-medium text-[#1E4C40]">Cupo</label>
+                        <input type="number" name="cupo" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                    </div>
+                    <div class="mb-2">
+                        <label for="residente_id" class="block text-sm font-medium text-[#1E4C40]">Residente</label>
+                        <select name="residente_id" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            <option value="">Seleccione un residente</option>
+                            {% for residente in residentes %}
+                                <option value="{{residente.pkidresidente}}">{{ residente.nombre_residente}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="visitante_id" class="block text-sm font-medium text-[#1E4C40]">Visitante</label>
+                        <select name="visitante_id" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            <option value="">Seleccione un visitante</option>
+                            {% for visitante in visitantes %}
+                                <option value="{{visitante.pkidvisitante}}">{{visitante.nombre}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="estado" class="block text-sm font-medium text-[#1E4C40]">Estado</label>
+                        <select name="estado" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            <option value="disponible">Disponible</option>
+                            <option value="ocupado">Ocupado</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="fecha" class="block text-sm font-medium text-[#1E4C40]">Fecha</label>
+                        <input type="datetime-local" name="fecha" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                    </div>
+                    <div class="mb-2">
+                        <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
+                        <select name="tipo" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            <option value="carro">Carro</option>
+                            <option value="moto">Moto</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="placa" class="block text-sm font-medium text-[#1E4C40]">Placa</label>
+                        <input type="text" name="placa" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                    </div>
+                </div>
+                <div class="modal-footer p-3">
+                    <button type="submit" class="btn btn-success" style="background-color: #1E4C40;">Registrar</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modales de Edición -->
+{% for p in parqueos %}
+<div class="modal fade" id="modalEditarParqueo{{p.pkidparqueadero}}" tabindex="-1" aria-labelledby="modalEditarParqueoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-[#1E4C40] text-white">
+                <h5 class="modal-title font-bold" id="modalEditarParqueoLabel{{p.pkidparqueadero}}">Editar Parqueadero</h5>
+                <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('editar_parqueo', pkidparqueadero=p.pkidparqueadero) }}" method="post">
+                <div class="modal-body grid grid-cols-1 md:grid-cols-2 gap-4 p-4"> 
+                    <div class="mb-2">
+                        <label class="block text-sm font-medium text-[#1E4C40]">Cupo</label>
+                        <input type="number" name="cupo" value="{{p.cupo}}" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                    </div>
+                    <div class="mb-2">
+                        <label for="residente_id" class="block text-sm font-medium text-[#1E4C40]">Residente</label>
+                        <select name="residente_id" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            <option value="">Seleccione un residente</option>
+                            {% for r in residentes %}
+                                <option value="{{ r.pkidresidente }}" {% if p.residente_id == r.pkidresidente %}selected{% endif %}>
+                                    {{ r.nombre_residente}}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="visitante_id" class="block text-sm font-medium text-[#1E4C40]">Visitante</label>
+                        <select name="visitante_id" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            <option value="">Seleccione un visitante</option>
+                            {% for v in visitantes %}
+                                <option value="{{ v.pkidvisitante }}"{% if p.visitante_id == v.pkidvisitante %}selected{% endif %}>
+                                    {{ v.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="estado" class="block text-sm font-medium text-[#1E4C40]">Estado</label>
+                        <select name="estado" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            {% set estados = ["disponible","ocupado"] %}
+                            {% for estado_opcion in estados %}
+                                <option value="{{ estado_opcion }}" {% if p.estado == estado_opcion %}selected{% endif %}>
+                                    {{ estado_opcion }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="fecha" class="block text-sm font-medium text-[#1E4C40]">Fecha</label>
+                        <input type="datetime-local" name="fecha" value="{{ p.fecha }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
+                        <select name="tipo" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            {% set tipos = ["carro", "moto"] %}
+                            {% for tipo_opcion in tipos %}
+                                <option value="{{ tipo_opcion }}" {% if p.tipo == tipo_opcion %}selected{% endif %}>
+                                    {{ tipo_opcion }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="placa" class="block text-sm font-medium text-[#1E4C40]">Placa</label>
+                        <input type="text" name="placa" value="{{ p.placa }}" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-sm font-medium text-[#1E4C40]">Hora Salida</label>
+                        <input type="datetime-local" step="1" name="hora_salida"  value="{{ p.hora_salida.strftime('%Y-%m-%dT%H:%M:%S') if p.hora_salida else '' }}" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" style="background-color: #1E4C40;">Guardar</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<div class="flex justify-center mt-4">
+    <ul class="flex list-none">
+        {% if page > 1 %}
+            <li>
+                <a href="?page={{ page - 1 }}{% if estado_buscar %}&estado={{ estado_buscar }}{% endif %}"
+                    class="px-3 py-1 mx-1 bg-[#1E4C40] text-white rounded hover:border-gray-300">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            </li>
+        {% endif %}
+
+        {% for i in range(1, total_pages + 1) %}
+        <li>
+            <a href="?page={{ i }}{% if estado_buscar %}&estado={{ estado_buscar }}{% endif %}"
+                class="px-3 py-1 mx-1 rounded {% if page == i %}bg-[#1E4C40] text-white{% else %}border-gray-200 text-white hover:bg-gray-300{% endif %}">
+                {{ i }}
+            </a>    
+        </li>
+        {% endfor %}
+
+        {% if page < total_pages %}
+        <li>
+            <a href="?page={{ page + 1 }}{% if estado_buscar %}&estado={{ estado_buscar }}{% endif %}"
+                class="px-3 py-1 mx-1 bg-[#1E4C40] text-white rounded hover:bg-gray-300">
+                <i class="bi bi-chevron-double-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+
+{% endblock %}
