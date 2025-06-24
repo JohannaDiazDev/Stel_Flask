@@ -945,60 +945,80 @@ def novedades():
     db = get_db_connection()
     cursor = db.cursor()
 
-    page = request.args.get('page', 1, type=int)
-    per_page = 10
-    offset = (page - 1) * per_page
-    estado = request.args.get('estado', '').strip().lower()
+    page = int(request.args.get('page', 1))
+    por_pagina = 8
+    offset = (page - 1) * por_pagina
 
-    sql = """
-        SELECT n.pkidnovedad, u.nombre AS nombre_trabajador, n.fecha, n.inmueble_id, n.tipo, n.asunto, n.descripcion, n.estado 
+    estado = request.args.get('estado')
+
+    rol_id = session.get('rol_id')
+    trabajador_id = session.get('trabajador_id')
+
+    if rol_id == 1:
+        base_template = 'admin/base_dash.html'
+    elif rol_id == 3:
+        base_template = 'guarda/dash_guarda.html'
+
+    filtros = []
+    valores = []
+
+    if estado:
+        filtros.append("n.estado = %s")
+        valores.append(estado)
+
+    if rol_id == 3:  # Guarda solo ve sus novedades
+        filtros.append("n.trabajador_id = %s")
+        valores.append(trabajador_id)
+
+    where_clause = f"WHERE {' AND '.join(filtros)}" if filtros else ""
+
+    cursor.execute(f"SELECT COUNT(*) FROM novedades n {where_clause}", tuple(valores))
+    total_registros = cursor.fetchone()[0]
+    total_paginas = (total_registros + por_pagina - 1) // por_pagina
+
+    sql = f"""
+        SELECT n.pkidnovedad, n.trabajador_id, u.nombre AS nombre_trabajador, n.fecha, n.inmueble_id,
+               n.tipo, n.asunto, n.descripcion, n.estado
         FROM novedades n
         LEFT JOIN trabajador t ON n.trabajador_id = t.pkidtrabajador
         LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
-        LEFT JOIN inmueble i ON n.inmueble_id = i.pkidinmueble
+        {where_clause}
+        ORDER BY n.fecha DESC
+        LIMIT %s OFFSET %s
     """
-    params = []
-    if estado:
-        sql += "WHERE n.estado LIKE %s"
-        params.append(f"%{estado}%")
-    sql += " LIMIT %s OFFSET %s"
-    params.extend([per_page, offset])            
+    valores.extend([por_pagina, offset])
+    cursor.execute(sql, tuple(valores))
+    columnas = [col[0] for col in cursor.description]
+    novedades = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
 
-    cursor.execute(sql, params)
-    resultados = cursor.fetchall()
-    
-    columnas = ['pkidnovedad', 'nombre_trabajador', 'fecha', 'inmueble_id', 'tipo', 'asunto', 'descripcion', 'estado']
-    novedades = [dict(zip(columnas, fila)) for fila in resultados]
-
-    # Obtener datos auxiliares
-    cursor.execute("SELECT t.pkidtrabajador, u.nombre FROM trabajador t LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser")
-    columnas_trabajador = [col[0] for col in cursor.description]
-    trabajadores = [dict(zip(columnas_trabajador, fila)) for fila in cursor.fetchall()]
-
-    cursor.execute("SELECT pkiduser, nombre FROM usuarios")
-    columnas_usuario = [col[0] for col in cursor.description]
-    usuarios = [dict(zip(columnas_usuario, fila)) for fila in cursor.fetchall()]
+    cursor.execute("""
+    SELECT t.pkidtrabajador, u.nombre
+    FROM trabajador t
+    LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+    """)
+    trabajadores = [dict(zip([col[0] for col in cursor.description], fila)) for fila in cursor.fetchall()]
 
     cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
-    columnas_inmueble = [col[0] for col in cursor.description]
-    inmuebles = [dict(zip(columnas_inmueble, fila)) for fila in cursor.fetchall()]
-
-    if estado:
-        cursor.execute("SELECT COUNT(*) FROM novedades WHERE estado LIKE %s", (f"%{estado}%",))
-    else:
-        cursor.execute("SELECT COUNT(*) FROM novedades")
-    total_novedad = cursor.fetchone()[0]
-    total_pages = (total_novedad + per_page - 1) // per_page    
+    inmuebles = [dict(zip([col[0] for col in cursor.description], fila)) for fila in cursor.fetchall()]
 
     cursor.close()
     db.close()
-    response = make_response(render_template('admin/novedades.html', novedades=novedades,page=page,total_pages=total_pages, estado_buscar=estado, 
-        resultados=resultados, trabajadores=trabajadores, inmuebles=inmuebles, usuarios=usuarios))
 
+    response = make_response(render_template(
+        'admin/novedades.html',
+        novedades=novedades,
+        trabajadores=trabajadores,
+        inmuebles=inmuebles,
+        estado_buscar=estado,
+        page=page,
+        total_pages=total_paginas,base_template=base_template
+    ))
     response.headers['Cache-Control'] = 'no-store'
     return response
 
+
 @app.route('/admin/novedades', methods=['POST'])
+@login_required
 def crear_novedad():
     db = get_db_connection()
     cursor = db.cursor()
@@ -1026,33 +1046,58 @@ def crear_novedad():
     flash('Novedad registrada exitosamente.', 'success')
     return redirect(url_for('novedades'))
 
-@app.route('/admin/novedades/<int:pkidnovedad>/editar_novedad', methods=['GET','POST'])
+@app.route('/admin/novedades/<int:pkidnovedad>/editar_novedad', methods=['GET', 'POST'])
+@login_required
 def editar_novedad(pkidnovedad):
     db = get_db_connection()
     cursor = db.cursor()
 
-    if request.method == 'POST':
+    rol_id = session.get('rol_id')
+    trabajador_id_session = session.get('trabajador_id')
 
+    # Validar si es dueño del registro si es GUARDIA
+    if rol_id == 3:
+        cursor.execute("SELECT trabajador_id FROM novedades WHERE pkidnovedad = %s", (pkidnovedad,))
+        creador = cursor.fetchone()
+        if not creador or creador[0] != trabajador_id_session:
+            flash("No puedes editar una novedad que no creaste.", "danger")
+            cursor.close()
+            db.close()
+            return redirect(url_for('novedades'))
+
+    if request.method == 'POST':
         trabajador_id = request.form.get('trabajador_id')
-        fecha = request.form.get('fecha') 
+        fecha = request.form.get('fecha')
         inmueble_id = request.form.get('inmueble_id') or None
         tipo = request.form.get('tipo')
         asunto = request.form.get('asunto')
         descripcion = request.form.get('descripcion')
         estado = request.form.get('estado')
 
-        sql = """UPDATE novedades SET trabajador_id = %s, fecha = %s, inmueble_id = %s, tipo = %s, asunto = %s, descripcion = %s, estado = %s WHERE pkidnovedad = %s"""
+        sql = """
+            UPDATE novedades
+            SET trabajador_id = %s, fecha = %s, inmueble_id = %s,
+                tipo = %s, asunto = %s, descripcion = %s, estado = %s
+            WHERE pkidnovedad = %s
+        """
         valores = (trabajador_id, fecha, inmueble_id, tipo, asunto, descripcion, estado, pkidnovedad)
         cursor.execute(sql, valores)
         db.commit()
         db.close()
-        flash("Novedad actualizada correctamente","success")
+        flash("Novedad actualizada correctamente", "success")
         return redirect(url_for('novedades'))
+
     cursor.execute("SELECT * FROM novedades WHERE pkidnovedad = %s", (pkidnovedad,))
     novedad = cursor.fetchone()
     cursor.close()
     db.close()
-    return render_template('admin/novedades.html', novedad=novedad)
+
+    if not novedad:
+        flash("Novedad no encontrada.", "warning")
+        return redirect(url_for('novedades'))
+
+    # No necesitas redireccionar a una nueva vista; la edición se hace desde el modal de la lista.
+    return redirect(url_for('novedades'))
 
 @app.route('/dashboard_guarda')
 @login_required

@@ -141,7 +141,7 @@
     </table>
     <div class="flex justify-center mt-6 space-x-2">
         {% if page > 1 %}
-            <a href="{{ url_for('usuarios', page=page-1, cedula=cedula_buscar) }}" class="px-3 py-1 bg-gray-200 rounded">Anterior</a>
+            <a href="{{ url_for('usuarios', page=page-1, cedula=cedula_buscar) }}" class="px-3 py-1 bg-gray-200 rounded"><i class="bi bi-chevron-double-left"></i></a>
         {% endif %}
         {% for p in range(1, total_pages + 1) %}
             <a href="{{ url_for('usuarios', page=p, cedula=cedula_buscar) }}" class="px-3 py-1 rounded {% if p == page %}bg-[#1E4C40] text-white{% else %}bg-gray-200{% endif %}">
@@ -149,7 +149,7 @@
             </a>
         {% endfor %}
         {% if page < total_pages %}
-            <a href="{{ url_for('usuarios', page=page+1, cedula=cedula_buscar) }}" class="px-3 py-1 bg-gray-200 rounded">Siguiente</a>
+            <a href="{{ url_for('usuarios', page=page+1, cedula=cedula_buscar) }}" class="px-3 py-1 bg-gray-200 rounded"><i class="bi bi-chevron-double-right"></i></a>
         {% endif %}
     </div>
  </div>

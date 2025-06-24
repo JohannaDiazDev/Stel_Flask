@@ -1,4 +1,4 @@
-{% extends 'admin/base_dash.html' %}
+{% extends base_template %}
 {% block content %}
 <div class="max-w-5xl mx-auto py-8">
     <h1 class="text-3xl font-bold mb-6 text-[#1E4C40] text-center items-center">
@@ -17,11 +17,11 @@
             </select>
         </div>
 
-        <div class="flex gap-2 justify-between">
-            <button type="submit" class="w-full bg-[#1E4C40] text-white px-4 py-2 rounded-md hover:bg-[#163a2f] transition">
+        <div class="flex flex-col md:flex-row md:items-end md:gap-4">
+            <button type="submit" class="w-full md:w-auto bg-[#1E4C40] text-white px-4 py-2 rounded-md hover:bg-[#163a2f] transition">
                 Buscar <i class="bi bi-search"></i>
             </button>
-            <button type="button" class="btn bg-[#1E4C40] text-white px-4 py-2 rounded hover:bg-[#163a2f] transition flex items-center gap-2"
+            <button type="button" class="w-full md:w-auto btn bg-[#1E4C40] text-white px-4 py-2 rounded hover:bg-[#163a2f] transition flex items-center gap-2"
                 data-bs-toggle="modal" data-bs-target="#modalNovedad">
                 Registrar <i class="bi bi-plus-circle-dotted"></i>
             </button>
@@ -41,8 +41,8 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="trabajador_id" class="form-label">Trabajador</label>
-                                <select class="form-select" name="trabajador_id" required>
+                                <label for="trabajador_id" class="block text-sm font-medium text-[#1E4C40]">Trabajador</label>
+                                <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="trabajador_id" required>
                                     <option value="">Seleccione</option>
                                     {% for trabajador in trabajadores %}
                                         <option value="{{ trabajador.pkidtrabajador }}">{{ trabajador.nombre }}</option>
@@ -50,12 +50,12 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="fecha" class="form-label">Fecha</label>
-                                <input type="datetime-local" class="form-control" name="fecha" required>
+                                <label for="fecha" class="block text-sm font-medium text-[#1E4C40]">Fecha</label>
+                                <input type="datetime-local" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="fecha" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="inmueble_id" class="form-label">Inmueble (opcional)</label>
-                                <select class="form-select" name="inmueble_id">
+                                <label for="inmueble_id" class="block text-sm font-medium text-[#1E4C40]">Inmueble (opcional)</label>
+                                <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"" name="inmueble_id">
                                     <option value="">Ninguno</option>
                                     {% for inmueble in inmuebles %}
                                         <option value="{{ inmueble.pkidinmueble }}">{{ inmueble.numeroinmueble }}</option>
@@ -63,24 +63,24 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="tipo" class="form-label">Tipo</label>
-                                <select class="form-select" name="tipo" required>
+                                <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
+                                <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="tipo" required>
                                     <option value="Solicitud">Solicitud</option>
                                     <option value="Queja">Queja</option>
                                     <option value="Recomendación">Recomendación</option>
                                 </select>
                             </div>
                             <div class="col-md-12 mb-3">
-                                <label for="asunto" class="form-label">Asunto</label>
-                                <input type="text" class="form-control" name="asunto" required>
+                                <label for="asunto" class="block text-sm font-medium text-[#1E4C40]">Asunto</label>
+                                <input type="text" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="asunto" required>
                             </div>
                             <div class="col-md-12 mb-3">
-                                <label for="descripcion" class="form-label">Descripción</label>
-                                <textarea class="form-control" name="descripcion" rows="3" required></textarea>
+                                <label for="descripcion" class="block text-sm font-medium text-[#1E4C40]">Descripción</label>
+                                <textarea class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="descripcion" rows="3" required></textarea>
                             </div>
                             <div class="col-md-12 mb-3">
-                                <label for="estado" class="form-label">Estado</label>
-                                <select class="form-select" name="estado" required>
+                                <label for="estado" class="block text-sm font-medium text-[#1E4C40]">Estado</label>
+                                <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="estado" required>
                                     <option value="pendiente">Pendiente</option>
                                     <option value="proceso">Proceso</option>
                                     <option value="resuelto">Resuelto</option>
@@ -89,28 +89,26 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle-dotted"></i> Registrar</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-diamond-fill"></i> Cancelar</button>
+                        <button type="submit" class="btn btn-success" style="background-color: #1E4C40;" ><i class="bi bi-plus-circle-dotted"></i> Registrar</button>
+                        <button type="button" class="btn btn-danger" style="background-color: #a11129;" data-bs-dismiss="modal"><i class="bi bi-x-diamond-fill"></i> Cancelar</button>
                     </div>
                 </form> <!-- CIERRE FORM CREAR NOVEDAD -->
             </div>
         </div>
     </div>
 
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for novedad in novedades %}
+        {% set border_color = 'border-gray-300' %}
+        {% if novedad.estado|lower == 'pendiente' %}
+            {% set border_color = 'border-red-400' %}
+        {% elif novedad.estado|lower == 'proceso' %}
+            {% set border_color = 'border-yellow-400' %}
+        {% elif novedad.estado|lower == 'resuelto' %}
+            {% set border_color = 'border-green-400' %}
+        {% endif %}
 
-    <!-- LISTADO DE NOVEDADES -->
-{% for novedad in novedades %}
-    {% set border_color = 'border-gray-300' %}
-    {% if novedad.estado|lower == 'pendiente' %}
-        {% set border_color = 'border-red-400' %}
-    {% elif novedad.estado|lower == 'proceso' %}
-        {% set border_color = 'border-yellow-400' %}
-    {% elif novedad.estado|lower == 'resuelto' %}
-        {% set border_color = 'border-green-400' %}
-    {% endif %}
-
-    <div class="relative pl-4 mb-4 border-l-4 {{ border_color }}">
-        <div class="bg-white shadow-sm p-3 rounded-lg">
+        <div class="bg-white shadow-sm p-3 rounded-lg border {{ border_color }}">
             <div class="flex justify-between items-start gap-2">
                 <div class="text-sm text-[#1E4C40] space-y-1">
                     <h2 class="text-lg font-semibold text-[#1E4C40]">
@@ -141,92 +139,86 @@
                         {% else %} bg-gray-200 text-gray-600 {% endif %}">
                         {{ novedad.estado }}
                     </span>
-                    <button type="button" class="mt-1 bg-[#1E4C40] text-white px-3 py-1 rounded text-xs hover:bg-[#163a2f] transition"
-                        data-bs-toggle="modal" data-bs-target="#modal{{novedad.pkidnovedad}}">
-                        <i class="bi bi-pencil-square"></i> Editar
-                    </button>
+                    {% if session.get('rol_id') == 1 or novedad.trabajador_id == session.get('trabajador_id') %}
+                        <button type="button" class="mt-1 bg-[#1E4C40] text-white px-3 py-1 rounded text-xs hover:bg-[#163a2f] transition"
+                            data-bs-toggle="modal" data-bs-target="#modal{{novedad.pkidnovedad}}">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </button>
+                    {% endif %}
                 </div>
             </div>
         </div>
-    </div>
 
-
-    
-    <div class="modal fade" id="modal{{novedad.pkidnovedad}}" tabindex="-1" aria-labelledby="modalLabell" aria-hidden="true">
-        <div class="modal-dialog modal-dialog centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalLabell">{{novedad.pkidnovedad}}</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ url_for('editar_novedad', pkidnovedad=novedad.pkidnovedad) }}" method="post">
-                        <div class="col-md-12 mb-3">
-                            <label for="trabajador_id">Trabajador</label>
-                            <select name="trabajador_id">
-                                <option value="">Seleccione un Trabajador</option>
-                                {% for trabajador in trabajadores %}
-                                    <option value="{{ trabajador.pkidtrabajador}}"
-                                        {% if trabajador.pkidtrabajador == novedad[1] %} selected {% endif %}>
-                                        {{ trabajador.nombre }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="fecha">Fecha</label>
-                            <input type="datetime-local" name="fecha" value="{{ novedad.fecha }}">
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="inmueble_id">Inmueble</label>
-                            <select name="inmueble_id">
-                                <option value="">Ninguno</option>
-                                {% for inmueble in inmuebles %}
-                                    <option value="{{ inmueble.pkidinmueble }}" {% if novedad.inmueble_id == inmueble.pkidinmueble %}selected{% endif %}>
-                                        {{ inmueble.numeroinmueble }}
-                                    </option>
-                                {% endfor %}    
-                            </select>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="tipo">Tipo</label>
-                            <select name="tipo">
-                                {% set tipos = ['Solicitud','Queja','Recomendación'] %}
-                                {% for tipo_opcion in tipos %}
-                                    <option value="{{ tipo_opcion }}" {% if novedad.tipo == tipo_opcion %}selected{% endif %}>{{tipo_opcion}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="asunto">Asunto</label>
-                            <input type="text" name="asunto" value="{{ novedad.asunto }}">
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="descripcion">Descripción</label>
-                            <textarea name="descripcion" value="{{ novedad.descripcion}}"></textarea>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="estado">Estado</label>
-                            <select name="estado">
-                                {% set estados = ['Pendiente','Proceso','Resuelto'] %}
-                                {% for estado_opcion in estados %}
-                                    <option value="{{ estado_opcion }}" {% if novedad.estado == estado_opcion %}selected{% endif %}>{{ estado_opcion}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-success" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar <i class="bi bi-x-diamond-fill"></i></button>
-                            <button type="submit" class="btn btn-success" style="background-color: #1E4C40;">Guardar <i class="bi bi-floppy-fill"></i></button>
-                        </div>
-                    </form>
+        <!-- MODAL DE EDICIÓN -->
+        <div class="modal fade" id="modal{{novedad.pkidnovedad}}" tabindex="-1" aria-labelledby="modalLabell" aria-hidden="true">
+            <div class="modal-dialog modal-dialog centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="modalLabell">{{novedad.pkidnovedad}}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ url_for('editar_novedad', pkidnovedad=novedad.pkidnovedad) }}" method="post">
+                            <div class="mb-2">
+                                <label for="trabajador_id" class="block text-sm font-medium text-[#1E4C40]">Trabajador</label>
+                                <input type="hidden" name="trabajador_id" value="{{ novedad.trabajador_id }}">
+                                <input type="text" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" value="{{ novedad.nombre_trabajador }}" readonly>
+                            </div>
+                            <div class="mb-2">
+                                <label for="fecha" class="block text-sm font-medium text-[#1E4C40]">Fecha</label>
+                                <input type="datetime-local" name="fecha" value="{{ novedad.fecha }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            </div>
+                            <div class="mb-2">
+                                <label for="inmueble_id" class="block text-sm font-medium text-[#1E4C40]">Inmueble</label>
+                                <select name="inmueble_id" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                    <option value="">Ninguno</option>
+                                    {% for inmueble in inmuebles %}
+                                        <option value="{{ inmueble.pkidinmueble }}" {% if novedad.inmueble_id == inmueble.pkidinmueble %}selected{% endif %}>
+                                            {{ inmueble.numeroinmueble }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
+                                <select name="tipo" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                    {% set tipos = ['Solicitud','Queja','Recomendación'] %}
+                                    {% for tipo_opcion in tipos %}
+                                        <option value="{{ tipo_opcion }}" {% if novedad.tipo == tipo_opcion %}selected{% endif %}>{{tipo_opcion}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label for="asunto" class="block text-sm font-medium text-[#1E4C40]">Asunto</label>
+                                <input type="text" name="asunto" value="{{ novedad.asunto }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                            </div>
+                            <div class="mb-2">
+                                <label for="descripcion" class="block text-sm font-medium text-[#1E4C40]">Descripción</label>
+                                <textarea name="descripcion" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">{{ novedad.descripcion }}</textarea>
+                            </div>
+                            <div class="mb-2">
+                                <label for="estado" class="block text-sm font-medium text-[#1E4C40]">Estado</label>
+                                <select name="estado" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                    {% set estados = ['Pendiente','Proceso','Resuelto'] %}
+                                    {% for estado_opcion in estados %}
+                                        <option value="{{ estado_opcion }}" {% if novedad.estado == estado_opcion %}selected{% endif %}>{{ estado_opcion }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-success" style="background-color: #1E4C40;">Guardar <i class="bi bi-floppy-fill"></i></button>
+                                <button type="button" class="btn btn-success" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar <i class="bi bi-x-diamond-fill"></i></button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>    
-    {% else %}
-        <p class="text-[#1E4C40] text-center">No hay novedades registradas.</p>
     {% endfor %}
-    <div class="flex justify-center mt-4">
+</div>
+
+<div class="sticky bottom-0 left-0 bg-white py-3 shadow-md flex justify-center z-40 border-t border-gray-300">
+    <div class="flex justify-center space-x-2">
         <ul class="flex list-none">
             {% if page > 1 %}
             <li>
@@ -236,7 +228,7 @@
                 </a>
             </li>
             {% endif %}
-    
+
             {% for i in range(1, total_pages + 1) %}
             <li>
                 <a href="?page={{ i }}{% if estado_buscar %}&estado={{ estado_buscar }}{% endif %}" 
@@ -245,7 +237,7 @@
                 </a>
             </li>
             {% endfor %}
-    
+
             {% if page < total_pages %}
             <li>
                 <a href="?page={{ page + 1 }}{% if tipo_buscar %}&tipo={{ tipo_buscar }}{% endif %}" 
@@ -256,7 +248,9 @@
             {% endif %}
         </ul>
     </div>
-    
+</div>
+
+
 </div>
 
 {% endblock %}
