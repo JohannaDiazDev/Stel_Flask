@@ -54,10 +54,6 @@ def datetimeformat(value, format='%A, %d de %B'):
     if isinstance(value, str):
         value = datetime.strptime(value, '%Y-%m-%d')
     return value.strftime(format)
-#@app.route('/usuarios')
-#def mostrar_usuarios():
-#    usuarios = Usuarios.query.all()  # Obtiene todos los usuarios
-#    return {'usuarios': [usuarios.nombre for usuarios in usuarios]}
 
 @app.route('/servicios')
 def servicios():
@@ -98,7 +94,6 @@ def enviar_mensaje():
 
     return jsonify({'success' : True, 'message': 'Correo enviado exitosamente'})    
         
-
 @app.route('/ingresar', methods=['GET', 'POST'])
 def ingresar():
     if request.method == 'POST':
@@ -169,7 +164,6 @@ def ingresar():
     
     return response
 
-
 @app.route('/admin/dashboard_admin')
 @login_required
 def dashboard_admin():   
@@ -195,11 +189,11 @@ def dashboard_admin():
     db.close()
 
     response = make_response(render_template('admin/dashboard_admin.html',
-                                             correspondencia_count=correspondencia_count,
-                                             parqueadero_count=parqueadero_count,
-                                             multas_count=multas_count,
-                                             paz_y_salvo=paz_y_salvo,
-                                             moroso=moroso))
+            correspondencia_count=correspondencia_count,
+            parqueadero_count=parqueadero_count,
+            multas_count=multas_count,
+            paz_y_salvo=paz_y_salvo,
+            moroso=moroso))
     
     # Agregar cabeceras para evitar caché
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
@@ -267,8 +261,9 @@ def usuarios():
     ))
     response.headers['Cache-Control'] = 'no-store'
     return response
-# Crear un usuario
+
 @app.route('/admin/usuarios', methods=['POST'])
+@login_required
 def crear_usuario():
     db = get_db_connection()
     cursor = db.cursor()
@@ -291,6 +286,7 @@ def crear_usuario():
     return redirect(url_for('usuarios'))
 
 @app.route('/delete/<int:pkiduser>')
+@login_required
 def delete(pkiduser):
     db = get_db_connection()
     cursor = db.cursor()
@@ -300,6 +296,7 @@ def delete(pkiduser):
     return redirect(url_for('usuarios'))    
 
 @app.route('/admin/usuarios/<int:pkiduser>/editar_usuario', methods=['GET', 'POST'])
+@login_required
 def editar_usuario(pkiduser):
     db = get_db_connection()
     cursor = db.cursor()
@@ -366,7 +363,9 @@ def inmueble():
         9: {'min': 188, 'max': 213},
         10: {'min': 214, 'max': 240}
     }
-    return render_template('admin/inmueble.html', andenes=andenes, base_template=base_template)
+    response = make_response(render_template('admin/inmueble.html', andenes=andenes, base_template=base_template))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 @app.route('/residentes')#----------------------------------------revisar#
 def Residentes():
@@ -398,10 +397,8 @@ def turnos():
         cursor.close()
         db.close()
 
-        # Redirigir para evitar reenviar formulario al recargar
         return redirect(url_for('turnos'))
 
-    # Consulta turnos solo si es GET
     cursor.execute("""
         SELECT t.*, u.nombre 
         FROM turnos t
@@ -414,7 +411,8 @@ def turnos():
     cursor.close()
     db.close()
 
-    return render_template('/admin/turnos.html', guardas=guardas, turnos=turnos)
+    response = make_response(render_template('/admin/turnos.html', guardas=guardas, turnos=turnos))
+    return response
 
 @app.route('/admin/multa', methods=['GET'])
 @login_required
@@ -494,6 +492,7 @@ def multa():
     return response
 
 @app.route('/admin/multa', methods=['POST'])
+@login_required
 def crear_multa():
     db = get_db_connection()
     cursor = db.cursor()
@@ -519,6 +518,7 @@ def crear_multa():
     return redirect(url_for('multa', trabajadores,trabajadores))
 
 @app.route('/delete_multa/<int:pkidmulta>')
+@login_required
 def delete_multa(pkidmulta):
     db = get_db_connection()
     cursor = db.cursor()
@@ -528,6 +528,7 @@ def delete_multa(pkidmulta):
     return redirect(url_for('multa'))
 
 @app.route('/admin/multa/<int:pkidmulta>/editar_multa', methods=['GET','POST'])
+@login_required
 def editar_multa(pkidmulta):
     db = get_db_connection()
     cursor = db.cursor()
@@ -633,6 +634,7 @@ def cartera():
     return response
 
 @app.route('/admin/cartera', methods=['POST'])
+@login_required
 def crear_cartera():
     db = get_db_connection()
     cursor = db.cursor()
@@ -657,6 +659,7 @@ def crear_cartera():
     return redirect(url_for('cartera', trabajadores=trabajadores))
 
 @app.route('/delete_cartera/<int:pkidestado>')
+@login_required
 def delete_cartera(pkidestado):
     db = get_db_connection()
     cursor = db.cursor()
@@ -666,6 +669,7 @@ def delete_cartera(pkidestado):
     return redirect(url_for('cartera'))
 
 @app.route('/admin/cartera/<int:pkidestado>/editar_cartera', methods=['GET','POST'])
+@login_required
 def editar_cartera(pkidestado):
     db = get_db_connection()
     cursor = db.cursor()
@@ -762,6 +766,7 @@ def visitante():
     return response
 
 @app.route('/admin/visitante', methods=['POST'])
+@login_required
 def crear_visitante():
     db = get_db_connection()
     cursor = db.cursor()
@@ -785,6 +790,7 @@ def crear_visitante():
     return redirect(url_for('visitante', inmuebles=inmuebles))
 
 @app.route('/delete_visitante/<int:pkidvisitante>')
+@login_required
 def delete_visitante(pkidvisitante):
     db = get_db_connection()
     cursor = db.cursor()
@@ -794,6 +800,7 @@ def delete_visitante(pkidvisitante):
     return redirect(url_for('visitante'))
 
 @app.route('/admin/visitante/<int:pkidvisitante>/editar_visitante', methods=['POST'])
+@login_required
 def editar_visitante(pkidvisitante):
     db = get_db_connection()
     cursor = db.cursor()
@@ -868,7 +875,6 @@ def parqueadero():
     fila = cursor.fetchone()
     total_ingresos = fila[0] if fila and fila[0] is not None else 0
 
-
     cursor.execute("""
         SELECT MONTH(fecha), SUM(tarifa) FROM parqueadero
         WHERE tarifa IS NOT NULL AND YEAR(fecha) = %s
@@ -903,12 +909,12 @@ def parqueadero():
     db.close()
 
     response = make_response(render_template('admin/parqueadero.html',
-                total_cupos=total_cupos, ocupado=ocupado, hoy=hoy,
-                disponible=disponible, total_ingresos=total_ingresos, 
-                cupos_carros=cupos_carros, cupos_motos=cupos_motos, carros_ocupados=carros_ocupados,
-                mes_actual=mes_nombre, mes_actual_num=mes, meses=meses, motos_ocupadas=motos_ocupadas,
-                meses_graf=meses_graf, ingresos_graf=ingresos_graf, registros=registros,pagina=pagina,
-                total_paginas=total_paginas))
+        total_cupos=total_cupos, ocupado=ocupado, hoy=hoy,
+        disponible=disponible, total_ingresos=total_ingresos, 
+        cupos_carros=cupos_carros, cupos_motos=cupos_motos, carros_ocupados=carros_ocupados,
+        mes_actual=mes_nombre, mes_actual_num=mes, meses=meses, motos_ocupadas=motos_ocupadas,
+        meses_graf=meses_graf, ingresos_graf=ingresos_graf, registros=registros,pagina=pagina,
+        total_paginas=total_paginas))
     response.headers['Cache-Control'] = 'no-store'
     return response
 
@@ -1016,7 +1022,6 @@ def novedades():
     response.headers['Cache-Control'] = 'no-store'
     return response
 
-
 @app.route('/admin/novedades', methods=['POST'])
 @login_required
 def crear_novedad():
@@ -1055,7 +1060,6 @@ def editar_novedad(pkidnovedad):
     rol_id = session.get('rol_id')
     trabajador_id_session = session.get('trabajador_id')
 
-    # Validar si es dueño del registro si es GUARDIA
     if rol_id == 3:
         cursor.execute("SELECT trabajador_id FROM novedades WHERE pkidnovedad = %s", (pkidnovedad,))
         creador = cursor.fetchone()
@@ -1096,7 +1100,6 @@ def editar_novedad(pkidnovedad):
         flash("Novedad no encontrada.", "warning")
         return redirect(url_for('novedades'))
 
-    # No necesitas redireccionar a una nueva vista; la edición se hace desde el modal de la lista.
     return redirect(url_for('novedades'))
 
 @app.route('/dashboard_guarda')
@@ -1118,28 +1121,10 @@ def dashboard_guarda():
     db.close()
 
     response = make_response(render_template('guarda/dashboard_guarda.html',
-                parqueadero_contar=parqueadero_contar, correspondencia_contar=correspondencia_contar,
-                novedades_contar=novedades_contar))
+        parqueadero_contar=parqueadero_contar, correspondencia_contar=correspondencia_contar,
+        novedades_contar=novedades_contar))
     response.headers['Cache-Control'] = 'no-store'
     return response
-
-@app.route('/inmueble_guarda')
-@login_required
-def inmueble_guarda():
-    # Distribución de los andenes
-    andenes = {
-        1: {'min': 1, 'max': 31},
-        2: {'min': 32, 'max': 56},
-        3: {'min': 64, 'max': 87},
-        4: {'min': 88, 'max': 101},
-        5: {'min': 102, 'max': 115},
-        6: {'min': 116, 'max': 139},
-        7: {'min': 140, 'max': 163},
-        8: {'min': 164, 'max': 187},
-        9: {'min': 188, 'max': 213},
-        10: {'min': 214, 'max': 240}
-    }
-    return render_template('guarda/inmueble_guarda.html', andenes=andenes)
 
 @app.route('/guarda/parqueadero_guarda')
 @login_required
@@ -1155,11 +1140,12 @@ def parqueadero_guarda():
     estado = request.args.get('estado', '') 
 
     sql = """
-        SELECT p.*, u.nombre AS nombre_residente, v.nombre
+        SELECT p.*, u.nombre AS nombre_residente, v.nombre, i.numeroinmueble
         FROM parqueadero p
         LEFT JOIN residente r ON p.residente_id = r.pkidresidente
         LEFT JOIN usuarios u ON r.usuario_id = u.pkiduser
         LEFT JOIN visitante v ON p.visitante_id = v.pkidvisitante       
+        LEFT JOIN inmueble i ON v.inmueble_id = i.pkidinmueble
     """
     params = []
     if estado:
@@ -1184,6 +1170,7 @@ def parqueadero_guarda():
     columnas_visitante = [col[0] for col in cursor.description]
     visitantes = [dict(zip(columnas_visitante, fila)) for fila in cursor.fetchall()]
 
+    
     if estado:
         cursor.execute("SELECT COUNT(*) FROM parqueadero WHERE estado LIKE %s", (f"%{estado}%",))
     else:
@@ -1201,6 +1188,7 @@ def parqueadero_guarda():
     return response
 
 @app.route('/guarda/parqueadero_guarda', methods=['POST'])
+@login_required
 def registrar_parqueo():
     if session.get('rol_id') != 3:
         flash('No tienes permisos para registrar parqueaderos', 'danger')
@@ -1229,6 +1217,7 @@ def registrar_parqueo():
     return redirect(url_for('parqueadero_guarda'))
 
 @app.route('/guarda/parqueadero_guarda/<int:pkidparqueadero>/editar_parqueo', methods=['GET', 'POST'])
+@login_required
 def editar_parqueo(pkidparqueadero):
     db = get_db_connection()
     cursor = db.cursor()
@@ -1402,6 +1391,7 @@ def registrar_correspondencia():
     return redirect(url_for('correspondencia_guarda', trabajadores=trabajadores))
 
 @app.route('/guarda/correspondencia_guarda/editar_correspondencia', methods=['GET','POST'])
+@login_required
 def editar_correspondencia():
     db = get_db_connection()
     cursor = db.cursor()
@@ -1424,11 +1414,6 @@ def editar_correspondencia():
     db.close()
     flash("Correspondencia actualizada correctamente", "success")
     return redirect(url_for('correspondencia_guarda'))
-
-
-@app.route('/novedades_guarda')
-def novedades_guarda():
-    return 'novedades guarda'
 
 @app.route('/dashboard_residente')
 def dashboard_residente():
