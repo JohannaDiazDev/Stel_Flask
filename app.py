@@ -76,7 +76,6 @@ def enviar_mensaje():
     mensaje = data.get('mensaje','')
 
     errores = {}
-
     if not re.match(r'^[a-zA- Záéíóú\s]{3,60}$', nombre):
         errores['nombre'] = 'Nombre inválido'
 
@@ -102,11 +101,9 @@ def ingresar():
         
         db = get_db_connection()
         cursor = db.cursor()
-        cursor.execute("SELECT pkiduser, contraseña, rol_id FROM usuarios WHERE correo = %s", (correo,))
+        cursor.execute("SELECT pkiduser, contraseña, rol_id, nombre FROM usuarios WHERE correo = %s", (correo,))
         user = cursor.fetchone()
-        #cursor.close()
-        #db.close()
-
+        
         if user is None:
             flash('❌ Usuario no encontrado', 'danger')
             return redirect(url_for('ingresar'))
@@ -121,6 +118,7 @@ def ingresar():
             session['loggedin'] = True
             session['pkiduser'] = user[0]
             session['rol_id'] = user[2]
+            session['nombre'] = user[3]
 
             flash('Inicio de sesión exitoso', 'success')
             
@@ -166,7 +164,11 @@ def ingresar():
 
 @app.route('/admin/dashboard_admin')
 @login_required
-def dashboard_admin():   
+def dashboard_admin(): 
+    if session.get('rol_id') != 1:
+        flash('No tienes permisos para acceder!', 'danger')
+        return redirect(url_for('ingresar'))
+    nombre = session.get('nombre', 'Administrador')  
     db = get_db_connection()
     cursor = db.cursor()
 
@@ -192,7 +194,7 @@ def dashboard_admin():
             correspondencia_count=correspondencia_count,
             parqueadero_count=parqueadero_count,
             multas_count=multas_count,
-            paz_y_salvo=paz_y_salvo,
+            paz_y_salvo=paz_y_salvo,nombre=nombre,
             moroso=moroso))
     
     # Agregar cabeceras para evitar caché
@@ -366,10 +368,6 @@ def inmueble():
     response = make_response(render_template('admin/inmueble.html', andenes=andenes, base_template=base_template))
     response.headers['Cache-Control'] = 'no-store'
     return response
-
-@app.route('/residentes')#----------------------------------------revisar#
-def Residentes():
-    return "Página de Residentes"
 
 @app.route('/turnos', methods=['GET', 'POST'])
 @login_required
@@ -1105,6 +1103,10 @@ def editar_novedad(pkidnovedad):
 @app.route('/dashboard_guarda')
 @login_required
 def dashboard_guarda():
+    if session.get('rol_id') != 3:
+        flash('No tienes permisos para acceder!', 'danger')
+        return redirect(url_for('ingresar'))
+    nombre = session.get('nombre', 'Guarda')
     db = get_db_connection()
     cursor = db.cursor()
 
@@ -1122,7 +1124,7 @@ def dashboard_guarda():
 
     response = make_response(render_template('guarda/dashboard_guarda.html',
         parqueadero_contar=parqueadero_contar, correspondencia_contar=correspondencia_contar,
-        novedades_contar=novedades_contar))
+        novedades_contar=novedades_contar, nombre=nombre))
     response.headers['Cache-Control'] = 'no-store'
     return response
 
@@ -1158,6 +1160,7 @@ def parqueadero_guarda():
     cursor.execute(sql,params)
     columnas = [col[0] for col in cursor.description]
     parqueos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+                
     cursor.execute("""
         SELECT r.pkidresidente, u.nombre AS nombre_residente
         FROM residente r
@@ -1170,7 +1173,6 @@ def parqueadero_guarda():
     columnas_visitante = [col[0] for col in cursor.description]
     visitantes = [dict(zip(columnas_visitante, fila)) for fila in cursor.fetchall()]
 
-    
     if estado:
         cursor.execute("SELECT COUNT(*) FROM parqueadero WHERE estado LIKE %s", (f"%{estado}%",))
     else:
@@ -1416,10 +1418,165 @@ def editar_correspondencia():
     return redirect(url_for('correspondencia_guarda'))
 
 @app.route('/dashboard_residente')
+@login_required
 def dashboard_residente():
-    return 'pagina residente'
+    if session.get('rol_id') != 2:
+        flash('No tienes permisos para acceder!', 'danger')
+        return redirect(url_for('ingresar'))
+    nombre = session.get('nombre', 'Residente')
+    pkiduser = session.get('pkiduser')
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    cursor.execute("""
+        SELECT r.pkidresidente, i.pkidinmueble, u.nombre
+        FROM residente r
+        JOIN inmueble i ON r.inmueble_id = i.pkidinmueble
+        JOIN usuarios u ON r.usuario_id = u.pkiduser
+        WHERE u.pkiduser = %s
+    """, (pkiduser,))
+    data = cursor.fetchone()
+
+    if not data:
+        flash('No se encontró información.', 'danger')
+    residente_id, inmueble_id, nombre = data
+
+    cursor.execute("SELECT saldo FROM cartera WHERE inmueble_id = %s", (inmueble_id,))
+    saldo = cursor.fetchone()
+    cartera_pendiente = saldo and saldo[0] > 0
+
+    cursor.execute("SELECT COUNT(*) FROM multa WHERE inmueble_id = %s AND fecha_pago = ''", (inmueble_id,))
+    multas_pendientes = cursor.fetchone()[0] > 0
+
+    cursor.execute("SELECT COUNT(*) FROM correspondencia WHERE inmueble_id = %s", (inmueble_id,))
+    tiene_correspondencia = cursor.fetchone()[0] > 0
+
+    cursor.execute("SELECT COUNT(*) FROM novedades WHERE inmueble_id = %s", (inmueble_id,))
+    tiene_novedades = cursor.fetchone()[0] > 0
+    
+    cursor.execute("SELECT COUNT(*) FROM novedades WHERE inmueble_id = %s", (inmueble_id,))
+    cursor.close()
+    db.close()
+    response = make_response(render_template('residente/dashboard_residente.html', nombre=nombre, pkiduser=pkiduser,
+                cartera_pendiente=cartera_pendiente, multas_pendientes=multas_pendientes, tiene_correspondencia=tiene_correspondencia,
+                tiene_novedades=tiene_novedades))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+@app.route('/residente/cartera_residente')
+@login_required
+def cartera_residente():
+    if session.get('rol_id') != 2:
+        flash('Acceso Denegado.', 'danger')
+        return redirect(url_for('ingresar'))
+    
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    pkiduser = session.get('pkiduser')
+
+    cursor.execute("""
+        SELECT r.pkidresidente, i.pkidinmueble, i.numeroinmueble, u.nombre
+        FROM residente r
+        JOIN inmueble i ON r.inmueble_id = i.pkidinmueble
+        JOIN usuarios u ON r.usuario_id = u.pkiduser
+        WHERE u.pkiduser = %s 
+    """, (pkiduser,))
+    resultado = cursor.fetchone()
+
+    if not resultado:
+        flash('No se encontró información asociada a este inmueble.', 'danger')
+        cursor.close()
+        db.close()
+        return redirect(url_for('dashboard_residente'))
+
+    residente_id, inmueble_id, numeroinmueble, nombre = resultado
+
+    cursor.execute("""
+    SELECT COALESCE(SUM(saldo), 0), MAX(estado), MAX(fecha_actual)
+    FROM cartera
+    WHERE inmueble_id = %s
+    """, (inmueble_id,))
+    cartera = cursor.fetchone()
+
+    saldo = cartera[0]
+    estado = cartera[1] or 'Sin Estado'
+    fecha_actual = cartera[2] or datetime.now().strftime('%Y-%m-%d')
 
 
+    cursor.execute("""
+        SELECT COALESCE(SUM(valor), 0)
+        FROM multa
+        WHERE inmueble_id = %s
+    """, (inmueble_id,))
+    valor_multas = cursor.fetchone()[0]
+
+    descuento = 0
+
+    valor_total = max(saldo - descuento + valor_multas, 0)
+    
+    cursor.close()
+    db.close()
+    return render_template('residente/cartera_residente.html', nombre=nombre,
+        numeroinmueble=numeroinmueble, saldo=saldo, descuento=descuento, valor=valor_multas, valor_total=valor_total,
+        estado=estado, fecha_actual=fecha_actual)
+    
+@app.route('/residente/multas_residente')
+@login_required
+def multas_residente():
+    if session.get('rol_id') != 2:
+        flash('Acceso Denegado.', 'danger')
+        return redirect(url_for('ingresar'))
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    pkiduser = session.get('pkiduser')
+
+    cursor.execute("""
+        SELECT r.pkidresidente, i.pkidinmueble, i.numeroinmueble, u.nombre
+        FROM residente r
+        JOIN inmueble i ON r.inmueble_id = i.pkidinmueble
+        JOIN usuarios u ON r.usuario_id = u.pkiduser
+        WHERE u.pkiduser = %s
+    """, (pkiduser,))
+    resultado = cursor.fetchone()
+
+    if not resultado:
+        flash('No se encontró información asociada a este inmueble.', 'danger')
+        cursor.close()
+        db.close()
+        return redirect(url_for('dashboard_residente'))
+
+    residente_id, inmueble_id, numeroinmueble, nombre = resultado
+
+    cursor.execute("""
+        SELECT fecha, tipo, valor, fecha_pago
+        FROM multa
+        WHERE inmueble_id = %s
+        ORDER BY fecha DESC
+    """, (inmueble_id,))
+
+    columnas = [col[0] for col in cursor.description]
+    multas = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    cursor.close()
+    db.close()
+
+    return render_template('residente/multas_residente.html',
+        nombre=nombre,
+        numeroinmueble=numeroinmueble,
+        multas=multas)
+
+
+@app.route('/residente/correspondencia_residente')
+def correspondencia_residente():
+    return 'pagina de correspondencia'
+
+@app.route('/residente/novedades_residente')
+def novedades_residente():
+    return 'pagina de novedades'
 
 @app.route('/logout')
 def logout():

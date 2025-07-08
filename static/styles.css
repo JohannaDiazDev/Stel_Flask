@@ -169,33 +169,3 @@ body {
     color: rgb(240, 255, 235) !important;
     border: 2px solid #fff !important;
 }
-
-/*Imprimir carta
-
-@media print {
-  body * {
-    display: none !important;
-  }
-
-  #area-carta, #area-carta * {
-    display: block !important;
-    visibility: visible !important;
-    color: black !important;
-    background: white !important;
-  }
-
-  #area-carta {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 2rem;
-  }
-
-  @page {
-    margin: 1in;
-  }
-}*/
-
-
-

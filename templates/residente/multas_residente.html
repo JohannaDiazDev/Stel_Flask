@@ -1,0 +1,42 @@
+{% extends 'residente/dash_residente.html' %}
+
+{% block content %}
+
+<div class="max-w-5xl mx-auto mt-8">
+    <h2 class="text-2xl font-bold text-[#1E4C40] mb-6 text-center items-center">Multas <i class="bi bi-cash-stack"></i></h2>
+    <p class="text-center text-[#1E4C40] font-semibold text-lg mb-6">
+        {{ nombre }} - Inmueble: <span class="font-bold">{{ numeroinmueble }}</span>
+    </p>
+
+    {% if multas %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {% for multa in multas %}
+                <div class="bg-white shadow-2xl rounded-2xl p-4 flex flex-col items-center text-[#1E4C40] hover:shadow-xl transition">
+                    {% if multa.tipo == 'Ruido excesivo' %}
+                        <img src="{{ url_for('static', filename='vecinoruidoso.jpg') }}" alt="ruido" class="w-40 h-40 mb-6">
+                    {% elif multa.tipo == 'Mascota sin correa' %}
+                        <img src="{{ url_for('static', filename='perrosincorrea.jpg') }}" alt="mascota" class="w-40 h-40 mb-6">
+                    {% elif multa.tipo == 'Carro rayado' %}   
+                        <img src="{{ url_for('static', filename='carrorayon.jpg') }}" alt="carro" class="w-40 h-40 mb-6">
+                    {% else %}
+                        <i class="bi bi-exclamation-circle text-4xl mb-4"></i>    
+                    {% endif %}    
+                    
+                    <h3 class="font-bold text-lg mb-1 text-[#1E4C40]">Tipo: {{ multa.tipo }}</h3>
+                    <p class="text-lg mb-1"><i class="bi bi-calendar font-bold"></i> {{ multa.fecha }}</p>
+                    <p class="text-lg mb-1"><i class="bi bi-cash font-bold"></i> Valor: ${{ multa.valor }}</p>
+                    <p class="text-lg">
+                        {% if multa.fecha_pago %}
+                            <span class="text-green-600 font-semibold">Estado: <i class="bi bi-check-circle"></i>  Pagada</span>
+                        {% else %}
+                            <span class="text-red-600 font-semibold"> Estado: <i class="bi bi-x-circle"></i> Pendiente</span>    
+                        {% endif %}
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-[#1E4C40] font-semibold mt-8">No tienes multas registradas.</p>    
+    {% endif %}
+</div>
+{% endblock %}

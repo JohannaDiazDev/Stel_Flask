@@ -26,8 +26,9 @@ conexion.close()"""
 from flask_bcrypt import Bcrypt
 
 bcrypt = Bcrypt()
-
-password = "ju4pd*" 
+#70r3n@ residente
+#ju4pd* guarda
+password = "70r3n@" 
 hashed = bcrypt.generate_password_hash(password).decode('utf-8')
 
 print("Hash generado:", hashed)

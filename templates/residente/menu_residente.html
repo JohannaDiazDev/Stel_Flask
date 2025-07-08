@@ -1,4 +1,4 @@
-#cartera, multa novedades, correspondencia
+
 {% block content %}
 
 <nav class="bg-[#1E4C40] text-white p-4 w-full navbar flex justify-between items-center">
@@ -7,20 +7,21 @@
 </a>
 <div class="flex justify-center items-center flex-grow space-x-10 text-white font-bold text-xl">
     <div class="relative group">
-        <a href="{{ url_for('cartera')}}" class="bloc px-0 py-2">Cartera <i class="bi bi-wallet-fill"></i></a>
+        <a href="{{ url_for('cartera_residente')}}" class="bloc px-0 py-2">Cartera <i class="bi bi-wallet-fill"></i></a>
     </div>
     <div class="relative group">
-        <a href="{{ url_for('multa')}}" class="block px-0 py-2">Multa <i class="bi bi-cash-coin"></i></a>
-    </div>
-    <div class="relative group">
-        <a href="{{ url_for('novedades')}}" class="block px-0 py-2">Novedades <i class="bi bi-bell-fill"></i></a>
+        <a href="{{ url_for('multas_residente')}}" class="block px-0 py-2">Multa <i class="bi bi-cash-coin"></i></a>
     </div>
     <div class="relative group">
         <a href="{{ url_for('correspondencia_guarda')}}" class="block px-0 py-2">Correspondencia <i class="bi bi-box-seam-fill"></i></a>
     </div>
     <div class="relative group">
-        <a href="{{ url_for('logout') }}" class="text-white font-bold mr-10 text-lg items-end">
-            Salir <i class="bi bi-door-closed-fill text-2xl ml-2"></i>
+        <a href="{{ url_for('novedades')}}" class="block px-0 py-2">Novedades <i class="bi bi-bell-fill"></i></a>
+    </div>
+    
+    <div class="relative group">
+        <a href="{{ url_for('logout') }}" class="text-white font-bold mr-10 text-lg">
+            Salir <i class="bi bi-house-lock-fill text-2xl ml-2"></i>
         </a>
     </div>
 </div>
