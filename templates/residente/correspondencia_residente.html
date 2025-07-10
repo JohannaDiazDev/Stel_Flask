@@ -1,0 +1,75 @@
+{% extends 'residente/dash_residente.html' %}
+
+{% block content %}
+    <div class="max-w-5xl mx-auto mt-8">
+        <h2 class="text-2xl font-bold text-[#1E4C40] mb-6 text-center items-center">
+            Correspondencia <i class="bi bi-envelope-open-fill"></i>
+        </h2>
+        <p class="text-center text-[#1E4C40] font-semibold text-lg mb-6">
+            <i class="bi bi-person-standing"></i> {{ nombre }} - Inmueble <i class="bi bi-house-door-fill"></i>: <span class="font-bold">{{ numeroinmueble }}</span>
+        </p>
+
+        {% if correspondencias %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {% for c in correspondencias %}
+                    <div class="bg-white shadow-2xl rounded-2xl p-4 flex flex-col items-center text-[#1E4C40] hover:shadow-xl transition">
+
+                        {# Iconos según tipo de correspondencia #}
+                        {% set tipo = c.tipo|lower|trim %}
+                        {% if tipo == 'luz' %}
+                            <i class="bi bi-lightbulb-fill text-yellow-500 text-5xl mb-4"></i>
+                        {% elif tipo == 'agua' %}
+                            <i class="bi bi-droplet-fill text-blue-500 text-5xl mb-4"></i>
+                        {% elif tipo == 'gas' %}
+                            <i class="bi bi-fire text-red-500 text-5xl mb-4"></i>
+                        {% elif tipo == 'paquete' %}
+                            <i class="bi bi-box-seam text-indigo-500 text-5xl mb-4"></i>
+                        {% else %}
+                            <i class="bi bi-envelope-paper-fill text-5xl mb-4"></i>
+                        {% endif %}
+
+                        <h3 class="font-bold text-lg mb-1">{{ c.tipo|capitalize }}</h3>
+                        <p class="text-sm mb-1">
+                            <i class="bi bi-calendar-event"></i> Generado: {{ c.fecha_recibido }}
+                        </p>
+
+                        {% if c.fecha_entregado %}
+                            <p class="text-sm mb-1 text-green-600">
+                                <i class="bi bi-calendar-check-fill"></i> Entregado: {{ c.fecha_entrega }}
+                            </p>
+                            <span class="text-green-600 font-semibold"><i class="bi bi-check-circle"></i> Entregado</span>
+                        {% else %}
+                            <p class="text-sm mb-1 text-red-600">
+                                <i class="bi bi-clock"></i> No entregado
+                            </p>
+                            <span class="text-red-600 font-semibold"><i class="bi bi-x-circle"></i> Pendiente</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-[#1E4C40] font-semibold mt-8">No tienes correspondencia registrada.</p>
+        {% endif %}
+    </div>
+
+    {% if total_pages > 1 %}
+        <div class="flex justify-center mt-8 space-x-2 text-[#1E4C40]">
+            {% if page > 1 %}
+                <a href="{{ url_for('correspondencia_residente', page=page-1) }}" class="px-3 py-1 bg-[#1E4C40] rounded hover:bg-green-100">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            {% endif %}
+            {% for p in range(1, total_pages + 1) %}
+                <a href="{{ url_for('correspondencia_residente', page=p) }}" class="px-3 py-1 rounded {% if p == page %}bg-[#1E4C40] text-white{% else %}bg-green-100 hover:bg-green-200{% endif %}">
+                    {{ p }}
+                </a>
+            {% endfor %}
+
+            {% if page < total_pages %}
+                <a href="{{ url_for('correspondencia_residente', page=page+1) }}" class="px-3 py-1 bg-[#1E4C40] rounded hover:bg-green-100">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}    
+{% endblock %}

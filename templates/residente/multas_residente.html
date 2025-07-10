@@ -18,6 +18,17 @@
                         <img src="{{ url_for('static', filename='perrosincorrea.jpg') }}" alt="mascota" class="w-40 h-40 mb-6">
                     {% elif multa.tipo == 'Carro rayado' %}   
                         <img src="{{ url_for('static', filename='carrorayon.jpg') }}" alt="carro" class="w-40 h-40 mb-6">
+                    {% elif multa.tipo == 'Estacionamiento indebido' %}
+                        <img src="{{ url_for('static', filename='Estacionamientoindebido.jpg')}}" alt="estacionamiento" class="w-40 h-40 mb-6">
+                    {% elif mumlta.tipo == 'Problemas con los vecinos' %}
+                        <img src="{{ url_for('static', filename='Problemasvecinos.jpg')}}" alt="vecinos" class="w-40 h-40 mb-6">
+                    {% elif multa.tipo == 'Daños a zonas comunes' %}
+                        <img src="{{ url_for('static', filename='Dañoszonascomunes.jpg')}}" alt="daños zonas" class="w-40 h-40 mb-6">
+                    {% elif multa.tipo == 'Problemas con mascotas' %}
+                        <img src="{{ url_for('static', filename='Problemasmascotas.PNG')}}" alt="problemas mascotas" class="w-40 h-40 mb-6">
+                    {% elif multa.tipo == 'Inasistencia asamblea' %}
+                        <img src="{{ url_for('static', filename='Inasistenciaasamblea.png')}}" alt="asamblea" class="w-40 h-40 mb-6">            
+
                     {% else %}
                         <i class="bi bi-exclamation-circle text-4xl mb-4"></i>    
                     {% endif %}    

@@ -1518,9 +1518,11 @@ def cartera_residente():
     
     cursor.close()
     db.close()
-    return render_template('residente/cartera_residente.html', nombre=nombre,
+    response = make_response(render_template('residente/cartera_residente.html', nombre=nombre,
         numeroinmueble=numeroinmueble, saldo=saldo, descuento=descuento, valor=valor_multas, valor_total=valor_total,
-        estado=estado, fecha_actual=fecha_actual)
+        estado=estado, fecha_actual=fecha_actual))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
     
 @app.route('/residente/multas_residente')
 @login_required
@@ -1564,19 +1566,214 @@ def multas_residente():
     cursor.close()
     db.close()
 
-    return render_template('residente/multas_residente.html',
+    response = make_response(render_template('residente/multas_residente.html',
         nombre=nombre,
         numeroinmueble=numeroinmueble,
-        multas=multas)
-
+        multas=multas))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 @app.route('/residente/correspondencia_residente')
+@login_required
 def correspondencia_residente():
-    return 'pagina de correspondencia'
+    if session.get('rol_id') != 2:
+        flash('Acceso Denegado.', 'danger')
+        return redirect(url_for('ingresar'))
+    
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    pkiduser = session.get('pkiduser')
+
+    cursor.execute("""
+        SELECT r.pkidresidente, i.pkidinmueble, i.numeroinmueble, u.nombre
+        FROM residente r
+                   JOIN inmueble i ON r.inmueble_id = i.pkidinmueble
+                   JOIN usuarios u ON r.usuario_id = u.pkiduser
+                   WHERE u.pkiduser = %s
+    """, (pkiduser,))
+    resultado = cursor.fetchone()
+    if not resultado:
+        flash('No se encontró información asociada a este inmueble', 'danger')
+        cursor.close()
+        db.close()
+    residente_id, inmueble_id, numeroinmueble, nombre = resultado
+
+    page = int(request.args.get('page', 1))
+    per_page = 6
+    offset = (page - 1) * per_page
+
+    cursor.execute("""
+        SELECT COUNT(*) FROM correspondencia
+        WHERE inmueble_id = %s OR inmueble_id IS NULL OR inmueble_id = 0
+    """, (inmueble_id,))
+    total_registros = cursor.fetchone()[0]
+    total_pages = (total_registros + per_page - 1) // per_page
+    cursor.execute("""
+        SELECT fecha_recibido, tipo, estado, fecha_entrega
+        FROM correspondencia
+        WHERE inmueble_id = %s OR inmueble_id IS NULL OR inmueble_id = 0
+        ORDER BY fecha_recibido DESC
+        LIMIT %s OFFSET %s
+    """, (inmueble_id, per_page, offset))    
+
+    columnas = [col[0] for col in cursor.description]
+    correspondencias = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+    cursor.close()
+    db.close()
+
+    response = make_response(render_template('residente/correspondencia_residente.html',
+        nombre=nombre,numeroinmueble=numeroinmueble,correspondencias=correspondencias,
+        page=page,total_pages=total_pages))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 @app.route('/residente/novedades_residente')
+@login_required
 def novedades_residente():
-    return 'pagina de novedades'
+    if session.get('rol_id') != 2:
+        flash('Acceso Denegado.', 'danger')
+        return redirect(url_for('ingresar'))
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    pkiduser = session.get('pkiduser')
+
+    # Obtener inmueble asociado al residente
+    cursor.execute("""
+        SELECT i.pkidinmueble
+        FROM residente r
+        JOIN inmueble i ON r.inmueble_id = i.pkidinmueble
+        WHERE r.usuario_id = %s
+    """, (pkiduser,))
+    inmueble = cursor.fetchone()
+    inmueble_id = inmueble[0] if inmueble else None
+
+    # Obtener filtro de estado desde GET
+    estado_buscar = request.args.get('estado', '').capitalize()  # Pendiente, Proceso, Resuelto o vacío
+
+    # Paginación
+    pagina = int(request.args.get('pagina', 1))
+    por_pagina = 3
+    offset = (pagina - 1) * por_pagina
+
+    # Construir consulta con o sin filtro
+    sql = """
+        SELECT pkidnovedad, trabajador_id, tipo, asunto, descripcion, fecha, estado
+        FROM novedades
+        WHERE inmueble_id = %s
+    """
+    params = [inmueble_id]
+
+    if estado_buscar:
+        sql += " AND estado = %s"
+        params.append(estado_buscar)
+
+    sql += " ORDER BY fecha DESC LIMIT %s OFFSET %s"
+    params.extend([por_pagina, offset])
+
+    cursor.execute(sql, tuple(params))
+    columnas = [col[0] for col in cursor.description]
+    novedades = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    # Total de registros para paginación
+    count_sql = """
+        SELECT COUNT(*)
+        FROM novedades
+        WHERE inmueble_id = %s
+    """
+    count_params = [inmueble_id]
+    if estado_buscar:
+        count_sql += " AND estado = %s"
+        count_params.append(estado_buscar)
+
+    cursor.execute(count_sql, tuple(count_params))
+    total_registros = cursor.fetchone()[0]
+    total_paginas = (total_registros + por_pagina - 1) // por_pagina
+
+    cursor.close()
+    db.close()
+
+    response = make_response(render_template('residente/novedades_residente.html',
+                novedades=novedades,
+                estado_buscar=estado_buscar,
+                pagina=pagina,
+                total_paginas=total_paginas))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+@app.route('/residente/novedades_residente', methods=['POST'])
+@login_required
+def registrar_novedad():
+    if session.get('rol_id') != 2:
+        flash('Acceso Denegado.', 'danger')
+        return redirect(url_for('ingresar'))
+
+    tipo = request.form.get('tipo')
+    asunto = request.form.get('asunto')
+    descripcion = request.form.get('descripcion')
+    fecha = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # Obtener inmueble_id desde el residente logueado
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    pkiduser = session.get('pkiduser')
+
+    cursor.execute("""
+        SELECT i.pkidinmueble
+        FROM residente r
+        JOIN inmueble i ON r.inmueble_id = i.pkidinmueble
+        WHERE r.usuario_id = %s
+    """, (pkiduser,))
+    resultado = cursor.fetchone()
+
+    if not resultado:
+        flash('No se encontró un inmueble asociado.', 'danger')
+        cursor.close()
+        db.close()
+        return redirect(url_for('dashboard_residente'))
+
+    inmueble_id = resultado[0]
+
+    cursor.execute("""
+        INSERT INTO novedades (trabajador_id, fecha, inmueble_id, tipo, asunto, descripcion, estado)
+        VALUES (NULL, %s, %s, %s, %s, %s, %s)
+    """, (fecha, inmueble_id, tipo, asunto, descripcion, 'Pendiente'))
+
+    db.commit()
+    cursor.close()
+    db.close()
+
+    flash('Novedad registrada correctamente.', 'success')
+    return redirect(url_for('novedades_residente'))
+
+@app.route('/residente/novedades_residente/editar_novedad_residente/<int:pkidnovedad>', methods=['POST'])
+@login_required
+def editar_novedad_residente(pkidnovedad):
+    if session.get('rol_id') != 2:
+        flash ('Acceso Denegado.', 'danger')
+        return redirect(url_for('ingresar'))
+
+    tipo = request.form.get('tipo') 
+    asunto = request.form.get('asunto')
+    descripcion = request.form.get('descripcion')    
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    cursor.execute("""
+        UPDATE novedades
+        SET tipo = %s, asunto = %s, descripcion = %s
+        WHERE pkidnovedad = %s
+    """, (tipo, asunto, descripcion, pkidnovedad))
+
+    db.commit()
+    cursor.close()
+    db.close()
+    flash('Novedad actualizada correctamente.', 'success')
+    return redirect(url_for('novedades_residente'))
 
 @app.route('/logout')
 def logout():

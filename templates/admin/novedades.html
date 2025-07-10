@@ -55,7 +55,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="inmueble_id" class="block text-sm font-medium text-[#1E4C40]">Inmueble (opcional)</label>
-                                <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"" name="inmueble_id">
+                                <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="inmueble_id">
                                     <option value="">Ninguno</option>
                                     {% for inmueble in inmuebles %}
                                         <option value="{{ inmueble.pkidinmueble }}">{{ inmueble.numeroinmueble }}</option>
@@ -65,9 +65,10 @@
                             <div class="col-md-6 mb-3">
                                 <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
                                 <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="tipo" required>
+                                    <option value="">Seleccione un tipo</option>
                                     <option value="Solicitud">Solicitud</option>
                                     <option value="Queja">Queja</option>
-                                    <option value="Recomendación">Recomendación</option>
+                                    <option value="Reporte">Reporte</option>
                                 </select>
                             </div>
                             <div class="col-md-12 mb-3">
@@ -182,7 +183,7 @@
                             <div class="mb-2">
                                 <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
                                 <select name="tipo" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
-                                    {% set tipos = ['Solicitud','Queja','Recomendación'] %}
+                                    {% set tipos = ['Solicitud','Queja','Reporte'] %}
                                     {% for tipo_opcion in tipos %}
                                         <option value="{{ tipo_opcion }}" {% if novedad.tipo == tipo_opcion %}selected{% endif %}>{{tipo_opcion}}</option>
                                     {% endfor %}

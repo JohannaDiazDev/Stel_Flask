@@ -7,17 +7,17 @@
         Dashboard Residente 
     </h1>
     <div class="flex gap-8 justify-center mb-8">
-        <a href="{{ url_for('cartera_residente') }}" class="{% if cartera_pendiente %} text-yellow-400 {% else %} text-[#1E4C40] {% endif %} text-4xl hover:scale-110 transition">
-            <i class="bi bi-wallet2"></i>
+        <a href="{{ url_for('cartera_residente') }}" class="{% if cartera_pendiente > 0 %} text-yellow-400 animate-pulse {% else %} text-[#1E4C40] {% endif %} text-4xl hover:scale-110 transition">
+            <i class="bi bi-wallet2 "></i>
         </a>
-        <a href="{{ url_for('multas_residente') }}" class="{% if multas_pendientes %} text-[#a11129] {% else %} text-[#1E4C40] {% endif %} text-4xl hover:scale-110 transition">
-            <i class="bi bi-exclamation-octagon-fill"></i>
+        <a href="{{ url_for('multas_residente') }}" class="{% if multas_pendientes > 0 %} animate-pulse text-[#a11129]  {% else %} text-[#a11129] {% endif %} text-4xl hover:scale-110 transition">
+            <i class="bi bi-cash-stack "></i>
         </a>
-        <a href="{{ url_for('correspondencia_residente') }}" class="{% if tiene_correspondencia %} text-green-500 {% else %} text-[#1E4C40] {% endif %} text-4xl hover:scale-110 transition">
-            <i class="bi bi-envelope-fill"></i>
+        <a href="{{ url_for('correspondencia_residente') }}" class="{% if tiene_correspondencia >0 %} animate-pulse text-green-500 {% else %} text-[#1E4C40] {% endif %} text-4xl hover:scale-110 transition">
+            <i class="bi bi-receipt-cutoff "></i>
         </a>
-        <a href="{{ url_for('novedades_residente') }}" class="{% if tiene_novedades %} text-blue-500 {% else %} text-[#1E4C40] {% endif %} text-4xl hover:scale-110 transition">
-            <i class="bi bi-chat-dots-fill"></i>
+        <a href="{{ url_for('novedades_residente') }}" class="{% if tiene_novedades > 0%} text-blue-500 animate-pulse {% else %} text-[#1E4C40] {% endif %} text-4xl hover:scale-110 transition">
+            <i class="bi bi-exclamation-diamond "></i>
         </a>
     </div>
 
@@ -40,5 +40,6 @@
         </div>
     </div>
 </div>
+
 
 {% endblock %}

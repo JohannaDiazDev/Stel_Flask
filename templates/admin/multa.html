@@ -146,7 +146,7 @@
                                     <select name="tipo" id="tipo" required class="border rounded px-2 py-1">
                                         {% set tipos = ["Ruido Excesivo", "Estacionamiento indebido", "Mascota sin correa", 
                                             "Problemas con los vecinos", "Daños a zonas comunes", 
-                                            "Problemas con mascotas", "Inasistencia asamblea"] %}
+                                            "Problemas con mascotas", "Inasistencia asamblea", "Carro rayado"] %}
                                         {% for tipo_opcion in tipos %}
                                             <option value="{{ tipo_opcion }}" {% if multa.tipo == tipo_opcion %}selected{% endif %}>{{ tipo_opcion }}</option>
                                         {% endfor %}
