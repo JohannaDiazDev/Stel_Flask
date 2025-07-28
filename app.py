@@ -12,6 +12,8 @@ import locale
 locale.setlocale(locale.LC_TIME, 'Spanish_Colombia')
 from collections import defaultdict
 from functools import wraps
+from validaciones.parqueadero import validar_datos_parqueadero
+from validaciones.correspondencia import validar_datos_correspondencia, validar_edicion_correspondencia
 
 app = Flask (__name__)
 bcrypt = Bcrypt(app)
@@ -1154,7 +1156,7 @@ def parqueadero_guarda():
         sql += " WHERE p.estado LIKE %s"
         params.append(f"%{estado}%")
 
-    sql += " LIMIT %s OFFSET %s"
+    sql += " ORDER BY p.pkidparqueadero DESC LIMIT %s OFFSET %s"
     params.extend([per_page, offset])
 
     cursor.execute(sql,params)
@@ -1209,6 +1211,12 @@ def registrar_parqueo():
     hora_salida = None
     tarifa = 0
 
+    errores = validar_datos_parqueadero(request.form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('parqueadero_guarda'))    
+
     cursor.execute("""
         INSERT INTO parqueadero (cupo, tarifa, residente_id, visitante_id, estado, fecha, tipo, placa, hora_salida)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -1218,90 +1226,71 @@ def registrar_parqueo():
     db.close()
     return redirect(url_for('parqueadero_guarda'))
 
-@app.route('/guarda/parqueadero_guarda/<int:pkidparqueadero>/editar_parqueo', methods=['GET', 'POST'])
+@app.route('/guarda/parqueadero_guarda/<int:pkidparqueadero>/editar_parqueo', methods=['POST'])
 @login_required
 def editar_parqueo(pkidparqueadero):
     db = get_db_connection()
     cursor = db.cursor()
 
-    if request.method == 'POST':
-        cupo = request.form['cupo']
-        residente_id = request.form.get('residente_id') or None
-        visitante_id = request.form.get('visitante_id') or None
-        estado = request.form['estado']
-        fecha_str = request.form['fecha']
-        tipo = request.form['tipo']
-        placa = request.form['placa']
-        hora_salida_str = request.form.get('hora_salida')
+    estado = request.form.get('estado') or ""
+    form = request.form
+    errores = validar_datos_parqueadero(form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('parqueadero_guarda'))
 
-        # Parseamos fecha y hora
-        formato_fecha = "%Y-%m-%dT%H:%M:%S" if len(fecha_str) > 16 else "%Y-%m-%dT%H:%M"
-        entrada = datetime.strptime(fecha_str, formato_fecha)
-        fecha = entrada.strftime("%Y-%m-%d %H:%M:%S")
+    cupo = form['cupo']
+    residente_id = form.get('residente_id') or None
+    visitante_id = form.get('visitante_id') or None
+    fecha_str = form['fecha']
+    tipo = form['tipo']
+    placa = form['placa']
+    hora_salida_str = form.get('hora_salida')
 
-        hora_salida = None
-        tarifa = 0
+    # Convertir fechas
+    formato_fecha = "%Y-%m-%dT%H:%M:%S" if len(fecha_str) > 16 else "%Y-%m-%dT%H:%M"
+    entrada = datetime.strptime(fecha_str, formato_fecha)
+    fecha = entrada.strftime("%Y-%m-%d %H:%M:%S")
 
-        if visitante_id and hora_salida_str:
-            formato_salida = "%Y-%m-%dT%H:%M:%S" if len(hora_salida_str) > 16 else "%Y-%m-%dT%H:%M"
+    hora_salida = None
+    tarifa = 0
+
+    if hora_salida_str:
+        formato_salida = "%Y-%m-%dT%H:%M:%S" if len(hora_salida_str) > 16 else "%Y-%m-%dT%H:%M"
+        try:
             salida = datetime.strptime(hora_salida_str, formato_salida)
-            hora_salida = salida.strftime("%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            flash('Formato de hora de salida inválido.', 'danger')
+            return redirect(url_for('parqueadero_guarda'))
 
+        if salida <= entrada:
+            flash('La hora de salida debe ser posterior a la hora de ingreso.', 'danger')
+            return redirect(url_for('parqueadero_guarda'))
+
+        hora_salida = salida.strftime("%Y-%m-%d %H:%M:%S")
+
+        if visitante_id:
             horas = (salida - entrada).total_seconds() / 3600
             horas = max(1, int(horas + 0.5))
             tarifa = horas * 1500
         elif residente_id:
-            if tipo == 'carro':
-                tarifa = 62000
-            elif tipo == 'moto':
-                tarifa = 40000
-
-        cursor.execute("""
-            UPDATE parqueadero
-            SET cupo=%s, tarifa=%s, residente_id=%s, visitante_id=%s, estado=%s,
-                fecha=%s, tipo=%s, placa=%s, hora_salida=%s
-            WHERE pkidparqueadero = %s
-        """, (cupo, tarifa, residente_id, visitante_id, estado, fecha, tipo, placa, hora_salida, pkidparqueadero))
-        db.commit()
-        flash("Parqueadero actualizado correctamente", "success")
+            tarifa = 62000 if tipo == 'carro' else 40000
 
     cursor.execute("""
-        SELECT p.*, u.nombre AS nombre_residente, v.nombre
-        FROM parqueadero p
-        LEFT JOIN residente r ON p.residente_id = r.pkidresidente
-        LEFT JOIN usuarios u ON r.usuario_id = u.pkiduser
-        LEFT JOIN visitante v ON p.visitante_id = v.pkidvisitante
-    """)
-    columnas = [col[0] for col in cursor.description]
-    parqueos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+        UPDATE parqueadero
+        SET cupo=%s, tarifa=%s, residente_id=%s, visitante_id=%s, estado=%s,
+            fecha=%s, tipo=%s, placa=%s, hora_salida=%s
+        WHERE pkidparqueadero = %s
+    """, (cupo, tarifa, residente_id, visitante_id, estado, fecha, tipo, placa, hora_salida, pkidparqueadero))
 
-    cursor.execute("""
-        SELECT r.pkidresidente, u.nombre AS nombre_residente
-        FROM residente r
-        LEFT JOIN usuarios u ON r.usuario_id = u.pkiduser
-    """)
-    columnas_residente = [col[0] for col in cursor.description]
-    residentes = [dict(zip(columnas_residente, fila)) for fila in cursor.fetchall()]
-
-    cursor.execute("SELECT pkidvisitante, nombre FROM visitante")
-    columnas_visitante = [col[0] for col in cursor.description]
-    visitantes = [dict(zip(columnas_visitante, fila)) for fila in cursor.fetchall()]
-
-    page = 1
-    per_page = 2
-    total_parqueadero = len(parqueos)
-    total_pages = (total_parqueadero + per_page - 1) // per_page
+    db.commit()
     cursor.close()
     db.close()
 
-    return render_template('guarda/parqueadero_guarda.html',
-        parqueos=parqueos,
-        residentes=residentes,
-        visitantes=visitantes,
-        page=page,
-        total_pages=total_pages,
-        estado_buscar=""
-    )
+    flash("Parqueadero actualizado correctamente", "success")
+    return redirect(url_for('parqueadero_guarda', estado=estado))
+
 
 @app.route('/correspondencia_guarda')
 @login_required
@@ -1369,6 +1358,12 @@ def registrar_correspondencia():
     tipo = request.form['tipo']
     estado = request.form['estado']
 
+    errores = validar_datos_correspondencia(request.form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('correspondencia_guarda'))    
+
     if fecha_str:
         formato = "%Y-%m-%dT%H:%M:%S" if len(fecha_str) > 16 else "%Y-%m-%dT%H:%M"
         fecha_recibido = datetime.strptime(fecha_str, formato).strftime('%Y-%m-%d %H:%M:%S')
@@ -1392,30 +1387,56 @@ def registrar_correspondencia():
     flash('Correspondencia registrada correctamente', 'success')
     return redirect(url_for('correspondencia_guarda', trabajadores=trabajadores))
 
-@app.route('/guarda/correspondencia_guarda/editar_correspondencia', methods=['GET','POST'])
+@app.route('/guarda/correspondencia_guarda/editar_correspondencia', methods=['POST'])
 @login_required
 def editar_correspondencia():
     db = get_db_connection()
     cursor = db.cursor()
 
     pkidcorrespondencia = request.form['pkidcorrespondencia'] 
-    tipo = request.form['tipo']
     descripcion = request.form['descripcion']
     estado = request.form['estado'] 
     fecha_entrega = request.form.get('fecha_entrega') or None
 
+    errores = validar_edicion_correspondencia(request.form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('correspondencia_guarda'))
+
+    # Validar que la correspondencia exista y obtener fecha recibido
+    cursor.execute("SELECT fecha_recibido FROM correspondencia WHERE pkidcorrespondencia = %s", (pkidcorrespondencia,))
+    resultado = cursor.fetchone()
+    if not resultado:
+        flash('No se encontró la correspondencia.', 'danger')
+        return redirect(url_for('correspondencia_guarda'))
+
+    fecha_recibido = resultado[0]  # tipo datetime.datetime
+
+    # Validar y convertir fecha_entrega
+    if fecha_entrega:
+        try:
+            fecha_entrega_dt = datetime.strptime(fecha_entrega, '%Y-%m-%dT%H:%M')
+            if fecha_entrega_dt < fecha_recibido:
+                flash('La fecha de entrega no puede ser anterior a la fecha de recibido.', 'danger')
+                return redirect(url_for('correspondencia_guarda'))
+        except ValueError:
+            flash('Formato de fecha inválido.', 'danger')
+            return redirect(url_for('correspondencia_guarda'))
+
     sql = """
         UPDATE correspondencia
-        SET tipo = %s, descripcion = %s, estado = %s, fecha_entrega = %s
+        SET descripcion = %s, estado = %s, fecha_entrega = %s
         WHERE pkidcorrespondencia = %s
     """
-    valores = (tipo, descripcion, estado, fecha_entrega, pkidcorrespondencia)
+    valores = (descripcion, estado, fecha_entrega, pkidcorrespondencia)
     cursor.execute(sql, valores)
     db.commit()
     cursor.close()
     db.close()
     flash("Correspondencia actualizada correctamente", "success")
     return redirect(url_for('correspondencia_guarda'))
+
 
 @app.route('/dashboard_residente')
 @login_required
@@ -1710,10 +1731,23 @@ def registrar_novedad():
         flash('Acceso Denegado.', 'danger')
         return redirect(url_for('ingresar'))
 
-    tipo = request.form.get('tipo')
-    asunto = request.form.get('asunto')
-    descripcion = request.form.get('descripcion')
+    tipo = request.form.get('tipo').strip()
+    asunto = request.form.get('asunto').strip()
+    descripcion = request.form.get('descripcion').strip()
     fecha = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    tipos_validos = ['Solicitud', 'Queja', 'Reporte']
+    if not tipo or tipo not in tipos_validos:
+        flash('Tipo de novedad inválido.', 'danger')
+        return redirect(url_for('novedades_residente'))
+    
+    if not asunto or len(asunto) < 3 or len(asunto) > 100:
+        flash('El asunto debe contener entre 3 y 100 caracteres.','danger')
+        return redirect(url_for('novedades_residente'))
+    
+    if not descripcion or len(descripcion) < 10 or len(descripcion) > 300:
+        flash('La descripción debe contener entre 10 y 300 caracteres.','danger')
+        return redirect(url_for('novedades_residente'))
 
     # Obtener inmueble_id desde el residente logueado
     db = get_db_connection()
@@ -1756,9 +1790,22 @@ def editar_novedad_residente(pkidnovedad):
         flash ('Acceso Denegado.', 'danger')
         return redirect(url_for('ingresar'))
 
-    tipo = request.form.get('tipo') 
-    asunto = request.form.get('asunto')
-    descripcion = request.form.get('descripcion')    
+    tipo = request.form.get('tipo', '').strip() 
+    asunto = request.form.get('asunto', '').strip()
+    descripcion = request.form.get('descripcion', '').strip()  
+
+    tipos_validos = ['Solicitud', 'Queja', 'Reporte']
+    if not tipo or tipo not in tipos_validos:
+        flash('Tipo de novedad inválido.', 'danger')
+        return redirect(url_for('novedades_residente'))
+    
+    if not asunto or len(asunto) < 3 or len(asunto) > 100:
+        flash('El asunto debe contener entre 3 y 100 caracteres.','danger')
+        return redirect(url_for('novedades_residente'))
+    
+    if not descripcion or len(descripcion) < 10 or len(descripcion) > 300:
+        flash('La descripción debe contener entre 10 y 300 caracteres.','danger')
+        return redirect(url_for('novedades_residente'))
 
     db = get_db_connection()
     cursor = db.cursor()

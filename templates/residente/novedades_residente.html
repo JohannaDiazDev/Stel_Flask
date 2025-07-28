@@ -35,26 +35,38 @@
                         <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
-                    <form action="{{ url_for('registrar_novedad') }}" method="post">
+                    <form action="{{ url_for('registrar_novedad') }}" method="post" id="formNovedad">
                         <div class="modal-body p-4">
                             <input type="hidden" name="inmueble_id" value="{{ inmueble_id }}">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
-                                    <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="tipo" required>
+                                    <label for="tipo"  class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
+                                    <select class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300" name="tipo" id="tipo">
                                         <option value="">Seleccione un tipo </option>
                                         <option value="Solicitud">Solicitud</option>
                                         <option value="Queja">Queja</option>
                                         <option value="Reporte">Reporte</option>
                                     </select>
+                                    <p id="error-tipo" class="text-sm text-red-600 mt-1 hidden">
+                                        <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                        Seleccione un tipo válido.
+                                    </p>
                                 </div>
                                 <div class="col-md-12 mb-3">
                                     <label for="asunto" class="block text-sm font-medium text-[#1E4C40]">Asunto</label>
-                                    <input type="text" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="asunto" required>
+                                    <input type="text" name="asunto" id="asunto" maxlength="100" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                    <p id="error-asunto" class="text-sm text-red-600 mt-1 hidden">
+                                        <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                        El asunto debe tener entre 3 y 100 caracteres.
+                                    </p>
                                 </div>
                                 <div class="col-md-12 mb-3">
                                     <label for="descripcion" class="block text-sm font-medium text-[#1E4C40]">Descripción</label>
-                                    <textarea class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="descripcion" rows="3" required></textarea>
+                                    <textarea name="descripcion" id="descripcion" rows="3" maxlength="300" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300"></textarea>
+                                    <p id="error-descripcion" class="text-sm text-red-600 mt-1 hidden">
+                                        <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                        La descripción debe tener entre 10 y 300 caracteres.
+                                    </p>
                                 </div>
                             </div>        
                         </div>
@@ -105,7 +117,7 @@
                             <div class="modal fade" id="modal{{ novedad.pkidnovedad }}" tabindex="-1">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
-                                        <form action="{{ url_for('editar_novedad_residente', pkidnovedad=novedad.pkidnovedad) }}" method="post">
+                                        <form action="{{ url_for('editar_novedad_residente', pkidnovedad=novedad.pkidnovedad) }}" method="post" class="form-editar-novedad" data-id="{{ novedad.pkidnovedad }}">
                                             <div class="modal-header bg-[#1E4C40] text-white">
                                                 <h5 class="modal-title">Editar Novedad</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -113,25 +125,39 @@
                                             <div class="modal-body">
                                                 <div class="mb-3">
                                                     <label class="form-label">Tipo</label>
-                                                    <select name="tipo" class="form-control" required>
+                                                    <select name="tipo" class="form-control border border-gray-300 rounded-md" id="tipo-editar{{ novedad.pkidnovedad }}">
                                                         {% set tipos = ['Solicitud','Queja','Reporte'] %}
                                                         {% for tipo_opcion in tipos %}
                                                             <option value="{{ tipo_opcion }}" {% if novedad.tipo == tipo_opcion %}selected{% endif %}>{{ tipo_opcion }}</option>
                                                         {% endfor %}
                                                     </select>
+                                                    <p id="error-tipo-editar{{ novedad.pkidnovedad }}" class="text-sm text-red-600 mt-1 hidden">
+                                                        <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                                        Selecciona un tipo válido.
+                                                    </p>
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Asunto</label>
-                                                    <input type="text" name="asunto" value="{{ novedad.asunto }}" class="form-control" required>
+                                                    <input type="text" name="asunto" value="{{ novedad.asunto }}" class="form-control border border-gray-300 rounded-md"
+                                                        id="asunto-editar{{ novedad.pkidnovedad }}" maxlength="100">
+                                                    <p id="error-asunto-editar{{ novedad.pkidnovedad }}" class="text-sm text-red-600 mt-1 hidden">
+                                                        <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                                        El asunto debe tener entre 3 y 100 caracteres.
+                                                    </p>
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Descripción</label>
-                                                    <textarea name="descripcion" class="form-control" rows="3" required>{{ novedad.descripcion }}</textarea>
+                                                    <textarea name="descripcion" class="form-control border border-gray-300 rounded-md"
+                                                        id="descripcion-editar{{ novedad.pkidnovedad }}" rows="3" maxlength="500">{{ novedad.descripcion }}</textarea>
+                                                    <p id="error-descripcion-editar{{ novedad.pkidnovedad }}" class="text-sm text-red-600 mt-1 hidden">
+                                                        <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                                        La descripción debe tener entre 10 y 500 caracteres.
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar</button>
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-success" style="background-color: #1E4C40;"><i class="bi bi-plus-circle-dotted"></i> Editar</button>
+                                                <button type="button" class="btn btn-danger" style="background-color: #a11129;" data-bs-dismiss="modal"><i class="bi bi-x-diamond-fill"></i> Cancelar</button>
                                             </div>
                                         </form>
                                     </div>
@@ -140,14 +166,11 @@
                     {% endif %}
                     </div>
 
-                    
-
                 {% endfor %}
             </div>
         {% else %}
             <p class="text-center text-[#1E4C40] font-semibold mt-8">No tienes novedades registradas. </p>
-        
-            
+                    
         {% endif %}
     </div>
 
@@ -160,5 +183,130 @@
         </a>
     {% endfor %}
         </div>
-{% endif %}
+    {% endif %}
+
+    <script>
+        const form = document.querySelector('#formNovedad');
+
+        const tipo = form.querySelector('[name="tipo"]');
+        const asunto = form.querySelector('[name="asunto"]');
+        const descripcion = form.querySelector('[name="descripcion"]');
+
+        const errorTipo = document.getElementById('error-tipo');
+        const errorAsunto = document.getElementById('error-asunto');
+        const errorDescripcion = document.getElementById('error-descripcion');
+
+        form.addEventListener('submit', function (e) {
+            let valido = true;
+
+            // Resetear errores y estilos
+            [tipo, asunto, descripcion].forEach(el => {
+                el.classList.remove('border-red-500');
+            });
+
+            [errorTipo, errorAsunto, errorDescripcion].forEach(el => {
+                el.classList.add('hidden');
+            });
+
+            // Validaciones personalizadas
+            if (!tipo.value || !['Solicitud', 'Queja', 'Reporte'].includes(tipo.value)) {
+                errorTipo.classList.remove('hidden');
+                errorTipo.classList.remove('border-[#1E4C40]');
+                tipo.classList.add('border-red-500');
+                valido = false;
+            } else {
+                tipo.classList.remove('border-red-500');
+                tipo.classList.add('border-[#1E4C40]');
+            }
+
+
+            if (!asunto.value.trim() || asunto.value.trim().length < 3 || asunto.value.trim().length > 100) {
+                errorAsunto.classList.remove('hidden');
+                asunto.classList.remove('border-[#1E4C40]');
+                asunto.classList.add('border-red-500');
+                valido = false;
+            } else {
+                asunto.classList.remove('border-red-500');
+                asunto.classList.add('border-[#1E4C40]');
+            }
+
+            if (!descripcion.value.trim() || descripcion.value.trim().length < 10 || descripcion.value.trim().length > 300) {
+                errorDescripcion.classList.remove('hidden');
+                descripcion.classList.remove('border-[#1E4C40]');
+                descripcion.classList.add('border-red-500');
+                valido = false;
+            } else {
+                descripcion.classList.remove('border-red-500');
+                descripcion.classList.add('border-[#1E4C40]');
+            }
+
+
+            if (!valido) {
+                e.preventDefault();
+            }
+        });
+    </script>
+
+    <script>
+        document.querySelectorAll('.form-editar-novedad').forEach(form => {
+            const id = form.dataset.id;
+
+            const tipo = form.querySelector(`#tipo-editar${id}`);
+            const asunto = form.querySelector(`#asunto-editar${id}`);
+            const descripcion = form.querySelector(`#descripcion-editar${id}`);
+
+            const errorTipo = form.querySelector(`#error-tipo-editar${id}`);
+            const errorAsunto = form.querySelector(`#error-asunto-editar${id}`);
+            const errorDescripcion = form.querySelector(`#error-descripcion-editar${id}`);
+
+            form.addEventListener('submit', function (e) {
+                let valido = true;
+
+                // Reset estilos
+                [tipo, asunto, descripcion].forEach(el => {
+                    el.classList.remove('border-red-500');
+                    el.classList.add('border-gray-300');
+                });
+
+                [errorTipo, errorAsunto, errorDescripcion].forEach(el => {
+                    el.classList.add('hidden');
+                });
+
+                // Validación de tipo
+                if (!tipo.value || !['Solicitud', 'Queja', 'Reporte'].includes(tipo.value)) {
+                    tipo.classList.remove('border-gray-300');
+                    tipo.classList.add('border-red-500');
+                    errorTipo.classList.remove('hidden');
+                    valido = false;
+                }
+
+                // Validación de asunto
+                const asuntoVal = asunto.value.trim();
+                if (asuntoVal.length < 3 || asuntoVal.length > 100) {
+                    asunto.classList.remove('border-gray-300');
+                    asunto.classList.add('border-red-500');
+                    errorAsunto.classList.remove('hidden');
+                    valido = false;
+                }
+
+                // Validación de descripción
+                const descripcionVal = descripcion.value.trim();
+                if (descripcionVal.length < 10 || descripcionVal.length > 500) {
+                    descripcion.classList.remove('border-gray-300');
+                    descripcion.classList.add('border-red-500');
+                    errorDescripcion.classList.remove('hidden');
+                    valido = false;
+                }
+
+                // Detener envío si no es válido
+                if (!valido) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+
+
+
+
 {% endblock %}

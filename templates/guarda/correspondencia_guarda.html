@@ -11,8 +11,11 @@
         <input type="hidden" name="descripcion" value="Recibo de Luz">
         <input type="hidden" name="fecha_recibido" value="{{ fecha_recibido }}">
         <input type="hidden" name="estado" value="Recibido">
-        <button class="bg-yellow-500 p-3 rounded-xl shadow hover:bg-yellow-600 w-full">
+        <button class="bg-yellow-500 p-3 rounded-xl shadow hover:bg-yellow-600 w-full transform hover:scale-105 transition duration-200 cursor-pointer font-bold">
             <i class="bi bi-lightbulb-fill text-3xl mb-2"></i><br>Recibo Luz
+            <div class="flex items-center justify-center mt-1 text-white text-sm italic">
+                <i class="bi bi-hand-index-thumb-fill transform -scale-x-100 mr-1 inline-block"></i> Haz clic para registrar
+            </div>
         </button>
     </form>
     <form action="{{ url_for('registrar_correspondencia' )}}" method="post">
@@ -21,8 +24,11 @@
         <input type="hidden" name="descripcion" value="Recibo del Agua">
         <input type="hidden" name="fecha_recibido" value="{{ fecha_recibido }}">
         <input type="hidden" name="estado" value="Recibido">
-        <button class="bg-blue-400 p-3 rounded-xl shadow hover:bg-blue-500 w-full">
+        <button class="bg-blue-400 p-3 rounded-xl shadow hover:bg-blue-500 w-full transform hover:scale-105 transition duration-200 cursor-pointer font-bold">
             <i class="bi bi-droplet-fill text-3xl mb-2"></i><br>Recibo Agua
+            <div class="flex items-center justify-center mt-1 text-white text-sm italic">
+                <i class="bi bi-hand-index-thumb-fill transform -scale-x-100 mr-1 inline-block"></i> Haz clic para registrar
+            </div>
         </button>
     </form>
     <form action="{{ url_for('registrar_correspondencia' )}}" method="post">
@@ -31,18 +37,23 @@
         <input type="hidden" name="descripcion" value="Recibo del Gas">
         <input type="hidden" name="fecha_recibido" value="{{ fecha_recibido }}">
         <input type="hidden" name="estado" value="Recibido">
-        <button class="bg-red-500 p-3 rounded-xl shadow hover:bg-red-600 w-full">
+        <button class="bg-red-500 p-3 rounded-xl shadow hover:bg-red-600 w-full transform hover:scale-105 transition duration-200 cursor-pointer font-bold">
             <i class="bi bi-fire text-3xl mb-2"></i><br>Recibo Gas
+            <div class="flex items-center justify-center mt-1 text-white text-sm italic">
+                <i class="bi bi-hand-index-thumb-fill transform -scale-x-100 mr-1 inline-block"></i> Haz clic para registrar
+            </div>
         </button>
     </form>
     
-    <button class="bg-[#1E4C40] p-3 rounded-xl shadow hover:bg-green-700 w-full" data-bs-toggle="modal" data-bs-target="#modalPaquete">
+    <button class="bg-[#1E4C40] p-3 rounded-xl shadow hover:bg-green-700 w-full transform hover:scale-105 transition duration-200 cursor-pointer font-bold" data-bs-toggle="modal" data-bs-target="#modalPaquete">
         <i class="bi bi-box-fill text-3xl mb-2"></i><br>Paquete
+        <div class="flex items-center justify-center mt-1 text-white text-sm italic">
+            <i class="bi bi-hand-index-thumb-fill transform -scale-x-100 mr-1 inline-block"></i> Haz clic para registrar
+        </div>
     </button>
     
 </div>
 
-<!-- Modal de Bootstrap -->
 <div class="modal fade" id="modalPaquete" tabindex="-1" aria-labelledby="modalPaqueteLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content shadow-lg p-3 mb-5">
@@ -51,25 +62,33 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <form method="post" action="{{ url_for('registrar_correspondencia') }}">
-                    <input type="hidden" name="tipo" value="paquete">
-                    <input type="hidden" name="fecha_recibido" value="{{ fecha_recibido }}">
-                    <input type="hidden" name="estado" value="Recibido">
-                    <input type="hidden" name="trabajador_id" value="{{ session['trabajador_id'] }}">
+                <form method="post" id="formPaquete" action="{{ url_for('registrar_correspondencia') }}">
+                    <input type="hidden" name="tipo" id="tipo" value="paquete">
+                    <input type="hidden" name="fecha_recibido" id="fecha_recibido" value="{{ fecha_recibido }}">
+                    <input type="hidden" name="estado" value="Recibido" id="estado">
+                    <input type="hidden" name="trabajador_id" id="trabajador_id" value="{{ session['trabajador_id'] }}">
 
                     <div class="mb-2">
                         <label for="inmueble_id" class="block text-sm font-medium text-[#1E4C40]">Inmueble</label>
-                        <select name="inmueble_id" required class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                        <select name="inmueble_id" id="inmueble_id" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
                             <option value="">Seleccione un inmueble</option>
                             {% for inmueble in inmuebles %}
                                 <option value="{{ inmueble.pkidinmueble }}">{{ inmueble.numeroinmueble }}</option>
                             {% endfor %}
                         </select>
+                        <p id="error-inmueble" class="text-sm text-red-600 mt-1 hidden">
+                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                            Seleccione un inmueble
+                        </p>
                     </div>
 
                     <div class="mb-2">
                         <label for="descripcion" class="block text-sm font-medium text-[#1E4C40]">Descripción</label>
-                        <textarea name="descripcion" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" required></textarea>
+                        <textarea name="descripcion" id="descripcion" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"></textarea>
+                        <p id="error-descripcion" class="text-sm text-red-600 mt-1 hidden">
+                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                            La descripción debe tener entre 3 y 200 caracteres.
+                        </p>
                     </div>
 
                     <div class="modal-footer flex justify-end gap-3 pt-4 border-t mt-4">
@@ -134,30 +153,46 @@
                     <h5 class="modal-title" id="modalLabel{{ c.pkidcorrespondencia }}">Editar</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ url_for('editar_correspondencia') }}" method="post">
+                <form class="form-editar-paquete" action="{{ url_for('editar_correspondencia') }}" method="post" data-id="{{ c.pkidcorrespondencia }}">
                     <input type="hidden" name="pkidcorrespondencia" value="{{ c.pkidcorrespondencia}}">
                     <div class="modal-body">
-                        <div class="mb-2">
+                        <input type="hidden" id="fecha-recibido-editar{{ c.pkidcorrespondencia }}" value="{{ c.fecha_recibido|replace(' ', 'T') }}">
+                        <!--<div class="mb-2">
                             <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
-                            <input type="text" name="tipo" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" required value="{{ c.tipo }}">
-                        </div>
+                            <input type="text" name="tipo" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" value="{{ c.tipo }}">
+                        </div>-->
                         <div class="mb-2">
                             <label for="descripcion" class="block text-sm font-medium text-[#1E4C40]">Descripción</label>
-                            <textarea name="descripcion" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" required value="{{ c.descripcion}}" ></textarea>
+                            <textarea name="descripcion" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
+                                id="descripcion-editar{{ c.pkidcorrespondencia }}">{{ c.descripcion }}
+                            </textarea>
+                            <p id="error-editar-descripcion{{ c.pkidcorrespondencia }}" class="text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                La descripción debe tener entre 3 y 200 caracteres
+                            </p>
                         </div>
                         <div class="mb-2">
                             <label for="estado" class="block text-sm font-medium text-[#1E4C40]">Estado</label>
-                            <select name="estado" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" required>
+                            <select name="estado" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
+                                id="estado-editar{{ c.pkidcorrespondencia }}">
                                {% set estados = ['Entregado', 'No Entregado'] %}
                                {% for estado_opcion in estados %}
                                 <option value="{{ estado_opcion }}"{% if c.estado == estado_opcion %}selected{% endif %}>{{ estado_opcion }}</option>
                                {% endfor %}
                             </select>
+                            <p id="error-editar-estado{{ c.pkidcorrespondencia }}" class="text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                Debe seleccionar un estado
+                            </p>
                         </div>
                         <div class="mb-2">
                             <label for="fecha_entrega" class="block text-sm font-medium text-[#1E4C40]">Fecha de Entrega</label>
                             <input type="datetime-local" name="fecha_entrega" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
-                                value="{{ c.fecha_entrega|replace(' ', 'T') if c.fecha_entrega else '' }}">
+                                value="{{ c.fecha_entrega|replace(' ', 'T') if c.fecha_entrega else '' }}" id="fecha-entrega-editar{{ c.pkidcorrespondencia }}">
+                                <p id="error-editar-fecha-entrega{{ c.pkidcorrespondencia }}" class="text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                    La fecha de entrega no puede ser anterior a la del recibido.
+                                </p>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-success" style="background-color: #1E4C40;">Guardar</button>
@@ -198,4 +233,9 @@
         {% endif %}
     </div>
 </div>
+
+
+{% endblock %}
+{% block scripts %}
+    <script src="{{url_for('static', filename='js/validar_correspondencia_guarda.js') }}"></script>
 {% endblock %}
