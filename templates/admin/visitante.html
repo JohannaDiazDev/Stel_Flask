@@ -5,7 +5,6 @@
 <div class="container mx-auto py-8">
     <h2 class="text-2xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Visitantes <i class="bi bi-person-walking"></i></h2>
     
-    
     <div class="modal fade" id="modall" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content shadow-lg p-3 mb-5">
@@ -14,51 +13,69 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="visitanteForm" action="{{ url_for('crear_visitante') }}" method="post">
+                    <form action="{{ url_for('crear_visitante') }}" method="post" id="visitanteForm">
                         <input type="hidden" id="pkidvisitante" name="pkidvisitante">
-                        <div class="mb-2">
-                            <label for="text">Fecha</label>
-                            <input type="datetime-local" id="fecha" name="fecha" required class="border rounded px-2 py-1">
-                            <span id="error-fecha" class="error-msg" style="color: red;"></span>
+                        <div class="col-md-12 mb-3">
+                            <label class="block text-sm font-medium text-[#1E4C40]" for="text">Fecha</label>
+                            <input type="datetime-local" id="fecha" name="fecha" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                            <p id="error-fecha" class="text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                Seleccione la fecha actual.
+                            </p>
                         </div>
-                        <div class="mb-2">
-                            <label for="inmueble_id">Inmueble</label>
-                            <select name="inmueble_id" required class="border rounded px-2 py-1">
+                        <div class="col-md-12 mb-3">
+                            <label class="block text-sm font-medium text-[#1E4C40]" for="inmueble_id">Inmueble</label>
+                            <select name="inmueble_id" id="inmueble_id" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
                                 {% for inmueble in inmuebles %}
                                     <option value="{{inmueble.pkidinmueble}}">{{inmueble.numeroinmueble}}</option>
                                 {% endfor %}
                             </select>
-                            <span class="error-inmueble text-red-500" id="error-inmueble"></span>
+                            <p id="error-inmueble" class="text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                Seleccione un inmueble válido.
+                            </p>
                         </div>
-                        <div class="mb-2">
-                            <label for="autorizado">¿Autorizado?</label>
-                            <select name="autorizado" required class="border rounded px-2 py-1">
+                        <div class="col-md-12 mb-3">
+                            <label class="block text-sm font-medium text-[#1E4C40]" for="autorizado">¿Autorizado?</label>
+                            <select name="autorizado" id="autorizado" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
                                 <option value="si">Si</option>
                                 <option value="no">No</option>
                             </select>
-                            <span class="error-autorizado text-red-500" id="error-autorizado"></span>
+                            <p id="error-autorizado" class="text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                Seleccione una opción.
+                            </p>
                         </div>
-                        <div class="mb-2">
-                            <label for="text">Nombre</label>
-                            <input type="text" id="nombre" name="nombre" required class="border rounded px-2 py-1">
-                            <span class="error-nombre text-red-500" id="error-nombre"></span>
+                        <div class="col-md-12 mb-3">
+                            <label class="block text-sm font-medium text-[#1E4C40]" for="text">Nombre</label>
+                            <input type="text" id="nombre" name="nombre" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                            <p id="error-nombre" class="text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                El nombre es obligatorio.
+                            </p>
                         </div>
-                        <div class="mb-2">
-                            <label for="numer">Cedula</label>
-                            <input type="number" id="cedula" name="cedula" required class="border rounded px-2 py-1">
-                            <span class="error-cedula text-red-500" id="error-cedula"></span>
+                        <div class="col-md-12 mb-3">
+                            <label class="block text-sm font-medium text-[#1E4C40]" for="numer">Cedula</label>
+                            <input type="number" id="cedula" name="cedula" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                            <p id="error-cedula" class="text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                La cedula es obligatoria.
+                            </p>
                         </div>
-                        <div class="mb-2">
-                            <label for="ingresa_carro">¿Ingresa Carro?</label>
+                        <div class="col-md-12 mb-3">
+                            <label class="block text-sm font-medium text-[#1E4C40]" for="ingresa_carro">¿Ingresa Carro?</label>
                             <select name="ingresa_carro" id="ingresa_carro">
                                 <option value="1">Si</option>
                                 <option value="2">No</option>
                             </select>
-                           <span class="error-carro text-red-500" id="error-carro"></span>
+                           <p id="error-carro" class="text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                Seleccione una opción.
+                            </p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-success" data-bs-dismiss="modal" style="background-color: #a11129;">Cancelar</button>
                             <button type="submit" id="crear_visitante" class="btn btn-primary" style="background-color: #1E4C40;">Guardar</button>
+                            <button type="button" class="btn btn-success" data-bs-dismiss="modal" style="background-color: #a11129;">Cancelar</button>
                         </div>
                     </form>
                 </div>
@@ -73,7 +90,7 @@
             </button>
             {% endif %}
             
-            <form method="GET" action="{{ url_for('visitante') }}" class="relative w-full max-w-md">
+            <form method="post" action="{{ url_for('visitante') }}" class="relative w-full max-w-md">
                 <i class="bi bi-search absolute right-3 top-1/2 transform -translate-y-1/2 text-[#1E4C40] text-lg"></i>
                 <input type="text" name="cedula" placeholder="Cédula" value="{{ cedula_buscar }}"
                     class="w-full pr-10 pl-4 py-2 border border-[#1E4C40] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E4C40]">
@@ -109,7 +126,7 @@
                     </td>
                     {% if session.get('rol_id') != 1 %}
                         <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-warning"style="background-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modal{{visitante.pkidvisitante}}">
+                            <button type="button" class="btn btn-sm btn-warning"style="background-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modalEditarVisitante{{visitante.pkidvisitante}}">
                                 <i class="bi bi-person-raised-hand text-white"></i> 
                             </button>
                         </td>
@@ -121,60 +138,78 @@
                     </td>-->
                 </tr>
                 {% if session.get('rol_id') != 1 %}
-                <div class="modal fade" id="modal{{visitante.pkidvisitante}}" tabindex="-1" aria-labelledby="ModalLabell" aria-hidden="true">
+                <div class="modal fade" id="modalEditarVisitante{{visitante.pkidvisitante}}" tabindex="-1" aria-labelledby="modalEditarVisitanteLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content shadow-lg p-3 mb-5">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="ModalLabel">{{visitante.pkidvisitante}}</h1>
+                                <h1 class="modal-title fs-5" id="modalEditarVisitanteLabel">{{visitante.pkidvisitante}}</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="post" action="{{ url_for('editar_visitante', pkidvisitante=visitante.pkidvisitante) }}">
-                                    <div class="mb-2">
-                                        <label for="datetime">Fecha</label>
-                                        <input type="datetime" id="fecha" name="fecha" value="{{visitante.fecha}}" required class="border rounded px-2 py-1">
-                                        <span id="error-fecha" class="error-msg" style="color:rgb(186, 5, 5);"></span>
+                                <form method="post" id="visitanteFormEditar{{ visitante.pkidvisitante }}" class="visitante-form-editar" data-id="{{ visitante.pkidvisitante }}" action="{{ url_for('editar_visitante', pkidvisitante=visitante.pkidvisitante) }}">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="datetime">Fecha</label>
+                                        <input type="datetime-local" id="fecha-editar{{ visitante.pkidvisitante }}" name="fecha" value="{{ visitante.fecha }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                        <p id="error-fecha-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                            Seleccione la fecha.
+                                        </p>
                                     </div>
-                                    <div class="mb-2">
-                                        <label for="inmueble_id">Inmueble</label>
-                                        <select name="inmueble_id" required class="border rounded px-2 py-1">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="inmueble_id">Inmueble</label>
+                                        <select name="inmueble_id" id="inmueble-editar{{ visitante.pkidvisitante }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
                                             {% for inmueble in inmuebles%}
                                                 <option value="{{ inmueble.pkidinmueble }}" {% if visitante.inmueble_id == inmueble.pkidinmueble %}selected{% endif %}>
                                                     {{ inmueble.numeroinmueble }}
                                                 </option>
                                             {% endfor %}
                                         </select>
-                                        <span class="error-inmueble text-red-500" id="error-inmueble"></span>
+                                        <p id="error-inmueble-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                            Seleccione un inmueble válido.
+                                        </p>
                                     </div>
-                                    <div class="mb-2">
-                                        <label for="autorizado">¿Autorizado?</label>
-                                        <select name="autorizado" required class="border rounded px-2 py-1">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="autorizado">¿Autorizado?</label>
+                                        <select name="autorizado" id="autorizado-editar{{ visitante.pkidvisitante }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
                                             <option value="1"{% if visitante.autorizado == 1 %}selected{% endif %}>Si</option>
                                             <option value="2"{% if visitante.autorizado == 2 %}selected{% endif %}>No</option>
                                         </select>
-                                        <span class="error-autorizado text-red-500" id="error-autorizado"></span>
+                                        <p id="error-autorizado-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                            Seleccione una opción.
+                                        </p>
                                     </div>
-                                    <div class="mb-2">
-                                        <label for="nombre">Nombre</label>
-                                        <input type="text" id="nombre" name="nombre" value="{{ visitante.nombre }}" required class="border rounded px-2 py-1">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="nombre">Nombre</label>
+                                        <input type="text" id="nombre-editar{{ visitante.pkidvisitante }}" name="nombre" value="{{ visitante.nombre }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                        <p id="error-nombre-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                            El nombre es obligatorio.
+                                        </p>
                                     </div>
-                                    <span id="error-nombre text-red-500" id="error-nombre"></span>
-                                    <div class="mb-2">
-                                        <label for="cedula">Cédula</label>
-                                        <input type="number" id="cedula" name="cedula" value="{{ visitante.cedula }}" required class="border rounded px-2 py-1">
-                                        <span class="error-cedula text-red-500" id="error-cedula"></span>
+                                    <div class="col-md-12 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="cedula">Cédula</label>
+                                        <input type="number" id="cedula-editar{{ visitante.pkidvisitante }}" name="cedula" value="{{ visitante.cedula }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                        <p id="error-cedula-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                            La cedula es obligatoria.
+                                        </p>
                                     </div>
-                                    <div class="mb-2">
-                                        <label for="ingresa_carro">¿Ingresa Carro?</label>
-                                        <select name="ingresa_carro" required class="border rounded px-2 py-1">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="ingresa_carro">¿Ingresa Carro?</label>
+                                        <select name="ingresa_carro" id="carro-editar{{ visitante.pkidvisitante }}" class="border rounded px-2 py-1">
                                             <option value="si"{% if visitante.ingresa_carro == si %}selected{% endif %}>Si</option>
                                             <option value="no"{% if visitante.ingresa_carro == no %}selected{% endif %}>No</option>
                                         </select>
-                                        <span class="error-carro text-red-500" id="error-carro"></span>
+                                        <p id="error-carro-editar{{ visitante.pkidvisitante}}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
+                                            Seleccione una opción.
+                                        </p>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar</button>
                                         <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Guardar<i class="bi bi-person-walking"></i></button>
+                                        <button type="button" class="btn btn-secondary" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar</button>
                                     </div>
                                 </form>
                             </div>
@@ -217,90 +252,8 @@
         </ul>
     </div>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function(){
-        const forms= document.querySelectorAll('form[action*="editar_visitante"]');
 
-        forms.forEach(form => {
-            form.addEventListener('submit', function (e) {
-                const fecha = form.querySelector('input[name="fecha"]'); 
-                const inmueble = form.querySelector('select[name="inmueble_id"]');
-                const autorizado = form.querySelector('select[name="autorizado"]');
-                const nombre = form.querySelector('input[name="nombre"]'); 
-                const cedula = form.querySelector('input[name="cedula"]'); 
-                const ingresa_carro = form.querySelector('select[name="ingresa_carro"]');
-
-                const errorFecha = form.querySelector('#error-fecha');
-                const errorInmueble = form.querySelector('#error-inmueble'); 
-                const errorAutorizado = form.querySelector('#error-autorizado'); 
-                const errorNombre = form.querySelector('#error-nombre'); 
-                const errorCedula = form.querySelector('#error-cedula'); 
-                const errorIngresa_carro = form.querySelector('#error-ingresa_carro'); 
-
-                errorFecha.textContent = '';
-                errorInmueble.textContent = '';
-                errorAutorizado.textContent = '';
-                errorNombre.textContent = '';
-                errorCedula.textContent = '';
-                errorIngresa_carro.textContent = '';
-
-                let valid = true;
-                const today = new Date().toISOString().split('T')[0];
-
-                if (!fecha.value) {
-                    errorFecha.textContent = 'La fecha es obligatoria';
-                    valid = false;
-                } else if (fecha.value !== today) {
-                    errorFecha.textContent = 'La fecha debe ser la actual';
-                    valid = false;
-                }
-
-                if (!inmueble.value) {
-                    errorInmueble.textContent = 'El inmueble es obligatorio';
-                    valid = false;
-                }
-
-                if (!autorizado.value) {
-                    errorAutorizado.textContent = 'El campo autorizado es obligatorio';
-                    valid = false;
-                }
-
-                if (!nombre.value.trim()) {
-                    errorNombre.textContent = 'El nombre es obligatorio';
-                    valid = false;
-                } else if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(nombre.value)) {
-                    errorNombre.textContent = 'El nombre solo debe contener letras y espacios';
-                    valid = false;
-                } else if (nombre.value.length < 3 || nombre.value.length > 50) {
-                    errorNombre.textContent = 'El nombre debe tener entre 3 y 50 caracteres';
-                    valid = false;
-                } else {
-                    errorNombre.textContent = '';
-                }                
-
-                if (!cedula.value.trim()) {
-                    errorCedula.textContent = 'La cédula es obligatoria';
-                    valid = false;
-                } else if (!/^\d+$/.test(cedula.value)) {
-                    errorCedula.textContent = 'La cédula debe contener solo números';
-                    valid = false;
-                } else if (cedula.value.length < 4 || cedula.value.length > 10) {
-                    errorCedula.textContent = 'La cédula debe tener entre 4 y 10 dígitos';
-                    valid = false;
-                } else {
-                    errorCedula.textContent = '';   
-                }
-
-                if (!ingresa_carro.value) {
-                    errorIngresa_carro.textContent = 'El campo es obligatorio';
-                    valid = false;
-                }
-
-                if (!valid) {
-                    e.preventDefault();
-                }
-            });
-        });
-    });
-</script>
+{% endblock %}
+{% block scripts %}
+    <script src="{{url_for('static', filename='js/validar_visitantes.js') }}"></script>
 {% endblock %}

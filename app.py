@@ -14,6 +14,7 @@ from collections import defaultdict
 from functools import wraps
 from validaciones.parqueadero import validar_datos_parqueadero
 from validaciones.correspondencia import validar_datos_correspondencia, validar_edicion_correspondencia
+from validaciones.visitante import validar_datos_visitante
 
 app = Flask (__name__)
 bcrypt = Bcrypt(app)
@@ -708,7 +709,7 @@ def editar_cartera(pkidestado):
 
     return render_template('admin/cartera.html', cartera=cartera, inmuebles=inmuebles, trabajadores=trabajadores)
 
-@app.route('/admin/visitante', methods=['GET'])
+@app.route('/admin/visitante')
 @login_required
 def visitante():
     db = get_db_connection()
@@ -738,7 +739,7 @@ def visitante():
     if cedula:
         sql += " WHERE v.cedula LIKE %s"
         params.append(f"%{cedula}%")
-    sql += "LIMIT %s OFFSET %s"
+    sql += " ORDER BY v.fecha DESC LIMIT %s OFFSET %s"
     params.extend([per_page, offset])
 
     cursor.execute(sql, params)
@@ -768,6 +769,14 @@ def visitante():
 @app.route('/admin/visitante', methods=['POST'])
 @login_required
 def crear_visitante():
+    
+    errores = validar_datos_visitante(request.form)
+
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('visitante'))
+
     db = get_db_connection()
     cursor = db.cursor()
 
@@ -778,6 +787,7 @@ def crear_visitante():
     cedula = request.form['cedula']
     ingresa_carro = request.form['ingresa_carro']
 
+    
     sql= "INSERT INTO visitante (fecha, inmueble_id, autorizado, nombre, cedula, ingresa_carro) VALUES (%s,%s,%s,%s,%s,%s)"
     valores = (fecha, inmueble_id, autorizado, nombre, cedula, ingresa_carro)
 
@@ -802,6 +812,14 @@ def delete_visitante(pkidvisitante):
 @app.route('/admin/visitante/<int:pkidvisitante>/editar_visitante', methods=['POST'])
 @login_required
 def editar_visitante(pkidvisitante):
+
+    errores = validar_datos_visitante(request.form)
+
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('visitante'))
+    
     db = get_db_connection()
     cursor = db.cursor()
 
