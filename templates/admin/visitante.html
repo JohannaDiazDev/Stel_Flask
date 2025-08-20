@@ -13,62 +13,62 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ url_for('crear_visitante') }}" method="post" id="visitanteForm">
+                    <form action="{{ url_for('crear_visitante') }}" method="post" class="form-visitante">
                         <input type="hidden" id="pkidvisitante" name="pkidvisitante">
                         <div class="col-md-12 mb-3">
                             <label class="block text-sm font-medium text-[#1E4C40]" for="text">Fecha</label>
-                            <input type="datetime-local" id="fecha" name="fecha" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
-                            <p id="error-fecha" class="text-sm text-red-600 mt-1 hidden">
+                            <input type="datetime-local" name="fecha" class="input-fecha mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                            <p class="error-fecha text-sm text-red-600 mt-1 hidden">
                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                 Seleccione la fecha actual.
                             </p>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="block text-sm font-medium text-[#1E4C40]" for="inmueble_id">Inmueble</label>
-                            <select name="inmueble_id" id="inmueble_id" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                            <select name="inmueble_id" class="input-inmueble mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
                                 {% for inmueble in inmuebles %}
                                     <option value="{{inmueble.pkidinmueble}}">{{inmueble.numeroinmueble}}</option>
                                 {% endfor %}
                             </select>
-                            <p id="error-inmueble" class="text-sm text-red-600 mt-1 hidden">
+                            <p class="error-inmueble text-sm text-red-600 mt-1 hidden">
                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                 Seleccione un inmueble válido.
                             </p>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="block text-sm font-medium text-[#1E4C40]" for="autorizado">¿Autorizado?</label>
-                            <select name="autorizado" id="autorizado" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
-                                <option value="si">Si</option>
-                                <option value="no">No</option>
+                            <select name="autorizado" class="input-autorizado mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                <option value="Si">Si</option>
+                                <option value="No">No</option>
                             </select>
-                            <p id="error-autorizado" class="text-sm text-red-600 mt-1 hidden">
+                            <p class="error-autorizado text-sm text-red-600 mt-1 hidden">
                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                 Seleccione una opción.
                             </p>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="block text-sm font-medium text-[#1E4C40]" for="text">Nombre</label>
-                            <input type="text" id="nombre" name="nombre" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
-                            <p id="error-nombre" class="text-sm text-red-600 mt-1 hidden">
+                            <input type="text" name="nombre" class="input-nombre mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                            <p class="error-nombre text-sm text-red-600 mt-1 hidden">
                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                 El nombre es obligatorio.
                             </p>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="block text-sm font-medium text-[#1E4C40]" for="numer">Cedula</label>
-                            <input type="number" id="cedula" name="cedula" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
-                            <p id="error-cedula" class="text-sm text-red-600 mt-1 hidden">
+                            <input type="number" name="cedula" class="input-cedula mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                            <p class="error-cedula text-sm text-red-600 mt-1 hidden">
                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                 La cedula es obligatoria.
                             </p>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="block text-sm font-medium text-[#1E4C40]" for="ingresa_carro">¿Ingresa Carro?</label>
-                            <select name="ingresa_carro" id="ingresa_carro">
-                                <option value="1">Si</option>
-                                <option value="2">No</option>
+                            <select name="ingresa_carro" class="input-carro mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                <option value="Si">Si</option>
+                                <option value="No">No</option>
                             </select>
-                           <p id="error-carro" class="text-sm text-red-600 mt-1 hidden">
+                           <p class="error-carro text-sm text-red-600 mt-1 hidden">
                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                 Seleccione una opción.
                             </p>
@@ -117,16 +117,16 @@
                     <td class="border border-gray-300 px-4 py-2 text-center">{{visitante.fecha.strftime('%Y-%m-%d %H:%M%S')}}</td>
                     <td class="border border-gray-300 px-4 py-2 text-center">{{visitante.inmueble_id}}</td>
                     <td class="border border-gray-300 px-4 py-2 text-center">
-                        {{ 'Sí' if visitante.autorizado == 1 else 'No' }}
+                        {{ 'Si' if visitante.autorizado == Si else 'No' }}
                     </td>
                     <td class="border border-gray-300 px-4 py-2 text-center">{{visitante.nombre}}</td>
                     <td class="border border-gray-300 px-4 py-2 text-center">{{visitante.cedula}}</td>
                     <td class="border border-gray-300 px-4 py-2 text-center">
-                        {{ 'Sí' if visitante.ingresa_carro == 1 else 'No' }}
+                        {{ 'Si' if visitante.ingresa_carro == Si else 'No' }}
                     </td>
                     {% if session.get('rol_id') != 1 %}
                         <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-warning"style="background-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modalEditarVisitante{{visitante.pkidvisitante}}">
+                            <button type="button" class="btn btn-sm"style="background-color: #1E4C40; text-white" data-bs-toggle="modal" data-bs-target="#modal{{visitante.pkidvisitante}}">
                                 <i class="bi bi-person-raised-hand text-white"></i> 
                             </button>
                         </td>
@@ -138,78 +138,78 @@
                     </td>-->
                 </tr>
                 {% if session.get('rol_id') != 1 %}
-                <div class="modal fade" id="modalEditarVisitante{{visitante.pkidvisitante}}" tabindex="-1" aria-labelledby="modalEditarVisitanteLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content shadow-lg p-3 mb-5">
+                <div class="modal fade" id="modal{{visitante.pkidvisitante}}" tabindex="-1" aria-labelledby="modalLabell" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog centered">
+                        <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="modalEditarVisitanteLabel">{{visitante.pkidvisitante}}</h1>
+                                <h1 class="modal-title" id="modalLabell">Editar Visitante {{ visitante.pkidvisitante }}</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="post" id="visitanteFormEditar{{ visitante.pkidvisitante }}" class="visitante-form-editar" data-id="{{ visitante.pkidvisitante }}" action="{{ url_for('editar_visitante', pkidvisitante=visitante.pkidvisitante) }}">
+                                <form action="{{ url_for('editar_visitante', pkidvisitante=visitante.pkidvisitante) }}" method="post" class="form-visitante">
                                     <div class="col-md-12 mb-3">
-                                        <label class="block text-sm font-medium text-[#1E4C40]" for="datetime">Fecha</label>
-                                        <input type="datetime-local" id="fecha-editar{{ visitante.pkidvisitante }}" name="fecha" value="{{ visitante.fecha }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
-                                        <p id="error-fecha-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="fecha">Fecha</label>
+                                        <input type="datetime-local" name="fecha" value="{{ visitante.fecha }}" class="input-fecha mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                        <p class="error-fecha text-sm text-red-600 mt-1 hidden">
                                             <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                             Seleccione la fecha.
                                         </p>
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label class="block text-sm font-medium text-[#1E4C40]" for="inmueble_id">Inmueble</label>
-                                        <select name="inmueble_id" id="inmueble-editar{{ visitante.pkidvisitante }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
-                                            {% for inmueble in inmuebles%}
+                                        <select name="inmueble_id" class="input-inmueble mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                            {% for inmueble in inmuebles %}
                                                 <option value="{{ inmueble.pkidinmueble }}" {% if visitante.inmueble_id == inmueble.pkidinmueble %}selected{% endif %}>
                                                     {{ inmueble.numeroinmueble }}
                                                 </option>
                                             {% endfor %}
                                         </select>
-                                        <p id="error-inmueble-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                        <p class="error-inmueble text-sm text-red-600 mt-1 hidden">
                                             <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                             Seleccione un inmueble válido.
                                         </p>
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label class="block text-sm font-medium text-[#1E4C40]" for="autorizado">¿Autorizado?</label>
-                                        <select name="autorizado" id="autorizado-editar{{ visitante.pkidvisitante }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
-                                            <option value="1"{% if visitante.autorizado == 1 %}selected{% endif %}>Si</option>
-                                            <option value="2"{% if visitante.autorizado == 2 %}selected{% endif %}>No</option>
+                                        <select name="autorizado" class="input-autorizado mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                            <option value="Si"{% if visitante.autorizado == "Si" %}selected{% endif %}>Si</option>
+                                            <option value="No"{% if visitante.autorizado == "No" %}selected{% endif %}>No</option>
                                         </select>
-                                        <p id="error-autorizado-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                        <p class="error-autorizado text-sm text-red-600 mt-1 hidden">
                                             <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                             Seleccione una opción.
                                         </p>
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label class="block text-sm font-medium text-[#1E4C40]" for="nombre">Nombre</label>
-                                        <input type="text" id="nombre-editar{{ visitante.pkidvisitante }}" name="nombre" value="{{ visitante.nombre }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
-                                        <p id="error-nombre-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                        <input type="text" name="nombre" value="{{ visitante.nombre }}" class="input-nombre mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                        <p class="error-nombre text-sm text-red-600 mt-1 hidden">
                                             <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                             El nombre es obligatorio.
                                         </p>
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label class="block text-sm font-medium text-[#1E4C40]" for="cedula">Cédula</label>
-                                        <input type="number" id="cedula-editar{{ visitante.pkidvisitante }}" name="cedula" value="{{ visitante.cedula }}" class="mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
-                                        <p id="error-cedula-editar{{ visitante.pkidvisitante }}" class="text-sm text-red-600 mt-1 hidden">
+                                        <input type="number" name="cedula" value="{{ visitante.cedula }}" class="input-cedula mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                        <p class="error-cedula text-sm text-red-600 mt-1 hidden">
                                             <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                             La cedula es obligatoria.
                                         </p>
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label class="block text-sm font-medium text-[#1E4C40]" for="ingresa_carro">¿Ingresa Carro?</label>
-                                        <select name="ingresa_carro" id="carro-editar{{ visitante.pkidvisitante }}" class="border rounded px-2 py-1">
-                                            <option value="si"{% if visitante.ingresa_carro == si %}selected{% endif %}>Si</option>
-                                            <option value="no"{% if visitante.ingresa_carro == no %}selected{% endif %}>No</option>
+                                        <select name="ingresa_carro" class="input-carro mt-1 block px-4 py-2 w-full border rounded-md shadow-lg focus:ring-[#1E4C40] focus:border-[#1E4C40] border-gray-300">
+                                            <option value="Si"{% if visitante.ingresa_carro == "Si" %}selected{% endif %}>Si</option>
+                                            <option value="No"{% if visitante.ingresa_carro == "No" %}selected{% endif %}>No</option>
                                         </select>
-                                        <p id="error-carro-editar{{ visitante.pkidvisitante}}" class="text-sm text-red-600 mt-1 hidden">
+                                        <p class="error-carro text-sm text-red-600 mt-1 hidden">
                                             <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                             Seleccione una opción.
                                         </p>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Guardar<i class="bi bi-person-walking"></i></button>
-                                        <button type="button" class="btn btn-secondary" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Guardar</button>
+                                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                                     </div>
                                 </form>
                             </div>

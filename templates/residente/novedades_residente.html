@@ -240,10 +240,32 @@
                 descripcion.classList.add('border-[#1E4C40]');
             }
 
-
             if (!valido) {
                 e.preventDefault();
             }
+
+            // Ocultar error en caso de ingresar datos correctos
+            tipo.addEventListener('change', () => {
+                if (['Solicitud', 'Queja', 'Reporte'].includes(tipo.value)) {
+                    errorTipo.classList.add('hidden');
+                    tipo.classList.remove('border-red-500');
+                }
+            });
+
+            asunto.addEventListener('input', () => {
+                if (asunto.value.trim().length >= 3 && asunto.value.trim().length <= 100) {
+                    errorAsunto.classList.add('hidden');
+                    asunto.classList.remove('border-red-500');
+                }
+            });
+
+            descripcion.addEventListener('input', () => {
+                if (descripcion.value.trim().length >= 10 && descripcion.value.trim().length <= 300) {
+                    errorDescripcion.classList.add('hidden');
+                    descripcion.classList.remove('border-red-500');
+                }
+            });
+
         });
     </script>
 
@@ -301,6 +323,27 @@
                 // Detener envío si no es válido
                 if (!valido) {
                     e.preventDefault();
+                }
+            });
+
+            tipo.addEventListener('change', () => {
+                if (['Solicitud', 'Queja', 'Reporte'].includes(tipo.value)) {
+                    errorTipo.classList.add('hidden');
+                    tipo.classList.remove('border-red-500');
+                }
+            });
+
+            asunto.addEventListener('input', () => {
+                if (asunto.value.trim().length >= 3 && asunto.value.trim().length <= 100) {
+                    errorAsunto.classList.add('hidden');
+                    asunto.classList.remove('border-red-500');
+                }
+            });
+
+            descripcion.addEventListener('input', () => {
+                if (descripcion.value.trim().length >= 10 && descripcion.value.trim().length <= 300) {
+                    errorDescripcion.classList.add('hidden');
+                    descripcion.classList.remove('border-red-500');
                 }
             });
         });

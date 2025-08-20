@@ -26,35 +26,53 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ url_for('crear_usuario') }}" method="post">
+                    <form action="{{ url_for('crear_usuario') }}" method="post" class="form-usuario">
                         <input type="hidden" id="pkiduser" name="pkiduser">
                         <div class="mb-2">
                             <label for="text">Nombre</label>
-                            <input type="text" id="nombre" name="nombre" required class="border rounded px-2 py-1 w-full">
+                            <input type="text" class="input-nombre" name="nombre" class="border rounded px-2 py-1 w-full">
+                            <p class="error-nombre text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> El nombre debe tener mínimo 3 caracteres.
+                            </p>
                         </div>
                         <div class="mb-2">
                             <label for="cedula">Cedula</label>
-                            <input type="text" id="cedula" name="cedula" required class="border rounded px-2 py-1 w-full">
+                            <input type="number" class="input-cedula" name="cedula"  class="border rounded px-2 py-1 w-full">
+                            <p class="error-cedula text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La cédula debe contener mínimo 4 caracteres.
+                            </p>
                         </div>
                         <div class="mb-2">
                             <label for="celular">celular</label>
-                            <input type="number" id="celular" name="celular" required class="border rounded px-2 py-1 w-full">
+                            <input type="number" class="input-celular" name="celular"  class="border rounded px-2 py-1 w-full">
+                            <p class="error-celular text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Número de celular inválido.
+                            </p>
                         </div>
                         <div class="mb-2">
                             <label for="correo">Correo</label>
-                            <input type="email" id="correo" name="correo" required class="border rounded px-2 py-1 w-full">
+                            <input type="email" class="input-correo" name="correo"  class="border rounded px-2 py-1 w-full">
+                            <p class="error-correo text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> correo inválido.
+                            </p>
                         </div>
                         <div class="mb-2">
                             <label for="contraseña">Contraseña</label>
-                            <input type="password" id="contraseña" name="contraseña" required class="border rounded px-2 py-1 w-full">
+                            <input type="password" class="input-contraseña" name="contraseña"  class="border rounded px-2 py-1 w-full">
+                            <p class="error-contraseña text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La contraseña es obligatoria.
+                            </p>
                         </div>
                         <div class="mb-2">
                             <label for="rol_id">Rol </label>
-                            <select name="rol_id">
+                            <select name="rol_id" class="input-rol_id">
                                 {% for rol in roles %}
                                     <option value="{{ rol.pkidrol }}">{{ rol.nombrerol }}</option>
                                 {% endfor %}
                             </select>
+                            <p class="error-rol text-sm text-red-600 mt-1 hidden">
+                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Seleccione un rol.
+                            </p>
                         </div>
                         <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" style="background-color: #a11129;" data-bs-dismiss="modal">Cerrar</button>
@@ -106,19 +124,34 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                    <form action="{{ url_for('editar_usuario', pkiduser=usuario.pkiduser) }}" method="POST">
+                    <form action="{{ url_for('editar_usuario', pkiduser=usuario.pkiduser) }}" method="POST" class="form-usuario">
                         <label for="text" class="text-[#1E4C40] font-semibold">Nombre</label>
-                        <input type="text" id="nombre" name="nombre" value="{{usuario.nombre}}" required class="border rounded px-2 py-1 w-full">
+                        <input type="text" class="input-nombre" name="nombre" value="{{usuario.nombre}}"  class="border rounded px-2 py-1 w-full">
+                        <p class="error-nombre text-sm text-red-600 mt-1 hidden">
+                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> El nombre debe tener mínimo 3 caracteres.
+                        </p>
                         <label for="cedula" class="text-[#1E4C40] font-semibold">Cedula</label>
-                        <input type="text" id="cedula" name="cedula" value="{{usuario.cedula}}"required class="border rounded px-2 py-1 w-full">
+                        <input type="text" class="input-cedula" name="cedula" value="{{usuario.cedula}}" class="border rounded px-2 py-1 w-full">
+                        <p class="error-cedula text-sm text-red-600 mt-1 hidden">
+                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La cédula debe contener mínimo 4 caracteres.
+                        </p>
                         <label for="celular" class="text-[#1E4C40] font-semibold">Celular</label>
-                        <input type="number" id="celular" name="celular" value="{{usuario.celular}}"required class="border rounded px-2 py-1 w-full">
+                        <input type="number" class="input-celular" name="celular" value="{{usuario.celular}}" class="border rounded px-2 py-1 w-full">
+                        <p class="error-celular text-sm text-red-600 mt-1 hidden">
+                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Número de celular inválido.
+                        </p>
                         <label for="correo" class="text-[#1E4C40] font-semibold">Correo</label>
-                        <input type="email" id="correo" name="correo" value="{{usuario.correo}}" required class="border rounded px-2 py-1 w-full">
+                        <input type="email" class="input-correo" name="correo" value="{{usuario.correo}}"  class="border rounded px-2 py-1 w-full">
+                        <p class="error-correo text-sm text-red-600 mt-1 hidden">
+                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> correo inválido.
+                        </p>
                         <label for="contraseña" class="text-[#1E4C40] font-semibold">Contraseña</label>
-                        <input type="password" id="contraseña" name="contraseña" value="{{usuario.contraseña}}" class="border rounded px-2 py-1 w-full">
+                        <input type="password" class="input-contraseña" name="contraseña" value="{{usuario.contraseña}}" class="border rounded px-2 py-1 w-full">
+                        <p class="error-contraseña text-sm text-red-600 mt-1 hidden">
+                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La contraseña es obligatoria.
+                        </p>
                         <label for="rol_id" class="text-[#1E4C40] font-semibold">Rol </label>
-                        <select id="rol_id" name="rol_id" class="border rounded px-2 py-1 w-full">
+                        <select class="input-rol_id" name="rol_id" class="border rounded px-2 py-1 w-full">
                             {% for rol in roles %}
                                 <option value="{{ rol.pkidrol }}" 
                                     {% if usuario and usuario.rol_id and usuario.rol_id == rol.pkidrol %}selected{% endif %}>
@@ -126,6 +159,9 @@
                                 </option>
                             {% endfor %}
                         </select>
+                        <p class="error-rol text-sm text-red-600 mt-1 hidden">
+                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Seleccione un rol.
+                        </p>
                     </div>
                     <div class="modal-footer">
                     
@@ -155,3 +191,6 @@
  </div>
  
  {% endblock %}
+ {% block scripts %}
+    <script src="{{url_for('static', filename='js/validar_usuarios.js') }}"></script>
+{% endblock %}

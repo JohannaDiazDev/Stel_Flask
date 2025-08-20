@@ -4,25 +4,31 @@ from datetime import datetime
 def validar_datos_correspondencia(form):
     errores = []
 
-    inmueble_id = form.get('inmueble_id').strip()
-    descripcion = form.get('descripcion', '').strip()
+    tipo = (form.get('tipo') or '').strip().lower()
+    inmueble_id = form.get('inmueble_id')
+    descripcion = form.get('descripcion', '')
 
+    tipos_validos = ['paquete', 'agua', 'gas', 'luz']
+    if tipo not in tipos_validos:
+        errores.append('Tipo de correspondencia inválido.')
 
-    if not inmueble_id or not inmueble_id.isdigit():
-        errores.append('Debe seleccionar un inmueble.')
-
-    if not descripcion or len(descripcion) < 3 or len(descripcion) > 200:
-        errores.append('La descripción debe tener entre 3 y 200 caracteres.')
+    # Validar inmueble y descripción solo si es Paquete
+    if tipo == 'paquete':
+        if not inmueble_id or not inmueble_id.isdigit():
+            errores.append('Debe seleccionar un inmueble.')
+        if not descripcion or len(descripcion) < 3 or len(descripcion) > 200:
+            errores.append('La descripción debe tener entre 3 y 200 caracteres.')
 
     return errores
+
 
 def validar_edicion_correspondencia(form):
     errores = []
 
-    descripcion = form.get('descripcion','')
-    estado = form.get('estado','')
-    fecha_entrega = form.get('fecha_entrega','')
-    fecha_recibido = form.get('fecha_recibido','')
+    descripcion = form.get('descripcion', '')
+    estado = form.get('estado', '')
+    fecha_entrega = form.get('fecha_entrega', '')
+    fecha_recibido = form.get('fecha_recibido', '')
 
     if not descripcion or len(descripcion) < 3 or len(descripcion) > 200:
         errores.append('La descripción debe tener entre 3 y 200 caracteres.')
@@ -39,5 +45,4 @@ def validar_edicion_correspondencia(form):
         except ValueError:
             errores.append('Formato de fecha inválido.')
 
-    return errores                    
-
+    return errores

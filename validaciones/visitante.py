@@ -10,30 +10,34 @@ def validar_datos_visitante(form):
     autorizado = form.get('autorizado', '').strip()
     nombre = form.get('nombre', '').strip()
     cedula = form.get('cedula', '').strip()
-    ingresa_carro = form.get('ingresa_carro', '').strip()
+    carro = form.get('ingresa_carro', '').strip()
 
-    # Validar nombre
-    if not nombre or not nombre.replace(" ", "").isalpha() or len(nombre) < 3 or len(nombre) > 50:
+    # nombre
+    if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{3,50}$', nombre):
         errores.append('El nombre debe tener entre 3 y 50 letras.')
 
-    # Validar cédula
+    # cédula
     if not cedula.isdigit() or not (4 <= len(cedula) <= 10):
         errores.append('La cédula debe tener entre 4 y 10 dígitos.')
 
-    # Validar fecha es hoy
-    try:
-        entrada = datetime.strptime(fecha, "%Y-%m-%dT%H:%M")
-    except ValueError:
-        errores.append('La fecha no tiene un formato válido.')
+    # fecha formato
+    if not fecha:
+        errores.append('Debe ingresar una fecha.')
+    else:
+        try:
+            datetime.strptime(fecha, '%Y-%m-%dT%H:%M') 
+        except ValueError:
+            errores.append('La fecha no tiene un formato válido.')
 
-    # Validar selectores
-    if not inmueble_id:
-        errores.append('Debe seleccionar un inmueble.')
+    # inmueble
+    if not inmueble_id or not inmueble_id.isdigit():
+        errores.append('Debe seleccionar un inmueble válido.')
 
-    if not autorizado:
-        errores.append('Debe indicar quién autorizó.')
+   
+    if autorizado not in ['Si', 'No']:
+        errores.append('Debe indicar si el ingreso es autorizado.')
 
-    if not ingresa_carro:
+    if carro not in ['Si', 'No']:
         errores.append('Debe seleccionar si ingresa con carro.')
 
     return errores

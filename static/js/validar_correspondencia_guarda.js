@@ -5,22 +5,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const descripcion = form.querySelector("textarea[name='descripcion']");
         const errorInmueble = document.getElementById('error-inmueble');
         const errorDescripcion = document.getElementById('error-descripcion');
+        const tipo = form.querySelector("input[name='tipo']").value;
 
-        // Validación en vivo
-        descripcion.addEventListener('input', () => {
-            const desc = descripcion.value.trim();
-            if (desc.length >= 3 && desc.length <= 200) {
-                errorDescripcion.classList.add('hidden');
-                descripcion.classList.remove('border-red-500');
-                descripcion.classList.add('border-[#1E4C40]');
+        // 🔹 Validación en vivo - inmueble
+        inmueble.addEventListener('change', () => {
+            if (inmueble.value) {
+                inmueble.classList.remove('border-red-500');
+                inmueble.classList.add('border-[#1E4C40]');
+                errorInmueble.classList.add('hidden');
             }
         });
 
-        inmueble.addEventListener('change', () => {
-            if (inmueble.value) {
-                errorInmueble.classList.add('hidden');
-                inmueble.classList.remove('border-red-500');
-                inmueble.classList.add('border-[#1E4C40]');
+        // 🔹 Validación en vivo - descripción
+        descripcion.addEventListener('input', () => {
+            const desc = descripcion.value.trim();
+            if (desc.length >= 3 && desc.length <= 200) {
+                descripcion.classList.remove('border-red-500');
+                descripcion.classList.add('border-[#1E4C40]');
+                errorDescripcion.classList.add('hidden');
             }
         });
 
@@ -28,21 +30,25 @@ document.addEventListener("DOMContentLoaded", () => {
         form.addEventListener('submit', function (e) {
             let valido = true;
 
+            // Ocultar errores previos
             [errorInmueble, errorDescripcion].forEach(el => el.classList.add('hidden'));
             [inmueble, descripcion].forEach(el => el.classList.remove('border-red-500'));
 
-            const desc = descripcion.value.trim();
-            if (!inmueble.value) {
-                errorInmueble.classList.remove('hidden');
-                inmueble.classList.add('border-red-500');
-                inmueble.classList.remove('border-[#1E4C40]');
-                valido = false;
-            }
-            if (!desc || desc.length < 3 || desc.length > 200) {
-                errorDescripcion.classList.remove('hidden');
-                descripcion.classList.add('border-red-500');
-                descripcion.classList.remove('border-[#1E4C40]');
-                valido = false;
+            if (tipo === "paquete") {
+                const desc = descripcion.value.trim();
+
+                if (!inmueble.value) {
+                    errorInmueble.classList.remove('hidden');
+                    inmueble.classList.add('border-red-500');
+                    inmueble.classList.remove('border-[#1E4C40]');
+                    valido = false;
+                }
+                if (!desc || desc.length < 3 || desc.length > 200) {
+                    errorDescripcion.classList.remove('hidden');
+                    descripcion.classList.add('border-red-500');
+                    descripcion.classList.remove('border-[#1E4C40]');
+                    valido = false;
+                }
             }
 
             if (!valido) e.preventDefault();
@@ -54,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const id = form.dataset.id;
 
         const descripcion = form.querySelector(`#descripcion-editar${id}`);
-        const estado = form.querySelector(`#estado-editar${id}`); 
+        const estado = form.querySelector(`#estado-editar${id}`);
         const fechaEntrega = form.querySelector(`#fecha-entrega-editar${id}`);
         const fechaRecibido = form.querySelector(`#fecha-recibido-editar${id}`);
 
@@ -95,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // Validación al enviar formulario de edición
         form.addEventListener('submit', (e) => {
             let valido = true;
 

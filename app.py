@@ -12,9 +12,7 @@ import locale
 locale.setlocale(locale.LC_TIME, 'Spanish_Colombia')
 from collections import defaultdict
 from functools import wraps
-from validaciones.parqueadero import validar_datos_parqueadero
-from validaciones.correspondencia import validar_datos_correspondencia, validar_edicion_correspondencia
-from validaciones.visitante import validar_datos_visitante
+from __init__ import *
 
 app = Flask (__name__)
 bcrypt = Bcrypt(app)
@@ -280,6 +278,13 @@ def crear_usuario():
     contraseña = request.form['contraseña']
     rol_id = request.form['rol_id']
 
+    errores = validar_datos_usuario(request.form)
+
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('usuarios'))
+
     sql = "INSERT INTO usuarios (nombre, cedula, celular, correo, contraseña, rol_id) VALUES (%s, %s, %s, %s, %s, %s)"
     valores = (nombre, cedula, celular, correo, contraseña, rol_id)
     
@@ -300,15 +305,21 @@ def delete(pkiduser):
     db.close()
     return redirect(url_for('usuarios'))    
 
-@app.route('/admin/usuarios/<int:pkiduser>/editar_usuario', methods=['GET', 'POST'])
+@app.route('/admin/usuarios/<int:pkiduser>/editar_usuario', methods=['POST'])
 @login_required
 def editar_usuario(pkiduser):
     db = get_db_connection()
     cursor = db.cursor()
 
-    if request.method == 'POST':
-        print(request.form)  # Verifica qué datos llegan en el formulario
+    errores = validar_datos_usuario(request.form)
 
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('usuarios'))
+
+    if request.method == 'POST':
+        
         # Obtener valores del formulario de forma segura
         nombre = request.form.get('nombre')
         cedula = request.form.get('cedula')
@@ -317,9 +328,7 @@ def editar_usuario(pkiduser):
         contraseña = request.form.get('contraseña')
         rol_id = request.form.get('rol_id')
 
-        if not nombre or not correo:  # Verifica que no haya valores vacíos
-            flash("Todos los campos son obligatorios", "error")
-            return redirect(url_for('editar_usuario', pkiduser=pkiduser))
+        
 
         # Actualizar usuario
         sql = """UPDATE usuarios SET nombre = %s, cedula = %s, celular = %s, 
@@ -441,7 +450,7 @@ def multa():
         sql += " WHERE m.tipo LIKE %s"
         params.append(f"%{tipo}%")
 
-    sql += " LIMIT %s OFFSET %s"
+    sql += " ORDER BY m.fecha DESC LIMIT %s OFFSET %s"
     params.extend([per_page, offset])
 
     cursor.execute(sql, params)
@@ -505,18 +514,27 @@ def crear_multa():
     trabajador_id = request.form['trabajador_id']
     fecha_pago = request.form['fecha_pago']
 
+    errores = validar_datos_multa(request.form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('multa'))    
+
     sql = "INSERT INTO multa (fecha, inmueble_id, tipo, valor, trabajador_id, fecha_pago) VALUES (%s, %s, %s, %s, %s, %s)"
     valores = (fecha, inmueble_id, tipo, valor, trabajador_id, fecha_pago)
 
     cursor.execute(sql, valores)
     db.commit()
-    cursor.close()
-    db.close()
-    cursor.execute("SELECT pkidtrabajador, nombre FROM trabajador")
+   
+    cursor.execute("""
+        SELECT t.pkidtrabajador, u.nombre
+        FROM trabajador t
+        LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
+    """)
     trabajadores = cursor.fetchall()
     cursor.close()
     db.close()
-    return redirect(url_for('multa', trabajadores,trabajadores))
+    return redirect(url_for('multa'))
 
 @app.route('/delete_multa/<int:pkidmulta>')
 @login_required
@@ -533,6 +551,13 @@ def delete_multa(pkidmulta):
 def editar_multa(pkidmulta):
     db = get_db_connection()
     cursor = db.cursor()
+
+    form = request.form
+    errores = validar_datos_multa(form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('multa'))
     
     if request.method == 'POST':
 
@@ -593,7 +618,7 @@ def cartera():
     if estado:
         sql += " WHERE c.estado LIKE %s"
         params.append(f"%{estado}%")
-    sql += " LIMIT %s OFFSET %s"
+    sql += " ORDER BY c.fecha_actual DESC LIMIT %s OFFSET %s"
     params.extend([per_page, offset])
 
     cursor.execute(sql,params)
@@ -647,17 +672,24 @@ def crear_cartera():
     trabajador_id = request.form['trabajador_id']
     observaciones = request.form['observaciones']
 
+    errores = validar_datos_cartera(request.form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('cartera'))    
+
     sql = "INSERT INTO cartera (fecha_actual, inmueble_id, estado, saldo, trabajador_id, observaciones) VALUES (%s, %s, %s, %s, %s, %s)"
     valores = (fecha_actual, inmueble_id, estado, saldo, trabajador_id, observaciones)
 
     cursor.execute(sql,valores)
     db.commit()
     
-    cursor.execute("SELECT pkidtrabajador FROM trabajador")
-    trabajadores = cursor.fetchall()
+    #cursor.execute("SELECT pkidtrabajador FROM trabajador")
+    #trabajadores = cursor.fetchall()
     cursor.close()
     db.close()
-    return redirect(url_for('cartera', trabajadores=trabajadores))
+    flash('Cartera registrada correctamente', 'success')
+    return redirect(url_for('cartera'))
 
 @app.route('/delete_cartera/<int:pkidestado>')
 @login_required
@@ -674,6 +706,13 @@ def delete_cartera(pkidestado):
 def editar_cartera(pkidestado):
     db = get_db_connection()
     cursor = db.cursor()
+
+    form = request.form
+    errores = validar_datos_cartera(form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect (url_for('cartera'))   
 
     if request.method == 'POST':
         fecha_actual = request.form.get('fecha_actual')
@@ -693,21 +732,21 @@ def editar_cartera(pkidestado):
 
     cursor.execute("SELECT * FROM cartera WHERE pkidestado = %s", (pkidestado,))
     cartera = cursor.fetchone()
-    cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
-    inmuebles = cursor.fetchall()
+    #cursor.execute("SELECT pkidinmueble, numeroinmueble FROM inmueble")
+    #inmuebles = cursor.fetchall()
 
-    cursor.execute("""
+    '''cursor.execute("""
         SELECT t.pkidtrabajador, u.nombre
         FROM trabajador t
         LEFT JOIN usuarios u ON t.usuario_id = u.pkiduser
         WHERE u.pkiduser = 1
     """)
-    trabajadores = cursor.fetchall()
+    trabajadores = cursor.fetchall()'''
 
     cursor.close()
     db.close() 
 
-    return render_template('admin/cartera.html', cartera=cartera, inmuebles=inmuebles, trabajadores=trabajadores)
+    return redirect(url_for('cartera'))
 
 @app.route('/admin/visitante')
 @login_required
@@ -769,13 +808,6 @@ def visitante():
 @app.route('/admin/visitante', methods=['POST'])
 @login_required
 def crear_visitante():
-    
-    errores = validar_datos_visitante(request.form)
-
-    if errores:
-        for error in errores:
-            flash(error, 'danger')
-        return redirect(url_for('visitante'))
 
     db = get_db_connection()
     cursor = db.cursor()
@@ -787,6 +819,12 @@ def crear_visitante():
     cedula = request.form['cedula']
     ingresa_carro = request.form['ingresa_carro']
 
+    errores = validar_datos_visitante(request.form)
+
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('visitante'))
     
     sql= "INSERT INTO visitante (fecha, inmueble_id, autorizado, nombre, cedula, ingresa_carro) VALUES (%s,%s,%s,%s,%s,%s)"
     valores = (fecha, inmueble_id, autorizado, nombre, cedula, ingresa_carro)
@@ -797,7 +835,7 @@ def crear_visitante():
     inmuebles = cursor.fetchall()
     cursor.close()
     db.close()
-    return redirect(url_for('visitante', inmuebles=inmuebles))
+    return redirect(url_for('visitante'))
 
 @app.route('/delete_visitante/<int:pkidvisitante>')
 @login_required
@@ -812,13 +850,6 @@ def delete_visitante(pkidvisitante):
 @app.route('/admin/visitante/<int:pkidvisitante>/editar_visitante', methods=['POST'])
 @login_required
 def editar_visitante(pkidvisitante):
-
-    errores = validar_datos_visitante(request.form)
-
-    if errores:
-        for error in errores:
-            flash(error, 'danger')
-        return redirect(url_for('visitante'))
     
     db = get_db_connection()
     cursor = db.cursor()
@@ -826,30 +857,29 @@ def editar_visitante(pkidvisitante):
     if session.get('rol_id') == 1:
         flash('No tienes permiso para editar visitantes.', 'danger')
         return redirect(url_for('visitante'))
-    if request.method == 'POST':
-        fecha = request.form.get('fecha')
-        inmueble_id = request.form.get('inmueble_id') 
-        autorizado = request.form.get('autorizado') 
-        nombre = request.form.get('nombre')
-        cedula = request.form.get('cedula')
-        ingresa_carro = request.form.get('ingresa_carro')
-
-        sql = "UPDATE visitante SET fecha = %s, inmueble_id = %s, autorizado = %s, nombre = %s, cedula = %s, ingresa_carro = %s WHERE pkidvisitante = %s"
-        valores = (fecha, inmueble_id, autorizado, nombre, cedula, ingresa_carro, pkidvisitante)
-        cursor.execute(sql,valores)
-        db.commit()
-        db.close()
-
-        flash("Visitante actualizado correctamente", "success")
+    
+    form = request.form
+    errores = validar_datos_visitante(form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
         return redirect(url_for('visitante'))
-    cursor.execute("SELECT * FROM visitante WHERE pkidvisitante = %s", (pkidvisitante))
-    visitante = cursor.fetchone()
-    cursor.execute("SELECT * FROM inmueble")
-    inmuebles = cursor.fetchall()
-    cursor.close()
+    
+    fecha = request.form.get('fecha')
+    inmueble_id = request.form.get('inmueble_id') 
+    autorizado = request.form.get('autorizado') 
+    nombre = request.form.get('nombre')
+    cedula = request.form.get('cedula')
+    ingresa_carro = request.form.get('ingresa_carro')
+
+    sql = "UPDATE visitante SET fecha = %s, inmueble_id = %s, autorizado = %s, nombre = %s, cedula = %s, ingresa_carro = %s WHERE pkidvisitante = %s"
+    valores = (fecha, inmueble_id, autorizado, nombre, cedula, ingresa_carro, pkidvisitante)
+    cursor.execute(sql,valores)
+    db.commit()
     db.close()
 
-    return render_template('admin/visitante.html', visitante=visitante, inmuebles=inmuebles)
+    flash("Visitante actualizado correctamente", "success")
+    return redirect(url_for('visitante'))
 
 @app.route('/admin/parqueadero', methods=['GET','POST'])
 @login_required
@@ -1054,6 +1084,12 @@ def crear_novedad():
     descripcion = request.form['descripcion']
     estado = request.form['estado']
 
+    errores = validar_datos_novedad(request.form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect(url_for('novedades'))    
+
     sql = """
         INSERT INTO novedades (trabajador_id, fecha, inmueble_id, tipo, asunto, descripcion, estado)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -1086,6 +1122,13 @@ def editar_novedad(pkidnovedad):
             cursor.close()
             db.close()
             return redirect(url_for('novedades'))
+
+    form = request.form
+    errores = validar_datos_novedad(form)
+    if errores:
+        for error in errores:
+            flash(error, 'danger')
+        return redirect (url_for('novedades'))    
 
     if request.method == 'POST':
         trabajador_id = request.form.get('trabajador_id')

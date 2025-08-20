@@ -33,7 +33,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <!-- FORMULARIO CREAR NOVEDAD (POST) -->
-                <form method="POST" action="{{ url_for('crear_novedad') }}">
+                <form method="POST" action="{{ url_for('crear_novedad') }}" class="form-novedad">
                     <div class="modal-header">
                         <h5 class="modal-title" id="modalNovedadLabel">Registrar Novedad</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -42,16 +42,22 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="trabajador_id" class="block text-sm font-medium text-[#1E4C40]">Trabajador</label>
-                                <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="trabajador_id" required>
+                                <select class="input-trabajador mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="trabajador_id">
                                     <option value="">Seleccione</option>
                                     {% for trabajador in trabajadores %}
                                         <option value="{{ trabajador.pkidtrabajador }}">{{ trabajador.nombre }}</option>
                                     {% endfor %}
                                 </select>
+                                <p class="error-trabajador text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Debe seleccionar un trabajador.
+                                </p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="fecha" class="block text-sm font-medium text-[#1E4C40]">Fecha</label>
-                                <input type="datetime-local" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="fecha" required>
+                                <input type="datetime-local" class="input-fecha mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="fecha">
+                                <p class="error-fecha text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Debe ingresar una fecha.
+                                </p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="inmueble_id" class="block text-sm font-medium text-[#1E4C40]">Inmueble (opcional)</label>
@@ -64,28 +70,40 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
-                                <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="tipo" required>
+                                <select class="input-tipo mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="tipo">
                                     <option value="">Seleccione un tipo</option>
                                     <option value="Solicitud">Solicitud</option>
                                     <option value="Queja">Queja</option>
                                     <option value="Reporte">Reporte</option>
                                 </select>
+                                <p class="error-tipo text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Debe seleccionar un tipo válido.
+                                </p>
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="asunto" class="block text-sm font-medium text-[#1E4C40]">Asunto</label>
-                                <input type="text" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="asunto" required>
+                                <input type="text" class="input-asunto mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="asunto">
+                                <p class="error-asunto text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> El asunto debe tener entre 5 y 100 caracteres.
+                                </p>
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="descripcion" class="block text-sm font-medium text-[#1E4C40]">Descripción</label>
-                                <textarea class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="descripcion" rows="3" required></textarea>
+                                <textarea class="input-descripcion mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="descripcion" rows="3"></textarea>
+                                <p class="error-descripcion text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La descripción debe tener entre 10 y 500 caracteres.
+                                </p>
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="estado" class="block text-sm font-medium text-[#1E4C40]">Estado</label>
-                                <select class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="estado" required>
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="proceso">Proceso</option>
-                                    <option value="resuelto">Resuelto</option>
+                                <select class="input-estado mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="estado">
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="Proceso">Proceso</option>
+                                    <option value="Resuelto">Resuelto</option>
                                 </select>
+                                <p class="error-estado text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Debe seleccionar un estado válido.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -159,7 +177,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form action="{{ url_for('editar_novedad', pkidnovedad=novedad.pkidnovedad) }}" method="post">
+                        <form action="{{ url_for('editar_novedad', pkidnovedad=novedad.pkidnovedad) }}" method="post" class="form-novedad">
                             <div class="mb-2">
                                 <label for="trabajador_id" class="block text-sm font-medium text-[#1E4C40]">Trabajador</label>
                                 <input type="hidden" name="trabajador_id" value="{{ novedad.trabajador_id }}">
@@ -167,7 +185,10 @@
                             </div>
                             <div class="mb-2">
                                 <label for="fecha" class="block text-sm font-medium text-[#1E4C40]">Fecha</label>
-                                <input type="datetime-local" name="fecha" value="{{ novedad.fecha }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                <input type="datetime-local" name="fecha" value="{{ novedad.fecha }}" class="input-fecha mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                <p class="error-fecha text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Debe ingresar una fecha.
+                                </p>
                             </div>
                             <div class="mb-2">
                                 <label for="inmueble_id" class="block text-sm font-medium text-[#1E4C40]">Inmueble</label>
@@ -182,20 +203,29 @@
                             </div>
                             <div class="mb-2">
                                 <label for="tipo" class="block text-sm font-medium text-[#1E4C40]">Tipo</label>
-                                <select name="tipo" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                <select name="tipo" class="input-tipo mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
                                     {% set tipos = ['Solicitud','Queja','Reporte'] %}
                                     {% for tipo_opcion in tipos %}
                                         <option value="{{ tipo_opcion }}" {% if novedad.tipo == tipo_opcion %}selected{% endif %}>{{tipo_opcion}}</option>
                                     {% endfor %}
                                 </select>
+                                <p class="error-tipo text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Debe seleccionar un tipo válido.
+                                </p>
                             </div>
                             <div class="mb-2">
                                 <label for="asunto" class="block text-sm font-medium text-[#1E4C40]">Asunto</label>
-                                <input type="text" name="asunto" value="{{ novedad.asunto }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                <input type="text" name="asunto" value="{{ novedad.asunto }}" class="input-asunto mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                <p class="error-asunto text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> El asunto debe tener entre 5 y 100 caracteres.
+                                </p>
                             </div>
                             <div class="mb-2">
                                 <label for="descripcion" class="block text-sm font-medium text-[#1E4C40]">Descripción</label>
-                                <textarea name="descripcion" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">{{ novedad.descripcion }}</textarea>
+                                <textarea name="descripcion" class="input-descripcion mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">{{ novedad.descripcion }}</textarea>
+                                <p class="error-descripcion text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La descripción debe tener entre 10 y 500 caracteres.
+                                </p>
                             </div>
                             <div class="mb-2">
                                 <label for="estado" class="block text-sm font-medium text-[#1E4C40]">Estado</label>
@@ -205,6 +235,9 @@
                                         <option value="{{ estado_opcion }}" {% if novedad.estado == estado_opcion %}selected{% endif %}>{{ estado_opcion }}</option>
                                     {% endfor %}
                                 </select>
+                                <p class="error-estado text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Debe seleccionar un estado válido.
+                                </p>
                             </div>
                             <div class="modal-footer">
                                 <button type="submit" class="btn btn-success" style="background-color: #1E4C40;">Guardar <i class="bi bi-floppy-fill"></i></button>
@@ -254,4 +287,7 @@
 
 </div>
 
+{% endblock %}
+{% block scripts %}
+    <script src="{{url_for('static', filename='js/validar_novedades.js') }}"></script>
 {% endblock %}
