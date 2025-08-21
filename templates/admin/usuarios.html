@@ -18,66 +18,69 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="modalUsuarioLabel" aria-hidden="true">
+        <div class="modal-dialog ">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Usuario <i class="bi bi-person-plus"></i></h1>
+                    <h1 class="modal-title fs-5" id="modalUsuarioLabel">Registrar Usuario <i class="bi bi-person-plus"></i></h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form action="{{ url_for('crear_usuario') }}" method="post" class="form-usuario">
                         <input type="hidden" id="pkiduser" name="pkiduser">
-                        <div class="mb-2">
-                            <label for="text">Nombre</label>
-                            <input type="text" class="input-nombre" name="nombre" class="border rounded px-2 py-1 w-full">
-                            <p class="error-nombre text-sm text-red-600 mt-1 hidden">
-                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> El nombre debe tener mínimo 3 caracteres.
-                            </p>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="block text-sm font-medium text-[#1E4C40]" for="text">Nombre</label>
+                                <input type="text" class="input-nombre mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="nombre">
+                                <p class="error-nombre text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> El nombre debe tener mínimo 3 caracteres.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="block text-sm font-medium text-[#1E4C40]" for="cedula">Cedula</label>
+                                <input type="number" class="input-cedula mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="cedula" >
+                                <p class="error-cedula text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La cédula debe contener mínimo 4 caracteres.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="block text-sm font-medium text-[#1E4C40]" for="celular">celular</label>
+                                <input type="number" class="input-celular mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="celular" >
+                                <p class="error-celular text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Número de celular inválido.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="block text-sm font-medium text-[#1E4C40]" for="correo">Correo</label>
+                                <input type="email" class="input-correo mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="correo" >
+                                <p class="error-correo text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> correo inválido.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="block text-sm font-medium text-[#1E4C40]" for="contraseña">Contraseña</label>
+                                <input type="password" class="input-contraseña mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="contraseña" >
+                                <p class="error-contraseña text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La contraseña es obligatoria.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="block text-sm font-medium text-[#1E4C40]" for="rol_id">Rol </label>
+                                <select name="rol_id" class="input-rol_id mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                    {% for rol in roles %}
+                                        <option value="{{ rol.pkidrol }}">{{ rol.nombrerol }}</option>
+                                    {% endfor %}
+                                </select>
+                                <p class="error-rol text-sm text-red-600 mt-1 hidden">
+                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Seleccione un rol.
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" id="crear_usuario" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Registrar</button>
+                                <button type="button" class="btn btn-secondary" style="background-color: #a11129;" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
                         </div>
-                        <div class="mb-2">
-                            <label for="cedula">Cedula</label>
-                            <input type="number" class="input-cedula" name="cedula"  class="border rounded px-2 py-1 w-full">
-                            <p class="error-cedula text-sm text-red-600 mt-1 hidden">
-                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La cédula debe contener mínimo 4 caracteres.
-                            </p>
-                        </div>
-                        <div class="mb-2">
-                            <label for="celular">celular</label>
-                            <input type="number" class="input-celular" name="celular"  class="border rounded px-2 py-1 w-full">
-                            <p class="error-celular text-sm text-red-600 mt-1 hidden">
-                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Número de celular inválido.
-                            </p>
-                        </div>
-                        <div class="mb-2">
-                            <label for="correo">Correo</label>
-                            <input type="email" class="input-correo" name="correo"  class="border rounded px-2 py-1 w-full">
-                            <p class="error-correo text-sm text-red-600 mt-1 hidden">
-                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> correo inválido.
-                            </p>
-                        </div>
-                        <div class="mb-2">
-                            <label for="contraseña">Contraseña</label>
-                            <input type="password" class="input-contraseña" name="contraseña"  class="border rounded px-2 py-1 w-full">
-                            <p class="error-contraseña text-sm text-red-600 mt-1 hidden">
-                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La contraseña es obligatoria.
-                            </p>
-                        </div>
-                        <div class="mb-2">
-                            <label for="rol_id">Rol </label>
-                            <select name="rol_id" class="input-rol_id">
-                                {% for rol in roles %}
-                                    <option value="{{ rol.pkidrol }}">{{ rol.nombrerol }}</option>
-                                {% endfor %}
-                            </select>
-                            <p class="error-rol text-sm text-red-600 mt-1 hidden">
-                                <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Seleccione un rol.
-                            </p>
-                        </div>
-                        <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" style="background-color: #a11129;" data-bs-dismiss="modal">Cerrar</button>
-                        <button type="submit" id="crear_usuario" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Registrar</button>
-                        </div>
+                        
                     </form>
                 </div>
             </div>
@@ -115,60 +118,74 @@
                     </a>
                 </td>
             </tr>
-
-            <div class="modal fade" id="modal{{usuario.pkiduser}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">{{usuario.pkiduser}}</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <!-- Modal Editar -->
+            <div class="modal fade" id="modal{{usuario.pkiduser}}" tabindex="-1" aria-labelledby="modalLabell" aria-hidden="true">
+                <div class="modal-dialog dialog-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalLabell">{{usuario.pkiduser}}</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="{{ url_for('editar_usuario', pkiduser=usuario.pkiduser) }}" method="POST" class="form-editar-usuario" data-id="{{  usuario.pkiduser }}">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="text">Nombre</label>
+                                        <input type="text" name="nombre" value="{{ usuario.nombre }}" id="nombre-editar{{ usuario.pkiduser }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                        <p id="error-nombre-editar{{ usuario.pkiduser }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> El nombre debe tener mínimo 3 caracteres.
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="cedula">Cedula</label>
+                                        <input type="text" name="cedula" value="{{ usuario.cedula }}" id="cedula-editar{{ usuario.pkiduser }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                        <p id="error-cedula-editar{{ usuario.pkiduser }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La cédula debe contener mínimo 4 caracteres.
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="celular">Celular</label>
+                                        <input type="number" name="celular" value="{{ usuario.celular }}" id="celular-editar{{ usuario.pkiduser }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                        <p id="error-celular-editar{{ usuario.pkiduser }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Número de celular inválido.
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="correo">Correo</label>
+                                        <input type="email" name="correo" value="{{usuario.correo}}" id="correo-editar{{ usuario.pkiduser }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                        <p id="error-correo-editar{{ usuario.pkiduser }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> correo inválido.
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="contraseña">Contraseña</label>
+                                        <input type="password" name="contraseña" value="{{usuario.contraseña}}" id="contraseña-editar{{ usuario.pkiduser }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                        <p id="error-contraseña-editar{{ usuario.pkiduser }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La contraseña es obligatoria.
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="rol_id">Rol </label>
+                                        <select name="rol_id" id="rol-editar{{ usuario.pkiduser }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                            {% for rol in roles %}
+                                                <option value="{{ rol.pkidrol }}" 
+                                                    {% if usuario and usuario.rol_id and usuario.rol_id == rol.pkidrol %}selected{% endif %}>
+                                                    {{ rol.nombrerol }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <p id="error-rol-editar{{ usuario.pkiduser }}" class="text-sm text-red-600 mt-1 hidden">
+                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Seleccione un rol.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Guardar <i class="bi bi-floppy-fill"></i> </button>
+                                        <button type="button" class="btn btn-success" style="background-color: #a11129;" data-bs-dismiss="modal">Cancelar</button>
+                                    </div>
+                                </div>  
+                            </form>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                    <form action="{{ url_for('editar_usuario', pkiduser=usuario.pkiduser) }}" method="POST" class="form-usuario">
-                        <label for="text" class="text-[#1E4C40] font-semibold">Nombre</label>
-                        <input type="text" class="input-nombre" name="nombre" value="{{usuario.nombre}}"  class="border rounded px-2 py-1 w-full">
-                        <p class="error-nombre text-sm text-red-600 mt-1 hidden">
-                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> El nombre debe tener mínimo 3 caracteres.
-                        </p>
-                        <label for="cedula" class="text-[#1E4C40] font-semibold">Cedula</label>
-                        <input type="text" class="input-cedula" name="cedula" value="{{usuario.cedula}}" class="border rounded px-2 py-1 w-full">
-                        <p class="error-cedula text-sm text-red-600 mt-1 hidden">
-                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La cédula debe contener mínimo 4 caracteres.
-                        </p>
-                        <label for="celular" class="text-[#1E4C40] font-semibold">Celular</label>
-                        <input type="number" class="input-celular" name="celular" value="{{usuario.celular}}" class="border rounded px-2 py-1 w-full">
-                        <p class="error-celular text-sm text-red-600 mt-1 hidden">
-                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Número de celular inválido.
-                        </p>
-                        <label for="correo" class="text-[#1E4C40] font-semibold">Correo</label>
-                        <input type="email" class="input-correo" name="correo" value="{{usuario.correo}}"  class="border rounded px-2 py-1 w-full">
-                        <p class="error-correo text-sm text-red-600 mt-1 hidden">
-                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> correo inválido.
-                        </p>
-                        <label for="contraseña" class="text-[#1E4C40] font-semibold">Contraseña</label>
-                        <input type="password" class="input-contraseña" name="contraseña" value="{{usuario.contraseña}}" class="border rounded px-2 py-1 w-full">
-                        <p class="error-contraseña text-sm text-red-600 mt-1 hidden">
-                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La contraseña es obligatoria.
-                        </p>
-                        <label for="rol_id" class="text-[#1E4C40] font-semibold">Rol </label>
-                        <select class="input-rol_id" name="rol_id" class="border rounded px-2 py-1 w-full">
-                            {% for rol in roles %}
-                                <option value="{{ rol.pkidrol }}" 
-                                    {% if usuario and usuario.rol_id and usuario.rol_id == rol.pkidrol %}selected{% endif %}>
-                                    {{ rol.nombrerol }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <p class="error-rol text-sm text-red-600 mt-1 hidden">
-                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Seleccione un rol.
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                    
-                    <button type="submit" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Guardar <i class="bi bi-floppy-fill"></i> </button>
-                    </div>
-                    </form>
-                </div>
                 </div>
             </div>
 

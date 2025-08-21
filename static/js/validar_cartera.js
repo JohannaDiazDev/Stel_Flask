@@ -132,3 +132,91 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// Editar con dataset id
+document.querySelectorAll(".form-editar-cartera").forEach(form => {
+    let id = form.dataset.id;
+
+    let fecha = document.getElementById("fecha-editar" + id);
+    let errorFecha = document.getElementById("error-fecha-editar" + id);
+
+    let inmueble = document.getElementById("inmueble-editar" + id);
+    let errorInmueble = document.getElementById("error-inmueble-editar" + id);
+
+    let estado = document.getElementById("estado-editar" + id);
+    let errorEstado = document.getElementById("error-estado-editar" + id);
+
+    let saldo = document.getElementById("saldo-editar" + id);
+    let errorSaldo = document.getElementById("error-saldo-editar" + id);
+
+    let trabajador = document.getElementById("trabajador-editar" + id);
+    let errorTrabajador = document.getElementById("error-trabajador-editar" + id);
+
+    let observaciones = document.getElementById("observaciones-editar" + id);
+    let errorObservaciones = document.getElementById("error-observaciones-editar" + id);
+
+    // 🔹 Validación en vivo
+    fecha.addEventListener("input", () => {
+        if (fecha.value) errorFecha.classList.add("hidden");
+    });
+
+    inmueble.addEventListener("change", () => {
+        if (inmueble.value) errorInmueble.classList.add("hidden");
+    });
+
+    estado.addEventListener("change", () => {
+        if (estado.value) errorEstado.classList.add("hidden");
+    });
+
+    saldo.addEventListener("input", () => {
+        let s = parseFloat(saldo.value);
+        if (saldo.value && !isNaN(s) && s >= 0) {
+            errorSaldo.classList.add("hidden");
+        }
+    });
+
+    trabajador.addEventListener("change", () => {
+        if (trabajador.value) errorTrabajador.classList.add("hidden");
+    });
+
+    observaciones.addEventListener("input", () => {
+        if (observaciones.value.length <= 200) {
+            errorObservaciones.classList.add("hidden");
+        }
+    });
+
+    // 🔹 Validación en submit
+    form.addEventListener("submit", function(e) {
+        let valido = true;
+
+        if (!fecha.value) {
+            errorFecha.classList.remove("hidden");
+            valido = false;
+        }
+        if (!inmueble.value) {
+            errorInmueble.classList.remove("hidden");
+            valido = false;
+        }
+        if (!estado.value) {
+            errorEstado.classList.remove("hidden");
+            valido = false;
+        }
+        let saldoNum = parseFloat(saldo.value);
+        if (!saldo.value || isNaN(saldoNum) || saldoNum < 0) {
+            errorSaldo.classList.remove("hidden");
+            valido = false;
+        }
+        if (!trabajador.value) {
+            errorTrabajador.classList.remove("hidden");
+            valido = false;
+        }
+        if (observaciones.value.length > 200) {
+            errorObservaciones.classList.remove("hidden");
+            valido = false;
+        }
+
+        if (!valido) {
+            e.preventDefault();
+        }
+    });
+});

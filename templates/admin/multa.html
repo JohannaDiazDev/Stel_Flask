@@ -138,7 +138,7 @@
                     </a>
                 </td>
             </tr>
-            <div class="modal fade" id="modal{{multa.pkidmulta}}" tabindex="-1" aria-labelledby="ModalLabel1" aria-hidden="true">
+            <div class="modal fade" id="modal{{ multa.pkidmulta }}" tabindex="-1" aria-labelledby="modalMultaLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -146,7 +146,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form action="{{ url_for('editar_multa', pkidmulta=multa.pkidmulta) }}" method="post" id="multaFormEditar" class="form-editar-multa" data-id="{{ multa.pkidmulta }}">
+                            <form action="{{ url_for('editar_multa', pkidmulta=multa.pkidmulta) }}" method="post" class="form-editar-multa" data-id="{{ multa.pkidmulta }}">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="block text-sm font-medium text-[#1E4C40]" for="fecha">Fecha</label>
@@ -161,7 +161,7 @@
                                         <label class="block text-sm font-medium text-[#1E4C40]" for="inmueble_id">Inmueble</label>
                                         <select name="inmueble_id" id="inmueble-editar{{ multa.pkidmulta }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
                                             {% for inmueble in inmuebles %}
-                                                <option value="{{ inmueble.pkidinmueble }}" {% if multa.inmueble_id == inmueble.pkidinmueble %}selected{% endif %}>
+                                                <option value="{{ inmueble.pkidinmueble }}"{% if multa.inmueble_id == inmueble.pkidinmueble %}selected{% endif %}>
                                                     {{ inmueble.numeroinmueble }}
                                                 </option>
                                             {% endfor %}   
@@ -178,7 +178,7 @@
                                                 "Problemas con los vecinos", "Daños a zonas comunes", 
                                                 "Problemas con mascotas", "Inasistencia asamblea", "Carro rayado"] %}
                                             {% for tipo_opcion in tipos %}
-                                                <option value="{{ tipo_opcion }}" {% if multa.tipo == tipo_opcion %}selected{% endif %}>{{ tipo_opcion }}</option>
+                                                <option value="{{ tipo_opcion }}"{% if multa.tipo == tipo_opcion %}selected{% endif %}>{{ tipo_opcion }}</option>
                                             {% endfor %}
                                         </select>
                                         <p id="error-tipo-editar{{ multa.pkidmulta }}" class="text-sm text-red-600 mt-1 hidden">

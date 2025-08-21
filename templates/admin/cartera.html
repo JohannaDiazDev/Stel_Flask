@@ -134,7 +134,7 @@
                     </td>
                 </tr>
 
-                <div class="modal fade" id="modal{{cartera.pkidestado}}" tabindex="-1" aria-labelledby="modalCarteraLabel" aria-hidden="true">
+                <div class="modal fade" id="modal{{ cartera.pkidestado }}" tabindex="-1" aria-labelledby="modalCarteraLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -142,55 +142,55 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form class="form-cartera" action="{{ url_for('editar_cartera', pkidestado=cartera.pkidestado) }}" method="post">
+                                <form class="form-editar-cartera" action="{{ url_for('editar_cartera', pkidestado=cartera.pkidestado) }}" method="post" data-id="{{ cartera.pkidestado }}">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label class="block text-sm font-medium text-[#1E4C40]" for="datetime">Fecha</label>
-                                            <input type="datetime-local" name="fecha_actual" value="{{ cartera.fecha_actual }}" class="input-fecha mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
-                                            <p class="error-fecha text-sm text-red-600 mt-1 hidden">
+                                            <input type="datetime-local" name="fecha_actual" value="{{ cartera.fecha_actual }}" id="fecha-editar{{ cartera.pkidestado }}"  class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                            <p id="error-fecha-editar{{ cartera.pkidestado }}" class="text-sm text-red-600 mt-1 hidden">
                                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                                 La fecha es obligatoria.
                                             </p>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="block text-sm font-medium text-[#1E4C40]" for="inmueble_id">Inmueble</label>
-                                            <select name="inmueble_id" class="input-inmueble mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                            <select name="inmueble_id" id="inmueble-editar{{ cartera.pkidestado }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
                                                 {% for inmueble in inmuebles %}
                                                     <option value="{{ inmueble.pkidinmueble }}" {% if cartera.inmueble_id == inmueble.pkidinmueble %}selected{% endif %}>
                                                         {{ inmueble.numeroinmueble }}
                                                     </option>
                                                 {% endfor %}   
                                             </select>
-                                            <p class="error-inmueble text-sm text-red-600 mt-1 hidden">
+                                            <p id="error-inmueble-editar{{ cartera.pkidestado }}" class="text-sm text-red-600 mt-1 hidden">
                                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                                 Debe seleccionar un inmueble
                                             </p>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="block text-sm font-medium text-[#1E4C40]" for="estado">Estado</label>
-                                            <select name="estado" id="estado" class="input-estado mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                            <select name="estado" id="estado-editar{{ cartera.pkidestado }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
                                                 {% set estados = ["Paz y Salvo", "Moroso", "Acuerdo de Pago", 
                                                     "Cobro Juridico"] %}
                                                 {% for estado_opcion in estados %}
                                                     <option value="{{ estado_opcion }}" {% if cartera.estado == estado_opcion %}selected{% endif %}>{{ estado_opcion }}</option>
                                                 {% endfor %}
                                             </select>
-                                            <p class="error-estado text-sm text-red-600 mt-1 hidden">
+                                            <p id="error-estado-editar{{ cartera.pkidestado }}" class="text-sm text-red-600 mt-1 hidden">
                                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                                 Estado inválido.
                                             </p>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="block text-sm font-medium text-[#1E4C40]" for="saldo">Saldo</label>
-                                            <input type="number" name="saldo" value="{{ cartera.saldo }}"class="input-saldo mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
-                                            <p class="error-saldo text-sm text-red-600 mt-1 hidden">
+                                            <input type="number" name="saldo" value="{{ cartera.saldo }}" id="saldo-editar{{ cartera.pkidestado }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                            <p id="error-saldo-editar{{ cartera.pkidestado }}" class="text-sm text-red-600 mt-1 hidden">
                                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                                 El saldo debe ser un número positivo.
                                             </p>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="block text-sm font-medium text-[#1E4C40]" for="trabajador_id">Trabajador</label>
-                                            <select name="trabajador_id" class="input-trabajador mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                            <select name="trabajador_id" id="trabajador-editar{{ cartera.pkidestado }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
                                                 <option value="">Seleccione un Trabajador</option>
                                                 {% for trabajador in trabajadores %}
                                                     <option value="{{ trabajador.pkidtrabajador }}" 
@@ -199,15 +199,15 @@
                                                     </option>
                                                 {% endfor %}
                                             </select>
-                                            <p class="error-trabajador text-sm text-red-600 mt-1 hidden">
+                                            <p id="error-trabajador-editar{{ cartera.pkidestado }}" class="text-sm text-red-600 mt-1 hidden">
                                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                                 Debe seleccionar un trabajador.
                                             </p>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="block text-sm font-medium text-[#1E4C40]" for="observaciones">Observaciones</label>
-                                            <input type="text" name="observaciones" value="{{ cartera.observaciones }}" class="input-observaciones mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
-                                            <p class="error-observaciones text-sm text-red-600 mt-1 hidden">
+                                            <input type="text" name="observaciones" value="{{ cartera.observaciones }}" id="observaciones-editar{{ cartera.pkidestado }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                            <p id="error-observaciones-editar{{ cartera.pkidestado }}" class="text-sm text-red-600 mt-1 hidden">
                                                 <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i>
                                                 Las observaciones no deben superar los 200 caracteres.
                                             </p>
