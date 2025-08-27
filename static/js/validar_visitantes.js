@@ -132,3 +132,86 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+document.querySelectorAll(".form-editar-visitante").forEach(form => {
+    let id = form.dataset.id;
+
+    let fecha = document.getElementById("fecha-editar" + id);
+    let errorFecha = document.getElementById("error-fecha-editar" + id);
+
+    let inmueble = document.getElementById("inmueble-editar" + id);
+    let errorInmueble = document.getElementById("error-inmueble-editar" + id);
+
+    let autorizado = document.getElementById("autorizado-editar" + id);
+    let errorAutorizado = document.getElementById("error-autorizado-editar" + id);
+
+    let nombre = document.getElementById("nombre-editar" + id);
+    let errorNombre = document.getElementById("error-nombre-editar" + id);
+
+    let cedula = document.getElementById("cedula-editar" + id);
+    let errorCedula = document.getElementById("error-cedula-editar" + id);
+
+    let carro = document.getElementById("carro-editar" + id);
+    let errorCarro = document.getElementById("error-carro-editar" + id);
+
+    fecha.addEventListener("change", () => {
+        if (fecha.value) errorFecha.classList.add("hidden");
+    });
+
+    inmueble.addEventListener("change", () => {
+        if (inmueble.value) errorInmueble.classList.add("hidden");
+    });
+
+    autorizado.addEventListener("change", () => {
+        if (autorizado.value) errorAutorizado.classList.add("hidden");
+    });
+
+    nombre.addEventListener("input", () => {
+        if (nombre.value) errorNombre.classList.add("hidden");
+    });
+
+    cedula.addEventListener("input", () => {
+        if (cedula.value) errorCedula.classList.add("hidden");
+    });
+
+    carro.addEventListener("change", () => {
+        if (carro.value) errorCarro.classList.add("hidden");
+    });
+
+    form.addEventListener("submit", function(e) {
+        let valido = true;
+
+        if (!fecha.value) {
+            errorFecha.classList.remove("hidden");
+            valido = false;
+        }
+
+        if (!inmueble.value) {
+            errorInmueble.classList.remove("hidden");
+            valido = false;
+        }
+
+        if (!autorizado) {
+            errorAutorizado.classList.remove("hidden");
+            valido = false;
+        }
+
+        if (!nombre.value) {
+            errorNombre.classList.remove("hidden");
+            valido = false;
+        }
+
+        if (!cedula.value) {
+            errorCedula.classList.remove("hidden");
+            valido = false;
+        }
+
+        if (!carro.value) {
+            errorCarro.classList.remove("hidden");
+            valido = false;
+        }
+
+        if (!valido) {
+            e.preventDefault();
+        }
+    });
+});

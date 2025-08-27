@@ -387,10 +387,9 @@ def turnos():
     db = get_db_connection()
     cursor = db.cursor()
 
-    # Consulta guardas al principio
+    # Guardas disponibles
     cursor.execute("SELECT pkiduser, nombre FROM usuarios WHERE rol_id = 3")
-    columnas = [col[0] for col in cursor.description]
-    guardas = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+    guardas = [dict(zip([col[0] for col in cursor.description], fila)) for fila in cursor.fetchall()]
 
     if request.method == 'POST':
         usuario_id = request.form['usuario_id']
@@ -398,31 +397,90 @@ def turnos():
         hora_inicio = request.form['hora_inicio']
         hora_fin = request.form['hora_fin']
 
+        # Validar horas
+        if hora_inicio >= hora_fin:
+            flash("La hora de inicio debe ser menor que la hora de fin.", "danger")
+            return redirect(url_for('turnos'))
+
+        # Validar solapamiento
+        cursor.execute("""
+            SELECT COUNT(*) FROM turnos 
+            WHERE usuario_id = %s AND fecha = %s 
+            AND (hora_inicio < %s AND hora_fin > %s)
+        """, (usuario_id, fecha, hora_fin, hora_inicio))
+        if cursor.fetchone()[0] > 0:
+            flash("Ese turno se traslapa con otro del mismo guarda.", "danger")
+            return redirect(url_for('turnos'))
+
         # Insertar turno
         cursor.execute("""
             INSERT INTO turnos (usuario_id, fecha, hora_inicio, hora_fin)
             VALUES (%s, %s, %s, %s)
         """, (usuario_id, fecha, hora_inicio, hora_fin))
         db.commit()
-        cursor.close()
-        db.close()
+        flash("Turno registrado con éxito", "success")
 
         return redirect(url_for('turnos'))
 
+    # --- PAGINACIÓN ---
+    page = request.args.get('page', 1, type=int)
+    per_page = 4  # cantidad de registros por página
+    offset = (page - 1) * per_page
+
+    # Total de turnos
+    cursor.execute("SELECT COUNT(*) FROM turnos")
+    total_turnos = cursor.fetchone()[0]
+
+    # Turnos paginados (orden descendente por fecha y hora de inicio)
     cursor.execute("""
         SELECT t.*, u.nombre 
         FROM turnos t
         JOIN usuarios u ON t.usuario_id = u.pkiduser
-        ORDER BY t.fecha DESC, t.hora_inicio ASC
-    """)
+        ORDER BY t.fecha DESC, t.hora_inicio DESC
+        LIMIT %s OFFSET %s
+    """, (per_page, offset))
+
     columnas = [col[0] for col in cursor.description]
     turnos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+    total_pages = (total_turnos + per_page - 1) // per_page
 
     cursor.close()
     db.close()
 
-    response = make_response(render_template('/admin/turnos.html', guardas=guardas, turnos=turnos))
-    return response
+    return render_template('/admin/turnos.html',
+        guardas=guardas,
+        turnos=turnos,
+        page=page,
+        total_pages=total_pages)
+
+@app.route('/turnos/<int:pkidturno>/editar', methods=['POST'])
+@login_required
+def editar_turno(pkidturno):
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    fecha = request.form['fecha']
+    hora_inicio = request.form['hora_inicio']
+    hora_fin = request.form['hora_fin']
+
+    # Validaciones
+    if hora_inicio >= hora_fin:
+        flash("La hora de inicio debe ser menor que la hora de fin.", "danger")
+        return redirect(url_for('turnos'))
+
+    cursor.execute("""
+        UPDATE turnos 
+        SET fecha = %s, hora_inicio = %s, hora_fin = %s
+        WHERE pkidturno = %s
+    """, (fecha, hora_inicio, hora_fin, pkidturno))
+    db.commit()
+    cursor.close()
+    db.close()
+
+    flash("Turno actualizado correctamente", "success")
+    return redirect(url_for('turnos'))
+
 
 @app.route('/admin/multa', methods=['GET'])
 @login_required

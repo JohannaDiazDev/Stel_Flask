@@ -2,35 +2,40 @@ from flask import flash
 import re 
 
 def validar_datos_usuario(form):
-    errores = []
+    errores = {}
 
-    nombre = form['nombre'].strip()
-    cedula = form['cedula'].strip()
-    celular = form['celular'].strip()
-    correo = form['correo'].strip()
-    contraseña = form['contraseña'].strip()
-    rol_id = form['rol_id'].strip()
+    nombre = form.get('nombre').strip()
+    cedula = form.get('cedula').strip()
+    celular = form.get('celular').strip()
+    correo = form.get('correo').strip()
+    contraseña = form.get('contraseña').strip()
+    rol_id = form.get('rol_id').strip()
 
     regex_nombre = re.compile(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{3,50}$')
     regex_cedula = re.compile(r'^\d{4,10}$')
     regex_correo = re.compile(r'^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com)$')
+    regex_celular = re.compile(r'^3\d{9}$')
+    regex_contraseña = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=<>?{}[\]~]).{8,}$')
 
     if not regex_nombre.match(nombre):
-        errores.append('El nombre debe tener mínimo 3 caracteres.')
+        errores["nombre"] = 'El nombre debe tener mínimo 3 caracteres.'
 
     if not regex_cedula.match(cedula):
-        errores.append('la cédula debe contener mínimo 4 caracteres.')
+        errores["cedula"] = 'la cédula debe contener mínimo 4 caracteres.'
 
-    if not celular.isdigit() or len(celular) < 10:
-        errores.append('El celular debe tener al menos 10 dígitos.')
+    if not regex_celular.match(celular):
+        errores["celular"] = 'El celular debe tener al menos 10 dígitos.'
 
     if not regex_correo.match(correo):
-        errores.append('Correo Inválido.')       
+        errores["correo"] = 'Correo Inválido.'
 
-    if not contraseña:
-        errores.append('La contraseña es obligatoria.')
+    if not regex_contraseña.match(contraseña):
+        errores["contraseña"] = (
+            'La contraseña debe tener mínimo 8 caracteres, '
+            'incluyendo mayúscula, minúscula, npumero  y un carácter especial.'
+        )
 
     if not rol_id:
-        errores.append('Debe seleccionar un rol.')
+        errores["rol_id"] = 'Debe seleccionar un rol.'
 
     return errores    

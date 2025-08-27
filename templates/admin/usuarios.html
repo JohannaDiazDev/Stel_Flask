@@ -66,7 +66,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="block text-sm font-medium text-[#1E4C40]" for="rol_id">Rol </label>
-                                <select name="rol_id" class="input-rol_id mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                <select name="rol_id" class="input-rol mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
                                     {% for rol in roles %}
                                         <option value="{{ rol.pkidrol }}">{{ rol.nombrerol }}</option>
                                     {% endfor %}
