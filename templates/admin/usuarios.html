@@ -6,7 +6,7 @@
     <h2 class="text-2xl font-bold mb-4 text-[#1E4C40] text-center justify-center">Usuarios <i class="bi bi-people-fill"></i></h2>
     <div class="bg-white shadow rounded-lg p-4 mb-6 w-full">
         <div class="flex justify-between items-end flex-wrap gap-4">
-            <button type="button" class="btn btn-success"style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modal1">
+            <button type="button" class="btn btn-success"style="background-color: #1E4C40; border-color: #1E4C40;" data-bs-toggle="modal" data-bs-target="#modalUsuario">
                 Registrar Usuario <i class="bi bi-person-plus"></i>
             </button>
             <form method="GET" action="{{ url_for('usuarios') }}" class="relative w-full max-w-md">
@@ -19,68 +19,137 @@
 
     <!-- Modal -->
     <div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="modalUsuarioLabel" aria-hidden="true">
-        <div class="modal-dialog ">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalUsuarioLabel">Registrar Usuario <i class="bi bi-person-plus"></i></h1>
+                    <h1 class="modal-title fs-5" id="modalUsuarioLabel">
+                        Registrar Usuario <i class="bi bi-person-plus"></i>
+                    </h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+    
                 <div class="modal-body">
                     <form action="{{ url_for('crear_usuario') }}" method="post" class="form-usuario">
-                        <input type="hidden" id="pkiduser" name="pkiduser">
                         <div class="row">
+                            <!-- Nombre -->
                             <div class="col-md-6 mb-3">
-                                <label class="block text-sm font-medium text-[#1E4C40]" for="text">Nombre</label>
-                                <input type="text" class="input-nombre mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="nombre">
+                                <label class="block text-sm font-medium text-[#1E4C40]">Nombre</label>
+                                <input type="text"
+                                    class="input-nombre mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
+                                    name="nombre">
                                 <p class="error-nombre text-sm text-red-600 mt-1 hidden">
-                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> El nombre debe tener mínimo 3 caracteres.
+                                    <i class="bi bi-exclamation-triangle-fill"></i> El nombre debe tener mínimo 3
+                                    caracteres.
                                 </p>
                             </div>
+    
+                            <!-- Cédula -->
                             <div class="col-md-6 mb-3">
-                                <label class="block text-sm font-medium text-[#1E4C40]" for="cedula">Cedula</label>
-                                <input type="number" class="input-cedula mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="cedula" >
+                                <label class="block text-sm font-medium text-[#1E4C40]">Cédula</label>
+                                <input type="number"
+                                    class="input-cedula mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
+                                    name="cedula">
                                 <p class="error-cedula text-sm text-red-600 mt-1 hidden">
-                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La cédula debe contener mínimo 4 caracteres.
-                                </p>
+                                    <i class="bi bi-exclamation-triangle-fill"></i> La cédula debe tener mínimo 4 dígitos
+                                </p>    
                             </div>
+    
+                            <!-- Celular -->
                             <div class="col-md-6 mb-3">
-                                <label class="block text-sm font-medium text-[#1E4C40]" for="celular">celular</label>
-                                <input type="number" class="input-celular mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="celular" >
+                                <label class="block text-sm font-medium text-[#1E4C40]">Celular</label>
+                                <input type="number"
+                                    class="input-celular mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
+                                    name="celular">
                                 <p class="error-celular text-sm text-red-600 mt-1 hidden">
-                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Número de celular inválido.
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Número de celular inválido
                                 </p>
                             </div>
+    
+                            <!-- Correo -->
                             <div class="col-md-6 mb-3">
-                                <label class="block text-sm font-medium text-[#1E4C40]" for="correo">Correo</label>
-                                <input type="email" class="input-correo mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="correo" >
+                                <label class="block text-sm font-medium text-[#1E4C40]">Correo</label>
+                                <input type="email"
+                                    class="input-correo mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
+                                    name="correo">
                                 <p class="error-correo text-sm text-red-600 mt-1 hidden">
-                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> correo inválido.
-                                </p>
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Correo inválido
+                                </p>    
                             </div>
+    
+                            <!-- Contraseña -->
                             <div class="col-md-6 mb-3">
-                                <label class="block text-sm font-medium text-[#1E4C40]" for="contraseña">Contraseña</label>
-                                <input type="password" class="input-contraseña mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg" name="contraseña" >
-                                <p class="error-contraseña text-sm text-red-600 mt-1 hidden">
-                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La contraseña es obligatoria.
-                                </p>
+                                <label class="block text-sm font-medium text-[#1E4C40]">Contraseña</label>
+                                <div class="relative">
+                                    <!-- input con id -->
+                                    <input type="password" id="input-password" name="password"
+                                        class="input-password mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg pr-10">
+                                    <!-- botón ojito -->
+                                    <button type="button" 
+                                            onclick="togglePassword('input-password','icono-ojito')" 
+                                            class="absolute inset-y-0 right-0 px-3 flex items-center text-[#1E4C40]">
+                                        <i id="icono-ojito" class="bi bi-eye"></i>
+                                    </button>
+                                    <p class="error-password text-sm text-red-600 mt-1 hidden">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> La contraseña debe tener mínimo 8 caracteres
+                                    </p>
+                                </div>
                             </div>
+    
+                            <!-- Rol -->
                             <div class="col-md-6 mb-3">
-                                <label class="block text-sm font-medium text-[#1E4C40]" for="rol_id">Rol </label>
-                                <select name="rol_id" class="input-rol mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                <label class="block text-sm font-medium text-[#1E4C40]">Rol</label>
+                                <select name="rol_id" id="rol_id"
+                                    class="input-rol mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
                                     {% for rol in roles %}
-                                        <option value="{{ rol.pkidrol }}">{{ rol.nombrerol }}</option>
+                                    <option value="{{ rol.pkidrol }}">{{ rol.nombrerol }}</option>
                                     {% endfor %}
                                 </select>
                                 <p class="error-rol text-sm text-red-600 mt-1 hidden">
-                                    <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> Seleccione un rol.
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Seleccionar un rol
                                 </p>
                             </div>
-                            <div class="modal-footer">
-                                <button type="submit" id="crear_usuario" class="btn btn-primary" style="background-color: #1E4C40; border-color: #1E4C40;">Registrar</button>
-                                <button type="button" class="btn btn-secondary" style="background-color: #a11129;" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+    
+                        <!-- Campos adicionales SOLO si es trabajador -->
+                        <div id="campos-trabajador" class="row" style="display:none;">
+                            <div class="col-md-6 mb-3">
+                                <label class="block text-sm font-medium text-[#1E4C40]">Empresa</label>
+                                <input type="text" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
+                                    name="empresa">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="block text-sm font-medium text-[#1E4C40]">Cargo</label>
+                                <input type="text" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg"
+                                    name="cargo">
                             </div>
                         </div>
-                        
+                        <div id="campos-inmueble" class="col-md-6 mb-3 hidden">
+                            <label class="block text-sm font-medium text-[#1E4C40]">Andén</label>
+                            <select id="anden" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                <option value="">Seleccione andén</option>
+                                {% for i in range(1,11) %}
+                                    <option value="{{ i }}">Andén {{ i }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <label class="block text-sm font-medium text-[#1E4C40] mt-3">Número de inmueble</label>
+                            <select id="inmueble_id" name="inmueble_id" 
+                                    class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+                                <option value="">Seleccione inmueble</option>
+                                {% for inmueble in inmuebles %}
+                                    <option value="{{ inmueble.pkidinmueble }}" data-anden="{{ inmueble.anden }}">
+                                        {{ inmueble.numeroinmueble }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Footer -->
+                        <div class="modal-footer">
+                            <button type="submit" id="crear_usuario" class="btn btn-primary"
+                                style="background-color: #1E4C40; border-color: #1E4C40;">Registrar</button>
+                            <button type="button" class="btn btn-secondary" style="background-color: #a11129;"
+                                data-bs-dismiss="modal">Cerrar</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -119,11 +188,11 @@
                 </td>
             </tr>
             <!-- Modal Editar -->
-            <div class="modal fade" id="modal{{usuario.pkiduser}}" tabindex="-1" aria-labelledby="modalLabell" aria-hidden="true">
-                <div class="modal-dialog dialog-lg">
+            <div class="modal fade" id="modal{{usuario.pkiduser}}" tabindex="-1" aria-labelledby="modalUsuarioLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="modalLabell">{{usuario.pkiduser}}</h1>
+                            <h1 class="modal-title fs-5" id="modalUsuarioLabel">{{usuario.pkiduser}}</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -157,11 +226,21 @@
                                             <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> correo inválido.
                                         </p>
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="block text-sm font-medium text-[#1E4C40]" for="contraseña">Contraseña</label>
-                                        <input type="password" name="contraseña" value="{{usuario.contraseña}}" id="contraseña-editar{{ usuario.pkiduser }}" class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
-                                        <p id="error-contraseña-editar{{ usuario.pkiduser }}" class="text-sm text-red-600 mt-1 hidden">
-                                            <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> La contraseña es obligatoria.
+                                    <div class="col-md-6 mb-3 relative">
+                                        <label class="block text-sm font-medium text-[#1E4C40]" for="password">Contraseña</label>
+                                        <input type="password" name="password" value="{{ usuario.password }}" 
+                                            id="password-editar{{ usuario.pkiduser }}" 
+                                            class="mt-1 block px-4 py-2 w-full border-[#1E4C40] rounded-md shadow-lg">
+
+                                        <button type="button" 
+                                                onclick="togglePassword('password-editar{{ usuario.pkiduser }}','icono-ojito{{ usuario.pkiduser }}')" 
+                                                class="absolute inset-y-0 right-2 px-3 flex items-center text-[#1E4C40]">
+                                            <i id="icono-ojito{{ usuario.pkiduser }}" class="bi bi-eye"></i>
+                                        </button>
+                                        <p id="error-password-editar{{ usuario.pkiduser }}" 
+                                        class="text-sm text-red-600 mt-1 hidden">
+                                        <i class="bi bi-exclamation-triangle-fill text-lg text-red-600"></i> 
+                                        La contraseña es obligatoria.
                                         </p>
                                     </div>
                                     <div class="col-md-6 mb-3">
@@ -206,6 +285,66 @@
         {% endif %}
     </div>
  </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const rolSelect = document.getElementById("rol_id");
+    const camposTrabajador = document.getElementById("campos-trabajador");
+
+    rolSelect.addEventListener("change", function () {
+      if (this.value === "3") {
+        camposTrabajador.style.display = "flex"; // muestra en fila
+      } else {
+        camposTrabajador.style.display = "none";
+      }
+    });
+  });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const rolSelect = document.getElementById("rol_id");
+        const camposInmueble = document.getElementById("campos-inmueble");
+
+        // Detectar cambio en rol
+        rolSelect.addEventListener("change", function () {
+            if (this.value === "2") {  // 2 = Residente
+                camposInmueble.classList.remove("hidden");
+            } else {
+                camposInmueble.classList.add("hidden");
+            }
+        });
+    });
+</script>
+<script>
+    document.getElementById("anden").addEventListener("change", function() {
+        let andenSeleccionado = this.value;
+        let opciones = document.querySelectorAll("#inmueble_id option");
+
+        opciones.forEach(opt => {
+            if (!opt.value) return; // saltar el "Seleccione inmueble"
+            opt.style.display = (opt.getAttribute("data-anden") === andenSeleccionado) ? "block" : "none";
+        });
+
+        // resetear selección al cambiar de andén
+        document.getElementById("inmueble_id").value = "";
+});
+</script>
+<script>
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        }
+    }
+</script>
+
  
  {% endblock %}
  {% block scripts %}

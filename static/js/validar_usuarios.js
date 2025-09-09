@@ -5,31 +5,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const expresionCedula = /^\d{4,10}$/;
     const expresionCorreo = /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com)$/;
     const expresionCelular = /^3\d{9}$/
-    const expresionContraseña = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=<>?{}[\]~]).{8,}$/;
+    const expresionPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=<>?{}[\]~]).{8,}$/;
 
     formularios.forEach(form => {
         const nombre = form.querySelector(".input-nombre");
         const cedula = form.querySelector(".input-cedula");
         const celular = form.querySelector(".input-celular");
         const correo = form.querySelector(".input-correo");
-        const contraseña = form.querySelector(".input-contraseña");
+        const password = form.querySelector(".input-password");
         const rol = form.querySelector(".input-rol");
 
         const errorNombre = form.querySelector(".error-nombre");
         const errorCedula = form.querySelector(".error-cedula");
         const errorCelular = form.querySelector(".error-celular");
         const errorCorreo = form.querySelector(".error-correo");
-        const errorContraseña = form.querySelector(".error-contraseña");
+        const errorPassword = form.querySelector(".error-password");
         const errorRol = form.querySelector(".error-rol");
         form.addEventListener("submit", e => {
             let valido = true;
 
-            [nombre, cedula, celular, correo, contraseña, rol].forEach(el => {
+            [nombre, cedula, celular, correo, password, rol].forEach(el => {
                 if (el) el.classList.remove("border-red-500");
             });
 
             // Limpiar errores anteriores
-            [errorNombre, errorCedula, errorCelular, errorCorreo, errorContraseña, errorRol].forEach(el => { 
+            [errorNombre, errorCedula, errorCelular, errorCorreo, errorPassword, errorRol].forEach(el => { 
                 if (el) el.classList.add("hidden");
             });
 
@@ -57,9 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 valido = false;
             }
 
-            if (!expresionContraseña.test(contraseña.value.trim())) {
-                errorContraseña.classList.remove("hidden");
-                contraseña.classList.add("border-red-500");
+            if (!expresionPassword.test(password.value.trim())) {
+                errorPassword.classList.remove("hidden");
+                password.classList.add("border-red-500");
                 valido = false;
             }
 
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         nombre.addEventListener("input", () => {
-            if (!nombre.test(nombre.value.trim())) {
+            if (!expresionNombre.test(nombre.value.trim())) {
                 errorNombre.classList.remove("hidden");
                 nombre.classList.add("border-red-500");
             } else {
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         cedula.addEventListener("input", () => {
-            if (!cedula.test(cedula.value.trim())) {
+            if (!expresionCedula.test(cedula.value.trim())) {
                 errorCedula.classList.remove("hidden");
                 cedula.classList.add("border-red-500");
             } else {
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         
         celular.addEventListener("input", () => {
-            if (!celular.test(celular.value.trim())) {
+            if (!expresionCelular.test(celular.value.trim())) {
                 errorCelular.classList.remove("hidden");
                 celular.classList.add("border-red-500");
             } else {
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         correo.addEventListener("input", () => {
-            if (!correo.test(correo.value.trim())) {
+            if (!expresionCorreo.test(correo.value.trim())) {
                 errorCorreo.classList.remove("hidden");
                 correo.classList.add("border-red-500");
             } else {
@@ -114,13 +114,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        contraseña.addEventListener("input", () => {
-            if (!contraseña.test(contraseña.value.trim())) {
-                errorContraseña.classList.remove("hidden");
-                contraseña.classList.add("border-red-500");
+        password.addEventListener("input", () => {
+            if (!expresionPassword.test(password.value.trim())) {
+                errorPassword.classList.remove("hidden");
+               password.classList.add("border-red-500");
             } else {
-                errorContraseña.classList.add("hidden");
-                contraseña.classList.remove("border-red-500");
+                errorPassword.classList.add("hidden");
+                password.classList.remove("border-red-500");
             }
         });
 
@@ -153,10 +153,10 @@ document.querySelectorAll(".form-editar-usuario").forEach(form => {
     let correo = document.getElementById("correo-editar" + id);
     let errorCorreo = document.getElementById("error-correo-editar" + id);
 
-    let contraseña = document.getElementById("contraseña-editar" + id);
-    let errorContraseña = document.getElementById("error-contraseña-editar" + id);
+    let password = document.getElementById("password-editar" + id);
+    let errorPassword = document.getElementById("error-password-editar" + id);
 
-    let rol = document.getElementById("rol" + id);
+    let rol = document.getElementById("rol-editar" + id);
     let errorRol = document.getElementById("error-rol-editar" + id);
 
     nombre.addEventListener("input", () => {
@@ -175,8 +175,8 @@ document.querySelectorAll(".form-editar-usuario").forEach(form => {
         if (correo.value) errorCorreo.classList.add("hidden");
     });
 
-    contraseña.addEventListener("input", () => {
-        if (contraseña.value) errorContraseña.classList.add("hidden");
+    password.addEventListener("input", () => {
+        if (password.value) errorPassword.classList.add("hidden");
     });
 
     rol.addEventListener("change", () => {
@@ -206,8 +206,8 @@ document.querySelectorAll(".form-editar-usuario").forEach(form => {
             valido = false;
         }
 
-        if (!contraseña.value) {
-            errorContraseña.classList.remove("hidden");
+        if (!password.value) {
+            errorPassword.classList.remove("hidden");
             valido = false;
         }
 

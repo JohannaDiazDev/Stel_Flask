@@ -22,16 +22,43 @@
             </div>
             <div class="mb-4 relative">
                 <label for="password" class="block text-sm font-medium text-[#1E4C40]">Contraseña</label>
-                <input type="password" name="contraseña"  id="password" class="mt-1 p-2 w-full border rounded-md bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1E4C40]" required>
+                <input type="password" name="password"  id="password" class="mt-1 p-2 w-full border rounded-md bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1E4C40]" required>
                 <button type="button" id="togglePassword" class="absolute right-2 top-9 text-gray-500">
                     <i class="bi bi-eye font-bold text-[#1E4C40]"></i>
                 </button>
+            </div>
+            <div class="text-center mt-4">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#resetPasswordModal" class="text-[#1E4C40] hover:underline">
+                    ¿Olvidaste tu contraseña?
+                </a>
             </div>
             <button type="submit" class="w-full bg-[#1E4C40] text-white p-2 rounded-md hover:bg-[#1E4C40]-700 transition">Ingresar</button>
         </form>
     </div>
 </div>
-
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-lg shadow-lg">
+            <div class="modal-header bg-[#1E4C40] text-white">
+                <h5 class="modal-title">Recuperar Contraseña</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('reset_password_request') }}" method="post">
+                    <div class="mb-3">
+                        <label for="correo_modal" class="block text-sm font-medium text-[#1E4C40]">Correo Electrónico</label>
+                        <input type="email" name="correo" id="correo_modal"
+                            class="mt-1 p-2 w-full border rounded-md bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1E4C40]"
+                            required>
+                    </div>
+                    <button type="submit" class="w-full bg-[#1E4C40] text-white p-2 rounded-md hover:bg-[#16352d]">
+                        <i class="bi bi-send"></i> Enviar código
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     document.getElementById('togglePassword').addEventListener('click', function () {
         const passwordInput = document.getElementById('password');

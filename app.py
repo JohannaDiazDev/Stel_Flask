@@ -1,4 +1,6 @@
 from flask import Flask, render_template, url_for, jsonify, request, session, flash, redirect, make_response
+from itsdangerous import URLSafeTimedSerializer
+from flask_mail import Mail, Message
 import re, time
 from flask_mysqldb import MySQL
 from flask_bcrypt import Bcrypt
@@ -6,13 +8,16 @@ from datetime import datetime
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
 import MySQLdb
-from datetime import datetime
+from datetime import datetime, timedelta
 import calendar
 import locale
 locale.setlocale(locale.LC_TIME, 'Spanish_Colombia')
 from collections import defaultdict
 from functools import wraps
 from __init__ import *
+import random 
+import secrets
+import requests
 
 app = Flask (__name__)
 bcrypt = Bcrypt(app)
@@ -21,12 +26,24 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'stel'
 app.secret_key = 'mysecretkey'
+
+# Configuración Correo
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'softwarestel8@gmail.com'
+app.config['MAIL_PASSWORD'] = 'REMOVIDO'
+app.config['MAIL_DEFAULT_SENDER'] = 'softwarestel8@gmail.com'
+
+
 def get_db_connection():
     return MySQLdb.connect(host="localhost", user="root", passwd="", db="stel")
 
 # Inicializar extensiones
 mysql = MySQL(app)
-bcrypt = Bcrypt()
+bcrypt = Bcrypt(app)
+mail = Mail(app)
+s = URLSafeTimedSerializer(app.secret_key)
 
 def login_required(f):
     @wraps(f)
@@ -98,23 +115,23 @@ def enviar_mensaje():
 def ingresar():
     if request.method == 'POST':
         correo = request.form['correo']
-        contraseña = request.form['contraseña']
+        password = request.form['password']
         
         db = get_db_connection()
         cursor = db.cursor()
-        cursor.execute("SELECT pkiduser, contraseña, rol_id, nombre FROM usuarios WHERE correo = %s", (correo,))
+        cursor.execute("SELECT pkiduser, password, rol_id, nombre FROM usuarios WHERE correo = %s", (correo,))
         user = cursor.fetchone()
         
         if user is None:
             flash('❌ Usuario no encontrado', 'danger')
             return redirect(url_for('ingresar'))
         
-        print(f"Contraseña ingresada: {contraseña}")
+        print(f"Contraseña ingresada: {password}")
         print(f"Hash en la BD: {user[1]}")
-        print(f"¿Coincide?: {bcrypt.check_password_hash(user[1], contraseña)}")
+        print(f"¿Coincide?: {bcrypt.check_password_hash(user[1], password)}")
         print(f"Contraseña en la BD: {user[1]}")
 
-        if user and bcrypt.check_password_hash(user[1], contraseña):  
+        if user and bcrypt.check_password_hash(user[1], password):  
             session.clear()
             session['loggedin'] = True
             session['pkiduser'] = user[0]
@@ -162,6 +179,87 @@ def ingresar():
     response.headers['Expires'] = '0'
     
     return response
+
+@app.route('/reset_password_request', methods=['POST'])
+def reset_password_request():
+    correo = request.form['correo']
+
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("SELECT pkiduser FROM usuarios WHERE correo=%s", (correo,))
+    usuarios = cursor.fetchone()
+
+    if not usuarios:
+        flash("No existe una cuenta con ese correo.", 'danger')
+        return redirect(url_for('ingresar'))
+
+    codigo = str(random.randint(100000, 999999))
+
+    cursor.execute("INSERT INTO reset_tokens (correo, codigo) VALUES (%s, %s)", (correo, codigo))
+    db.commit()
+
+    msg = Message("Código de recuperación - Stel", recipients=[correo])
+    msg.body = f"Tu código de verificación es: {codigo}"
+    mail.send(msg)
+
+    flash("Se ha enviado un código a tu correo.", "success")
+    return redirect(url_for("verify_code"))
+
+@app.route("/verify_code", methods=['GET', 'POST'])
+def verify_code():
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    if request.method == "POST":
+        correo = request.form["correo"]
+        codigo = request.form["codigo"]
+
+        cursor.execute("""
+            SELECT id, creado_en FROM reset_tokens
+            WHERE correo=%s AND codigo=%s
+            ORDER BY creado_en DESC LIMIT 1
+        """, (correo, codigo))
+        token = cursor.fetchone()
+
+        if not token:
+            flash("Código inválido.", "danger")
+            return redirect(url_for("verify_code"))
+        
+        creado_en = token[1]
+        if datetime.now() - creado_en > timedelta(minutes=10):
+            flash('El código ha expirado.', 'danger')
+            return redirect(url_for('reset_password_request'))
+        
+        session["reset_email"] = correo
+        return redirect(url_for("reset_password_form"))
+    
+    return render_template("verify_code.html")
+
+@app.route("/reset_password", methods=['GET', 'POST'])
+def reset_password_form():
+    if "reset_email" not in session:
+        flash("Primero valida tu código.", "danger")
+        return redirect(url_for('ingresar'))
+    
+    if request.method == "POST":
+        nueva_contra = request.form['password']
+        hashed = bcrypt.generate_password_hash(nueva_contra).decode('utf-8')
+
+        db = get_db_connection()
+        cursor = db.cursor()
+        cursor.execute("UPDATE usuarios SET password=%s WHERE correo=%s",
+                       (hashed, session["reset_email"]))
+        
+        db.commit()
+        cursor.close()
+        session.pop("reset_email", None)
+
+        flash("Contraseña actualizada exitosamente.", "success")
+        return redirect(url_for('ingresar'))
+    
+    return render_template("reset_password_form.html")
+
 
 @app.route('/admin/dashboard_admin')
 @login_required
@@ -230,7 +328,7 @@ def usuarios():
         params.append(f"%{cedula}%")
 
     # Paginación
-    sql += " LIMIT %s OFFSET %s"
+    sql += " ORDER BY u.pkiduser DESC LIMIT %s OFFSET %s"
     params.extend([per_page, offset])
 
     cursor.execute(sql, params)
@@ -241,6 +339,10 @@ def usuarios():
     cursor.execute("SELECT pkidrol, nombrerol FROM rol")
     columnas_roles = [col[0] for col in cursor.description]
     roles = [dict(zip(columnas_roles, fila)) for fila in cursor.fetchall()]
+
+    cursor.execute("SELECT pkidinmueble, numeroinmueble, anden FROM inmueble")
+    columnas_inmueble = [col[0] for col in cursor.description]
+    inmuebles = [dict(zip(columnas_inmueble, fila)) for fila in cursor.fetchall()]
 
     # Contar el total de usuarios
     if cedula:
@@ -257,6 +359,7 @@ def usuarios():
     response = make_response(render_template('admin/usuarios.html', 
         usuarios=usuarios, 
         roles=roles, 
+        inmuebles=inmuebles,
         page=page, 
         total_pages=total_pages, 
         cedula_buscar=cedula
@@ -271,28 +374,60 @@ def crear_usuario():
     db = get_db_connection()
     cursor = db.cursor()
     
-    nombre = request.form['nombre']
-    cedula = request.form['cedula']
-    celular = request.form['celular']
-    correo = request.form['correo']
-    contraseña = request.form['contraseña']
-    rol_id = request.form['rol_id']
+    nombre = request.form.get('nombre', '').strip()
+    cedula = request.form.get('cedula', '').strip()
+    celular = request.form.get('celular', '').strip()
+    correo = request.form.get('correo', '').strip()
+    password = request.form.get('password', '').strip()
+    rol_id = request.form.get('rol_id', '').strip()
+
+    empresa = request.form.get('empresa', '').strip()
+    cargo = request.form.get('cargo', '').strip()
 
     errores = validar_datos_usuario(request.form)
-
     if errores:
         for error in errores:
             flash(error, 'danger')
         return redirect(url_for('usuarios'))
-
-    sql = "INSERT INTO usuarios (nombre, cedula, celular, correo, contraseña, rol_id) VALUES (%s, %s, %s, %s, %s, %s)"
-    valores = (nombre, cedula, celular, correo, contraseña, rol_id)
     
+    password_hashed = bcrypt.generate_password_hash(password).decode('utf-8')
+
+
+    sql = "INSERT INTO usuarios (nombre, cedula, celular, correo, password, rol_id) VALUES (%s, %s, %s, %s, %s, %s)"
+    valores = (nombre, cedula, celular, correo, password_hashed, rol_id)
     cursor.execute(sql, valores)
+
+    usuario_id = cursor.lastrowid   # <- pkiduser recién creado
+
+    # Si el rol es Trabajador, también lo guardamos en la tabla trabajador
+    if int(rol_id) == 3:
+        cursor.execute(
+            "INSERT INTO trabajador (usuario_id, rol_id, empresa, cargo) VALUES (%s, %s, %s, %s)",
+            (usuario_id, rol_id, empresa, cargo)
+        )
+
+    if int(rol_id) == 2:
+        inmueble_id = request.form.get("inmueble_id")
+        
+        if not inmueble_id:
+            flash("⚠️ Debe seleccionar un inmueble para el residente", "danger")
+            db.rollback()
+            cursor.close()
+            db.close()
+            return redirect(url_for('usuarios'))
+
+        cursor.execute(
+            "INSERT INTO residente (usuario_id, inmueble_id, rol_id) VALUES (%s, %s, %s)",
+            (usuario_id, inmueble_id, rol_id)
+        )
+
+    cursor.execute("SELECT pkidinmueble, numeroinmueble, anden FROM inmueble")
+    inmuebles = cursor.fetchall()
+
     db.commit()
     cursor.close()
     db.close()
-    
+    flash('✅ Usuario creado correctamente', 'success')
     return redirect(url_for('usuarios'))
 
 @app.route('/delete/<int:pkiduser>')
@@ -312,45 +447,45 @@ def editar_usuario(pkiduser):
     cursor = db.cursor()
 
     errores = validar_datos_usuario(request.form)
-
     if errores:
         for error in errores:
             flash(error, 'danger')
         return redirect(url_for('usuarios'))
 
-    if request.method == 'POST':
-        
-        # Obtener valores del formulario de forma segura
-        nombre = request.form.get('nombre')
-        cedula = request.form.get('cedula')
-        celular = request.form.get('celular')
-        correo = request.form.get('correo')
-        contraseña = request.form.get('contraseña')
-        rol_id = request.form.get('rol_id')
+    # Obtener valores del formulario
+    nombre = request.form.get('nombre', '').strip()
+    cedula = request.form.get('cedula', '').strip()
+    celular = request.form.get('celular', '').strip()
+    correo = request.form.get('correo', '').strip()
+    password = request.form.get('password', '').strip()
+    rol_id = request.form.get('rol_id', '').strip()
 
-        
+    # Si enviaron nueva password → la hasheamos
+    if password:  
+        password_hashed = bcrypt.generate_password_hash(password).decode('utf-8')
+        sql = """
+            UPDATE usuarios 
+            SET nombre=%s, cedula=%s, celular=%s, correo=%s, password=%s, rol_id=%s
+            WHERE pkiduser=%s
+        """
+        valores = (nombre, cedula, celular, correo, password_hashed, rol_id, pkiduser)
+    else:
+        # Si no se envió contraseña → no se toca
+        sql = """
+            UPDATE usuarios 
+            SET nombre=%s, cedula=%s, celular=%s, correo=%s, rol_id=%s
+            WHERE pkiduser=%s
+        """
+        valores = (nombre, cedula, celular, correo, rol_id, pkiduser)
 
-        # Actualizar usuario
-        sql = """UPDATE usuarios SET nombre = %s, cedula = %s, celular = %s, 
-                 correo = %s, contraseña = %s, rol_id = %s WHERE pkiduser = %s"""
-        valores = (nombre, cedula, celular, correo, contraseña, rol_id, pkiduser)
-        cursor.execute(sql, valores)
-        db.commit()
-        db.close()
-
-        flash("Usuario actualizado correctamente", "success")
-        return redirect(url_for('usuarios'))
-
-    cursor.execute("SELECT * FROM usuarios WHERE pkiduser = %s", (pkiduser,))
-    usuario = cursor.fetchone()
-
-    # También recupera los roles
-    cursor.execute("SELECT * FROM roles")
-    roles = cursor.fetchall()
-
+    cursor.execute(sql, valores)
+    db.commit()
+    cursor.close()
     db.close()
 
-    return redirect(url_for('usuarios', usuario=usuario, roles=roles)) 
+    flash("✅ Usuario actualizado correctamente", "success")
+    return redirect(url_for('usuarios'))
+
 
 @app.route('/admin/inmueble')
 @login_required
@@ -1584,7 +1719,8 @@ def dashboard_residente():
 
     cursor.execute("SELECT saldo FROM cartera WHERE inmueble_id = %s", (inmueble_id,))
     saldo = cursor.fetchone()
-    cartera_pendiente = saldo and saldo[0] > 0
+    cartera_pendiente = (saldo[0] > 0) if saldo else False
+
 
     cursor.execute("SELECT COUNT(*) FROM multa WHERE inmueble_id = %s AND fecha_pago = ''", (inmueble_id,))
     multas_pendientes = cursor.fetchone()[0] > 0

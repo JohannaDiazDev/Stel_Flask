@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="h-screen flex items-center justify-center bg-gray-100">
+    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+        <h1 class="text-xl font-bold text-[#1E4C40] mb-4 text-center">
+            Verificar código
+        </h1>
+
+        <form method="POST">
+            <div class="mb-4">
+                <label for="codigo" class="block text-sm font-medium text-[#1E4C40]">Correo</label>
+                <input type="email" id="correo" name="correo"
+                    class="mt-1 p-2 w-full border rounded-md bg-white focus:ring-2 focus:ring-[#1E4C40]"
+                    required>
+            </div>
+            <div class="mb-4">
+                <label for="codigo" class="block text-sm font-medium text-[#1E4C40]">Código</label>
+                <input type="text" id="codigo" name="codigo"
+                    class="mt-1 p-2 w-full border rounded-md bg-white focus:ring-2 focus:ring-[#1E4C40]"
+                    required>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-[#1E4C40] text-white p-2 rounded-md hover:bg-[#16352d] transition">
+                Verificar
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
